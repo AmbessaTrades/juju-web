@@ -18,6 +18,7 @@ body{--focus-x:50%;--focus-y:30%}
 #play{width:min(880px,100%)}
 #play .screen{margin-top:28px;position:relative;aspect-ratio:16/9;background:#000;border:2px solid var(--line-hi)} #play video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 #play b{display:block;margin-top:14px;font:600 20px/1.25 "Spectral SC",serif}
+.posted{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:12px}.posted span{grid-column:1/-1;color:var(--ash);font:400 14px/1.35 "Josefin Sans",sans-serif}
 .sheetfoot{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:16px;flex-wrap:wrap}
 #kit{width:min(720px,100%)} #kit .part{display:grid;gap:8px;margin-top:18px} #kit .part .lab{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--ash);font:600 13px/1 "Josefin Sans",sans-serif;letter-spacing:.06em}
 #kit .part .txt{padding:12px 14px;background:var(--a-well);border:2px solid var(--line);color:var(--bone);font:400 15px/1.45 "Lato",sans-serif;white-space:pre-wrap;max-height:34vh;overflow:auto}
@@ -33,6 +34,7 @@ body{--focus-x:50%;--focus-y:30%}
 <section class="sheet" id="play" hidden aria-label="Film">
  <div class="screen"><video id="v" controls playsinline preload="metadata"></video></div>
  <b id="pt" data-d></b>
+ <form class="posted" id="posted" novalidate><span>Uploaded it? Paste its YouTube link and Juju follows how it does</span><input class="field" id="plink" type="url" inputmode="url" autocomplete="off" placeholder="youtube.com/watch?v=…" aria-label="Your upload's link"><button class="btn" id="pgo">Follow it</button></form>
  <div class="sheetfoot"><a class="btn bare" id="save" download>Save</a><button class="btn" id="kitgo">Upload kit</button><button class="btn need" id="keep" hidden>Keep</button></div>
 </section>
 <section class="sheet" id="kit" hidden aria-labelledby="kitTitle"><h3 id="kitTitle">Upload kit</h3><div id="kitParts"></div></section>
@@ -42,6 +44,9 @@ const $=id=>document.getElementById(id),esc=JUJU.esc,slug=Flow.ch();
 if(!slug){Flow.need('shelf');return}
 $('pot').href='cauldron.html?ch='+slug;
 let films=[],open=null;
+/* Uploaded: the 90/70/50 chain starts from the real numbers (skill echo-decay-90-70-50) */
+document.addEventListener('submit',e=>{if(e.target.id!=='posted')return;e.preventDefault();if(!open)return;const link=$('plink').value.trim();if(!link){JUJU.say($('pgo'),'Paste the link of your upload');return}
+ JUJU.once($('pgo'),async()=>{await JUJU.post('/api/tap/films/'+encodeURIComponent(open.id)+'/posted',{link});Kit.toast('Juju follows it: measured from 24 hours; at twice your usual views, Part 2 appears in Crossroads');$('plink').value=''})});
 const card=f=>`<button class="fi" role="listitem" data-f="${esc(f.id)}"><span class="pic">${Flow.pic(f)}${f.seconds?`<span class="len" data-d>${Flow.clock(f.seconds)}</span>`:''}${f.kept?'<span class="pill need kept">Kept</span>':''}</span><span class="t" data-d>${esc(f.title||f.sentence||'')}</span></button>`;
 /* a title in capitals reads as shouting next to the others: shown in sentence case. A title two films share gets its number. */
 const calm=t=>t&&/[A-Z]/.test(t)&&t===t.toUpperCase()?t.charAt(0)+t.slice(1).toLowerCase():t;
@@ -50,7 +55,7 @@ function names(l){const n={},seen={};for(const f of l){f.title=calm(f.title||f.s
 async function load(){const a=await JUJU.get('/api/tap/films?channel='+slug);films=names(a.films.filter(f=>f.state==='done'&&f.film));
  $('feed').innerHTML=films.length?films.map(card).join(''):`<div class="empty">${Art.emblem('publish-kit')}<b>Nothing ready yet</b></div>`;
  $('feed').classList.remove('wait');Flow.lazy($('feed'));$('go').disabled=!films.length}
-function play(f){open=f;$('pt').textContent=f.title||f.sentence||'';$('v').src=f.film;$('save').href=f.film;$('keep').hidden=!!f.kept||!!f.gold;Kit.sheet('play').open();Flow.tell('play',f);$('v').play().catch(()=>{})}
+function play(f){open=f;$('posted').hidden=!f.channel;$('plink').value='';$('pt').textContent=f.title||f.sentence||'';$('v').src=f.film;$('save').href=f.film;$('keep').hidden=!!f.kept||!!f.gold;Kit.sheet('play').open();Flow.tell('play',f);$('v').play().catch(()=>{})}
 $('feed').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(!b)return;const f=films.find(x=>x.id===b.dataset.f);if(f){Kit.press(b);play(f)}});
 $('go').addEventListener('click',()=>{if(films[0])play(films[0])});
 $('keep').addEventListener('click',()=>{if(!open)return;JUJU.once($('keep'),async()=>{const x=await JUJU.post('/api/tap/films/'+encodeURIComponent(open.id)+'/keep');$('keep').hidden=true;Kit.toast('Kept');await load();return x})});

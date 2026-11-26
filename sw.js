@@ -4,7 +4,7 @@
    Until juju-core runs here as WASM (lane A), a film is not made in the browser: Make says so. */
 const BASE = new URL('./', self.location).pathname;
 /* the version of the unit this worker belongs to: stamped by web/build.py, so a tab knows when the site has moved on */
-const ABOUT = {"version": "0.4.1", "core": null, "commit": "3b30036e"};            // /juju-web/ on GitHub Pages
+const ABOUT = {"version": "0.4.2", "core": null, "commit": "ec0d31f2"};            // /juju-web/ on GitHub Pages
 const STORE = 'juju-state-v1';
 let CFG = null;
 self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
@@ -139,13 +139,18 @@ async function answer(req, url) {
   }
   if (m === 'POST' && seg[1] === 'films' && seg[2] && seg[2].startsWith('web-') && ['stop', 'drop'].includes(seg[3])) { await change('orders', l => { const i = l.findIndex(o => o.id === seg[2]); if (i >= 0) l.splice(i, 1); }); return json(200, { ok: true }); }
   if (is('GET', 'tap', 'films')) { let l = (await films()).concat(((await list('orders')).data || []).map(o => ({ id: o.id, kind: o.kind, sentence: o.sentence, title: o.sentence, channel: o.channel, state: 'running', pct: 0, say: 'Waiting for your phone to open Juju', here: false }))); const ch = url.searchParams.get('channel'); if (ch) l = l.filter(f => f.channel === ch); return json(200, { films: l, money: await money() }); }
+  // Uploaded: the film's YouTube link goes to the Door, which measures it and runs the 90/70/50 chain (skill echo-decay-90-70-50)
+  if (is('POST', 'tap', 'films', '*', 'posted')) { const f = (await films()).find(x => x.id === seg[2]); if (!f) return no(404, 'gone', 'Not here'); if (!f.channel) return no(422, 'channel', 'This film has no channel');
+    try { return json(200, await door('POST', '/v1/chain/posted', { channel: f.channel, film: f.id, title: f.title || f.sentence, sentence: f.sentence, kind: f.kind, link: body.link })); } catch (e) { return e instanceof Fail ? json(e.status, e.body) : no(503, 'offline_door', 'No connection'); } }
   if (is('GET', 'tap', 'films', '*', 'kit')) { const f = (await films()).find(x => x.id === seg[2]); if (!f) return no(404, 'gone', 'Not here');
     return json(200, { id: f.id, title: f.title || f.sentence || null, description: f.sentence && f.sentence !== f.title ? f.sentence : null, thumb: f.thumb || null, thumb_label: null, film: f.film || null, seconds: f.seconds || null }); }
   if (is('GET', 'tap', 'films', '*')) { const f = (await films()).find(x => x.id === seg[2]); return f ? json(200, f) : no(404, 'gone', 'Not here'); }
   if (m === 'POST' && seg[1] === 'films') return no(409, 'on_phone', 'This film is on your phone: open Juju there to do this');
   const chans = (await list('channels')).data || [];
   if (is('GET', 'tap', 'channels')) { const fl = await films(), mine = url.searchParams.get('mine') === '1'; const l = chans.filter(c => !c.parked && (!mine || !c.owner || c.owner === s.who)); return json(200, { channels: await Promise.all(l.map(c => card(c, fl, sys))), systems: sys, looks: [], sizes: SIZES, money: await money() }); }
-  if (is('GET', 'tap', 'channels', '*')) { const c = chans.find(x => x.slug === seg[2]); if (!c) return no(404, 'gone', 'Not here'); const r = await card(c, await films(), sys); return json(200, Object.assign(r, { ideas: await ideasOf(c), systems: sys, sizes: SIZES })); }
+  if (is('GET', 'tap', 'channels', '*')) { const c = chans.find(x => x.slug === seg[2]); if (!c) return no(404, 'gone', 'Not here');
+    let chain = null; try { chain = (await door('GET', '/v1/chain?channel=' + encodeURIComponent(c.slug))).chain; if (chain && chain.idea) await list('ideas', true); } catch (e) { }
+    const r = await card(c, await films(), sys); return json(200, Object.assign(r, { chain, ideas: await ideasOf(c), systems: sys, sizes: SIZES })); }
   if (is('PATCH', 'tap', 'channels', '*')) {
     await change('channels', l => { const c = l.find(x => x.slug === seg[2]); if (!c) return 'Not here';
       if (typeof body.system === 'string') { const x = sys.find(y => y.id === body.system); if (!x || !x.kind) return 'Not a look'; if (x.locked) return 'Opens in High Juju';
@@ -210,7 +215,8 @@ async function answer(req, url) {
   }
   if (is('GET', 'tap', 'channels', '*', 'ideas') || is('POST', 'tap', 'channels', '*', 'ideas')) {
     const c = chans.find(x => x.slug === seg[2]); if (!c) return no(404, 'gone', 'Not here');
-    return json(200, { slug: c.slug, running: false, failed: false, ideas: await ideasOf(c), niche: c.niche_name || null, usd: null, titles: (c.titles && c.titles.length) ? c.titles : null, best: c.best || null });
+    let chain = null; try { chain = (await door('GET', '/v1/chain?channel=' + encodeURIComponent(c.slug))).chain; if (chain && chain.idea) await list('ideas', true); } catch (e) { }
+    return json(200, { slug: c.slug, running: false, failed: false, chain, ideas: await ideasOf(c), niche: c.niche_name || null, usd: null, titles: (c.titles && c.titles.length) ? c.titles : null, best: c.best || null });
   }
   return notYet();
 }

@@ -52,6 +52,7 @@ body{--focus-x:50%;--focus-y:40%}
  .idea:hover{transform:none}
  .looks{grid-template-columns:minmax(0,1fr)}
 }
+.kind.chain{color:var(--act)}
 </style></head>
 <body data-skin="nocturne" data-room="crossroads" data-title="Crossroads" data-back="altar.html" data-back-label="Altar">
 <main>
@@ -91,7 +92,7 @@ const shown=()=>ch.ideas.slice(page*3,page*3+3);
 const fallback=()=>ch.thumb||ch.avatar||'';
 /* only Juju's own thumbnail for this idea, else the channel's own picture; never one stand-in frame repeated on every card (Ambi, 26 Nov) */
 const pic=x=>x.thumb?`<img src="${esc(x.thumb)}" alt="">`:fallback()?`<img src="${esc(fallback())}" alt="">`:'';
-const card=(x,i)=>{const n=page*3+i,lk=x.locked||ch.locked,pc=pic(x);return `<button class="card idea${lk?' shut':''}${pc?'':' nopic'}" role="listitem" data-i="${n}" style="--n:${i}"${lk?' disabled aria-disabled="true"':''}>${pc?`<span class="pic">${pc}</span>`:''}<span class="kind" data-d>${esc(kindName(x.kind))}</span><span class="ti" data-d>${esc(x.title)}</span><span class="foot">${lk?`<span class="go dim">${Flow.lock}Opens in High Juju</span>`:`<span class="go">${Art.glyph('go')}Make</span><span class="btn bare tw" role="button" data-steer="${n}">Steer</span>`}</span></button>`};
+const card=(x,i)=>{const n=page*3+i,lk=x.locked||ch.locked,pc=pic(x);return `<button class="card idea${lk?' shut':''}${pc?'':' nopic'}" role="listitem" data-i="${n}" style="--n:${i}"${lk?' disabled aria-disabled="true"':''}>${pc?`<span class="pic">${pc}</span>`:''}<span class="kind${x.chain?' chain':''}" data-d>${x.chain?esc('Follows your hit · '+x.chain+'%'):esc(kindName(x.kind))}</span><span class="ti" data-d>${esc(x.title)}</span><span class="foot">${lk?`<span class="go dim">${Flow.lock}Opens in High Juju</span>`:`<span class="go">${Art.glyph('go')}Make</span><span class="btn bare tw" role="button" data-steer="${n}">Steer</span>`}</span></button>`};
 function draw(){
  Flow.head(ch);if(!document.querySelector('.head .chan.pick'))Flow.switcher('crossroads',slug);const l=shown(),h=$('hand');
  if(ch.locked&&!l.length){h.innerHTML=`<div class="empty">${Flow.lock}<b data-d>${esc(ch.look||'')}</b><span>Opens in High Juju</span></div>`;$('go').textContent='Shelf';$('own').hidden=true}

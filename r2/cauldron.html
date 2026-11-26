@@ -30,6 +30,8 @@ body{--focus-x:40%;--focus-y:30%}
 #first .meta b{font:600 20px/1.25 "Spectral SC",serif}
 #first .thumb{aspect-ratio:16/9;background:#000;overflow:hidden} #first .thumb img{width:100%;height:100%;object-fit:cover} #first .thumb[hidden]{display:none}
 .heldsay{margin:12px 0 0;color:var(--need);font:400 15px/1.4 "Josefin Sans",sans-serif}
+.posted{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:12px}.posted span{grid-column:1/-1;color:var(--ash);font:400 14px/1.35 "Josefin Sans",sans-serif}
+.exp{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}.exp span{color:var(--ash);font:600 12px/1.2 "Josefin Sans",sans-serif;letter-spacing:.06em;text-transform:uppercase;flex-basis:100%}
 .sheetfoot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:16px}
 @media (max-width:760px){
  .r{grid-template-columns:96px minmax(0,1fr);gap:12px;padding:8px}
@@ -49,6 +51,8 @@ body{--focus-x:40%;--focus-y:30%}
  <div class="screen"><video id="v" controls playsinline preload="metadata"></video></div>
  <div class="meta"><b id="ft" data-d></b><span class="thumb" id="fthumb" hidden></span></div>
  <p class="heldsay" id="heldsay" hidden></p>
+ <div class="exp" id="exp"><span>Export for upload</span><button class="btn" data-h="720">720p</button><button class="btn" data-h="1080">1080p</button></div>
+ <form class="posted" id="posted" novalidate><span>Uploaded it? Paste its YouTube link and Juju follows how it does</span><input class="field" id="plink" type="url" inputmode="url" autocomplete="off" placeholder="youtube.com/watch?v=…" aria-label="Your upload's link"><button class="btn" id="pgo">Follow it</button></form>
  <div class="sheetfoot"><button class="btn bare" id="fdrop">Drop</button><button class="btn need" id="keep">Keep</button></div>
 </section>
 <script>
@@ -75,12 +79,19 @@ function draw(){const l=films.filter(here);
 async function load(){const a=await JUJU.get(films_url);films=a.films;draw();return a}
 function watch(){if(poll)poll.stop();poll=JUJU.poll(films_url,a=>{const was=films.filter(f=>f.state==='running').map(f=>f.id);films=a.films;draw();
  films.filter(f=>was.includes(f.id)&&f.state==='done').forEach(f=>Kit.toast(f.title||'Ready'));return true},{every:()=>films.some(f=>f.state==='running')?2500:9000,fail:()=>{}})}
-function first(f){open=f;$('ft').textContent=f.title||f.sentence||'';const held=f.state==='held';$('keep').hidden=held;$('heldsay').hidden=!held;$('heldsay').textContent=held?(f.error||'Held back')+'. It can\'t be kept until Juju fixes this.':'';$('v').src=f.film;$('fthumb').hidden=!f.thumb;$('fthumb').innerHTML=f.thumb?`<img src="${esc(f.thumb)}" alt="">`:'';
+function first(f){open=f;$('exp').hidden=f.state!=='done'||f.here===false;$('posted').hidden=f.state!=='done'||!f.channel;$('plink').value='';$('ft').textContent=f.title||f.sentence||'';const held=f.state==='held';$('keep').hidden=held;$('heldsay').hidden=!held;$('heldsay').textContent=held?(f.error||'Held back')+'. It can\'t be kept until Juju fixes this.':'';$('v').src=f.film;$('fthumb').hidden=!f.thumb;$('fthumb').innerHTML=f.thumb?`<img src="${esc(f.thumb)}" alt="">`:'';
  Kit.sheet('first').open();Flow.tell('first',f);$('v').play().catch(()=>{})}
 $('rows').addEventListener('click',e=>{const b=e.target.closest('[data-act]'),r=e.target.closest('[data-f]');if(!r)return;const f=films.find(x=>x.id===r.dataset.f);if(!f)return;
  if(b){const a=b.dataset.act;return JUJU.once(b,async()=>{const x=await JUJU.post('/api/tap/films/'+encodeURIComponent(f.id)+'/'+a);await load();return x})}
  if(f.state==='done'||f.state==='held')first(f)});
 $('rows').addEventListener('keydown',e=>{if(e.key==='Enter'){const r=e.target.closest('.r.look');if(r)r.click()}});
+/* Uploaded: the 90/70/50 chain (Echo Decay) starts from the real numbers: measured from 24 h, armed at twice the channel's usual views */
+$('posted').addEventListener('submit',e=>{e.preventDefault();if(!open)return;const link=$('plink').value.trim();if(!link){JUJU.say($('pgo'),'Paste the link of your upload');return}
+ JUJU.once($('pgo'),async()=>{await JUJU.post('/api/tap/films/'+encodeURIComponent(open.id)+'/posted',{link});Kit.toast('Juju follows it: measured from 24 hours; at twice your usual views, Part 2 appears in Crossroads');$('plink').value=''})});
+/* Export: drawn again bigger, then saved to the phone (Movies/Juju, with its title and description) or the Mac's film folder (Ambi 26 Nov) */
+$('exp').addEventListener('click',e=>{const b=e.target.closest('[data-h]');if(!b||!open)return;const h=+b.dataset.h;
+ JUJU.once(b,async()=>{const ok=await JUJU.confirm({title:`Export at ${h}p?`,go:'Export',stay:'Not now',lines:[`Juju draws this film again at ${h}p. The words and the voice are kept, so it costs nothing new.`,`It takes longer than the first look${h>=1080?', about three times as long':''}. When it is done it is saved for you to upload.`]});if(!ok)return;
+  const r=await JUJU.post('/api/tap/films/'+encodeURIComponent(open.id)+'/export',{h});$('v').pause();Kit.sheet('first').close();Kit.toast(r.say||`Drawing it at ${h}p`);await load();watch();return r})});
 $('keep').addEventListener('click',()=>{if(!open)return;JUJU.once($('keep'),async()=>{const x=await JUJU.post('/api/tap/films/'+encodeURIComponent(open.id)+'/keep');$('v').pause();Kit.sheet('first').close();Kit.finish($('go'),'On the shelf');await load();return x})});
 $('fdrop').addEventListener('click',()=>{if(!open)return;JUJU.once($('fdrop'),async()=>{const x=await JUJU.post('/api/tap/films/'+encodeURIComponent(open.id)+'/drop');$('v').pause();Kit.sheet('first').close();await load();return x})});
 $('go').addEventListener('click',()=>JUJU.go(slug?'crossroads.html?ch='+slug:'crossroads.html'));

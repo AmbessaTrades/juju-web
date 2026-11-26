@@ -1,16 +1,13 @@
 {
- "version": "0.4.1",
- "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.4.1/juju-0.4.1.apk",
- "apk_sha256": "4b1df49d320ecdcc6af56a1011b839462e682869476edeebd6a0d557a12f73fe",
+ "version": "0.4.2",
+ "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.4.2/juju-0.4.2.apk",
+ "apk_sha256": "45a528426a2f050022dbb15e89dc29150f5d0a7fec25dcffa1c403667232be3c",
  "notes": [
-  "Delete a channel: the bin on each channel, or at the bottom of New Vessel; type DELETE to confirm.",
-  "Pasting a channel you already have opens it instead of making a second one.",
-  "A pasted channel gets its real name and picture, and Juju watches its best recent film to learn from it.",
-  "A video link pasted where a channel goes says where it belongs.",
-  "The upload kit (title, description, thumbnail) opens on the phone and the web.",
-  "The Mac app signs in to the Door by itself and is on the same version."
+  "Export: a finished film can be drawn again at 720p or 1080p; it lands in your phone's Movies/Juju with its title and description, ready to upload.",
+  "Uploaded it? Paste the link on the film: Juju measures it from 24 hours, and at twice your usual views Part 2 appears in Crossroads (then 70%, then 50%, then a rest).",
+  "The Mac app is on 0.4.2 too."
  ],
- "min_core": "0.4.1",
+ "min_core": "0.4.2",
  "engine": "d019fe24",
- "commit": "3b30036e"
+ "commit": "ec0d31f2"
 }
