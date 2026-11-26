@@ -93,7 +93,7 @@ function receipt(I){const v=V;if(!v){$('rc').innerHTML='';$('jar').innerHTML=Art
  $('rc').innerHTML=`<div class="row"><span>Name</span><input id="name" maxlength="60" placeholder="Name it" value="${esc(v.name||'')}" aria-label="Name"></div>
   <div class="row"><span>Niche</span><span data-d>${niche}</span></div>
   <button class="row tap" data-open="lookpick"><span>Look</span><span data-d>${L?esc(L.name):'<span class="nb">Pick a look</span>'}</span></button>
-  <div class="row" id="colrow"><span>Colours</span>${v.swatches&&v.swatches.length?`<span class="sw">${v.swatches.map(x=>{const h=(v.palette||{})[x.role]||x.hex;return `<button type="button" data-role="${x.role}" title="${esc(x.name)}" aria-label="${esc(x.name)}" style="background:${esc(h)}"${(v.palette||{})[x.role]?' class="changed"':''}></button>`}).join('')}</span>`:'<span class="nb">Pick a look</span>'}</div>
+  <div class="row" id="colrow"><span>Colours</span>${v.swatches&&v.swatches.length?`<span class="sw">${v.swatches.map(x=>{const pv=(v.palette||{})[x.role],h=x.i!=null?(Array.isArray(pv)&&pv[x.i])||x.hex:(typeof pv==='string'?pv:x.hex);return `<button type="button" data-role="${x.role}"${x.i!=null?` data-i="${x.i}"`:''} title="${esc(x.name)}" aria-label="${esc(x.name)}" style="background:${esc(h)}"${(v.palette||{})[x.role]?' class="changed"':''}></button>`}).join('')}</span>`:'<span class="nb">Pick a look</span>'}</div>
   <div class="row"><span>Titles like</span>${titles}</div>
   <div class="row"><span>Learn from</span>${v.refs&&v.refs.length?`<span data-d>${v.refs.length} film${v.refs.length>1?'s':''}; used when Bend is built</span>`:'<span class="nb">Paste a film on the left</span>'}</div>
   <div class="row"><span>Thumbnails</span>${thumbs}</div>
@@ -110,10 +110,12 @@ function drawRefs(){$('learn').hidden=!slug;const l=(V&&V.refs)||[];$('refs').in
 $('refform').addEventListener('submit',e=>{e.preventDefault();const link=$('ref').value.trim();if(!link){JUJU.say($('refgo'),'Paste a video link');return}
  JUJU.once($('refgo'),async()=>{await JUJU.long('/api/tap/channels/'+slug+'/refs',{link},70000);$('ref').value='';await load()})});
 /* colours: a swatch opens the look's own inks first, then any colour; the vessel keeps the change */
-let role='';
-$('rc').addEventListener('click',e=>{const b=e.target.closest('.sw button');if(!b||!V)return;e.stopPropagation();role=b.dataset.role;const L=looks.find(l=>l.id===V.look_from)||{},sw=(V.swatches||[]).find(x=>x.role===role)||{};
- $('cprole').textContent=sw.name||'';$('inks').innerHTML=(L.inks||[]).map(h=>`<button type="button" data-hex="${esc(h)}" style="background:${esc(h)}" aria-label="${esc(h)}"></button>`).join('');$('anycol').value=(V.palette||{})[role]||sw.hex||'#888888';Kit.sheet('colpick').open()});
-const setCol=h=>JUJU.patch('/api/tap/channels/'+slug,{palette:{[role]:h}}).then(()=>{Kit.sheet('colpick').close();return load()}).catch(x=>JUJU.say($('anyset'),x.say));
+let role='',ri=null;
+$('rc').addEventListener('click',e=>{const b=e.target.closest('.sw button');if(!b||!V)return;e.stopPropagation();role=b.dataset.role;ri=b.dataset.i!=null?+b.dataset.i:null;const L=looks.find(l=>l.id===V.look_from)||{},sw=(V.swatches||[]).find(x=>x.role===role)||{};
+ $('cprole').textContent=sw.name||'';$('inks').innerHTML=(L.inks||[]).map(h=>`<button type="button" data-hex="${esc(h)}" style="background:${esc(h)}" aria-label="${esc(h)}"></button>`).join('');$('anycol').value=sw.hex||'#888888';Kit.sheet('colpick').open()});
+/* a list colour (its states, from outside) changes one place in the look's whole list */
+const listWith=h=>{const cur=(V.palette||{})[role];const base=Array.isArray(cur)?cur.slice():((V.theme_lists||{})[role]||[]).slice();base[ri]=h||((V.theme_lists||{})[role]||[])[ri];return base};
+const setCol=h=>JUJU.patch('/api/tap/channels/'+slug,{palette:{[role]:ri!=null?listWith(h):h}}).then(()=>{Kit.sheet('colpick').close();return load()}).catch(x=>JUJU.say($('anyset'),x.say));
 $('inks').addEventListener('click',e=>{const b=e.target.closest('[data-hex]');if(b)setCol(b.dataset.hex)});
 $('anyset').addEventListener('click',()=>setCol($('anycol').value));$('cpreset').addEventListener('click',()=>setCol(null));
 function watch(){if(poll)poll.stop();let n=0;poll=JUJU.poll('/api/tap/channels/'+slug+'/ideas',I=>{receipt(I);if(!I.running)JUJU.get('/api/tap/channels/'+slug).then(v=>{V=v;receipt(I)}).catch(()=>{});return I.running||(!V.niche_line&&++n<6)},{every:4000,fail:()=>{}})}
