@@ -1,12 +1,12 @@
 {
- "version": "0.3.4",
- "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.3.4/juju-0.3.4.apk",
- "apk_sha256": "0e1b48b9e5d66ccfed0253ed6d08686b7e89166dd3f31c0b2984ac26deef5c65",
+ "version": "0.3.5",
+ "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.3.5/juju-0.3.5.apk",
+ "apk_sha256": "240dee449ae684398e05be0a01b7611478f1f3d6676cec7b53f0f512bd0fa8a2",
  "notes": [
-  "The Mojo Bag shows every service, Inworld and Google included, and says what its total adds up.",
-  "Gris-gris and High Juju say what opens High Juju instead of 'not yet'."
+  "The looks show pictures from real Juju films.",
+  "Paste your YouTube channel link to add it; the + opens the box."
  ],
- "min_core": "0.3.4",
+ "min_core": "0.3.5",
  "engine": "214c4752",
- "commit": "6f6404a7"
+ "commit": "7a201e25"
 }

@@ -86,6 +86,8 @@ const lookCard=l=>`<button class="look${V&&V.look_from===l.id?' on':''}" role="r
   <b data-d>${esc(l.name)}</b><small>${l.locked?'Opens in High Juju':l.examples.length?'Examples of this look':'No example yet'}</small></button>`;
 function drawLooks(){$('looks').innerHTML=looks.map(lookCard).join('');$('looks2').innerHTML=looks.map(lookCard).join('')}
 /* the receipt: what was chosen, what Juju read, and plain "Not built yet" where no program stands behind a line */
+/* the + jar opens Absorb: paste your channel (Ambi 26 Nov: the + did nothing) */
+document.addEventListener('click',e=>{if(!V&&e.target.closest&&e.target.closest('#jar')){const t=document.querySelector('[data-panel="d-absorb"]');if(t)t.click();setTimeout(()=>{const i=document.querySelector('#d-absorb input');if(i)i.focus()},60)}});
 function receipt(I){const v=V;if(!v){$('rc').innerHTML='';$('jar').innerHTML=Art.jar({state:'new'});$('go').disabled=true;return}
  const L=looks.find(l=>l.id===v.look_from),w=v.films_week||0;
  const rt=v.route||{},niche=v.niche_line?esc(v.niche_line):v.describe?esc(v.describe)+(rt.say?`<br><span class="nb">${esc(rt.say)}</span>`:rt.locked?'<br><span class="nb">Opens in High Juju</span>':''):I&&I.niche?esc(I.niche):I&&I.running?'<span class="nb">Juju is reading the channel</span>':v.door==='absorb'?'<span class="nb">Juju reads it next</span>':NB;

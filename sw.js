@@ -4,7 +4,7 @@
    Until juju-core runs here as WASM (lane A), a film is not made in the browser: Make says so. */
 const BASE = new URL('./', self.location).pathname;
 /* the version of the unit this worker belongs to: stamped by web/build.py, so a tab knows when the site has moved on */
-const ABOUT = {"version": "0.3.4", "core": null, "commit": "6f6404a7"};            // /juju-web/ on GitHub Pages
+const ABOUT = {"version": "0.3.5", "core": null, "commit": "7a201e25"};            // /juju-web/ on GitHub Pages
 const STORE = 'juju-state-v1';
 let CFG = null;
 self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
@@ -123,7 +123,7 @@ async function answer(req, url) {
   if (is('POST', 'mode') || is('POST', 'mode', 'check')) { try { return json(200, await door('POST', seg.length === 2 ? '/v1/mode/check' : '/v1/mode', body)); } catch (e) { const m = await localMode(); if (body && body.mode === 'high-juju') return json(409, Object.assign(m, { error: 'closed', say: API_SAY })); return json(200, m); } }
   if (seg[0] !== 'tap') return no(501, 'not_built', 'Not on the web yet');
   const sys = await seed('systems'), kinds = await seed('kinds');
-  if (is('GET', 'tap', 'looks')) return json(200, { looks: sys.map(x => ({ id: x.id, name: x.name, kind: x.kind, themes: x.themes, locked: x.locked, examples: [], swatches: x.swatches || [], inks: x.inks || [] })) });
+  if (is('GET', 'tap', 'looks')) return json(200, { looks: sys.map(x => ({ id: x.id, name: x.name, kind: x.kind, themes: x.themes, locked: x.locked, examples: (x.examples || []).map((e) => ({ title: e.title, seconds: e.seconds, thumb: BASE + e.file })), swatches: x.swatches || [], inks: x.inks || [] })) });
   if (is('GET', 'tap')) return json(200, { kinds: kinds.map(k => ({ id: k.id, name: k.name, themes: (k.themes || []).length > 1, allowed: k.themes })), sizes: SIZES, size_first: 1080, export_built: false, money: await money(), making: [] });
   if (is('POST', 'tap')) return no(501, 'web_no_make', 'Films are made in the phone app for now');
   if (is('GET', 'tap', 'films')) { let l = await films(); const ch = url.searchParams.get('channel'); if (ch) l = l.filter(f => f.channel === ch); return json(200, { films: l, money: await money() }); }
@@ -141,7 +141,10 @@ async function answer(req, url) {
       if (typeof body.minutes === 'number') { if (body.minutes < 1 || body.minutes > 40) return 'Not that long'; c.minutes = body.minutes; }
       if (typeof body.handle === 'string') c.handle = '@' + body.handle.trim().replace(/^@/, '');
       if (typeof body.name === 'string') { const n = body.name.split(/\s+/).join(' ').trim(); if (!n || n.length > 60) return 'Not a name'; c.name = n; c.named = true; }
-      if (typeof body.look === 'string') { const x = sys.find(y => y.id === body.look); if (!x || !x.kind) return 'Not a look'; if (x.locked) return 'Opens in High Juju'; c.system = x.id; c.kinds = [x.kind]; c.theme = (x.themes || [])[0] || null; c.look_from = x.id; delete c.palette; }
+      if (typeof body.link === 'string') { const L = body.link.trim(), h = (L.match(/@([A-Za-z0-9._-]{2,40})/) || [])[1];
+      if (!/(youtube\.com|youtu\.be)/i.test(L) || (!h && !/\/channel\/[A-Za-z0-9_-]+/.test(L))) return no(422, 'link', 'Paste a YouTube channel link, like youtube.com/@name');
+      Object.assign(v, { link: L, handle: h ? '@' + h : null, name: h || null, named: !!h, door: 'absorb', niche_words: h || '', route: { say: 'Now pick a look for this channel' } }); }
+    else if (typeof body.look === 'string') { const x = sys.find(y => y.id === body.look); if (!x || !x.kind) return 'Not a look'; if (x.locked) return 'Opens in High Juju'; c.system = x.id; c.kinds = [x.kind]; c.theme = (x.themes || [])[0] || null; c.look_from = x.id; delete c.palette; }
       if (typeof body.describe === 'string') { const d = body.describe.split(/\s+/).join(' ').trim(); if (d.length < 3 || d.length > 200) return 'One line, please'; c.describe = d; }
       if (body.palette && typeof body.palette === 'object') { c.palette = Object.assign({}, c.palette || {}); for (const [k, v] of Object.entries(body.palette)) { if (v === null) delete c.palette[k]; else if (/^#[0-9a-fA-F]{6}$/.test(v)) c.palette[k] = v; else return 'Not a colour'; } }
       if (typeof body.films_week === 'number') { if (body.films_week < 1 || body.films_week > 14) return 'One to fourteen a week'; c.films_week = body.films_week; }
@@ -150,7 +153,6 @@ async function answer(req, url) {
   }
   const notYet = say => json(501, { error: 'not_built', say: say || 'Not built yet', not_built: say || 'Not built yet' });
   if (is('POST', 'tap', 'channels')) {
-    if (typeof body.link === 'string') return notYet('Absorbing a channel by its link is not built on the web yet');
     const v = { kinds: [], order: 50, added: new Date().toISOString(), owner: s.who, name: null, named: false };
     if (typeof body.look === 'string') { const l = sys.find(x => x.id === body.look); if (!l || !l.kind) return no(422, 'look', 'Not a look'); if (l.locked) return no(423, 'locked', 'Opens in High Juju');
       Object.assign(v, { system: l.id, kinds: [l.kind], theme: (l.themes || [])[0] || null, look_from: l.id, door: 'ready-made' }); }

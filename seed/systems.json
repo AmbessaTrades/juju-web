@@ -106,6 +106,18 @@
    "#02040a",
    "#03060c",
    "#0d1118"
+  ],
+  "examples": [
+   {
+    "title": "Who Held Africa From Nile Gold To Sea And Back",
+    "seconds": 1555.9,
+    "file": "seed/thumbs/look-kingdoms-0.jpg"
+   },
+   {
+    "title": "Korea and Japan's first kingdoms: Every Year (300 BC \u2013 700 AD)",
+    "seconds": 192.5,
+    "file": "seed/thumbs/look-kingdoms-1.jpg"
+   }
   ]
  },
  {
@@ -215,6 +227,18 @@
    "#02040a",
    "#03060c",
    "#0d1118"
+  ],
+  "examples": [
+   {
+    "title": "How Asia lost the world's wealth to Europe and won it back: Every Year Mapped",
+    "seconds": 199.5,
+    "file": "seed/thumbs/look-wealth-0.jpg"
+   },
+   {
+    "title": "The richest country in South America kept changing: Every Year Mapped",
+    "seconds": 204.0,
+    "file": "seed/thumbs/look-wealth-1.jpg"
+   }
   ]
  },
  {
@@ -319,6 +343,18 @@
    "#02040a",
    "#03060c",
    "#0d1118"
+  ],
+  "examples": [
+   {
+    "title": "How the United States Was Drawn With Native Nations",
+    "seconds": 371.2,
+    "file": "seed/thumbs/look-states-0.jpg"
+   },
+   {
+    "title": "The richest state in America has changed four times: Every Year Mapped",
+    "seconds": 209.7,
+    "file": "seed/thumbs/look-states-1.jpg"
+   }
   ]
  },
  {
@@ -328,7 +364,19 @@
   "locked": true,
   "themes": [],
   "swatches": [],
-  "inks": []
+  "inks": [],
+  "examples": [
+   {
+    "title": "The canal that split a country in two",
+    "seconds": 85.2,
+    "file": "seed/thumbs/look-duppy-night-0.jpg"
+   },
+   {
+    "title": "A sea war fought in shallow northern water",
+    "seconds": 77.1,
+    "file": "seed/thumbs/look-duppy-night-1.jpg"
+   }
+  ]
  },
  {
   "id": "duppy-day",
@@ -337,7 +385,8 @@
   "locked": true,
   "themes": [],
   "swatches": [],
-  "inks": []
+  "inks": [],
+  "examples": []
  },
  {
   "id": "worlds",
@@ -446,6 +495,18 @@
    "#02040a",
    "#03060c",
    "#0d1118"
+  ],
+  "examples": [
+   {
+    "title": "10,000 Years of The sunken land of Kumari Kandam on One Map",
+    "seconds": 81.0,
+    "file": "seed/thumbs/look-worlds-0.jpg"
+   },
+   {
+    "title": "10,000 Years of The sunken land of Kumari Kandam on One Map",
+    "seconds": 82.3,
+    "file": "seed/thumbs/look-worlds-1.jpg"
+   }
   ]
  },
  {
@@ -455,7 +516,8 @@
   "locked": true,
   "themes": [],
   "swatches": [],
-  "inks": []
+  "inks": [],
+  "examples": []
  },
  {
   "id": "contagion-pulse",
@@ -464,7 +526,8 @@
   "locked": true,
   "themes": [],
   "swatches": [],
-  "inks": []
+  "inks": [],
+  "examples": []
  },
  {
   "id": "crude-ledger",
@@ -473,7 +536,8 @@
   "locked": true,
   "themes": [],
   "swatches": [],
-  "inks": []
+  "inks": [],
+  "examples": []
  },
  {
   "id": "engraved-atlas",
@@ -482,6 +546,7 @@
   "locked": true,
   "themes": [],
   "swatches": [],
-  "inks": []
+  "inks": [],
+  "examples": []
  }
 ]
