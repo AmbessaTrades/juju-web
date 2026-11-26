@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Juju · Feed Sight</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script>
+<style>
+/* ---- room-own parts, missing from the kit (named in the report): .lay a layout plan, .yt a plain YouTube preview
+   (its own colours, YouTube's, scoped to the preview only: ROOMS.md says the preview is not in Juju style) ---- */
+.lay{position:absolute;inset:0;container-type:inline-size;overflow:hidden;background:var(--a-well)}
+.lay::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,transparent 0 9px,color-mix(in oklab,var(--a-line) 16%,transparent) 9px 10px)}
+.lay .mass{position:absolute;border:2px dashed var(--a-line);border-bottom:0;border-radius:50% 50% 0 0/34% 34% 0 0;background:linear-gradient(180deg,color-mix(in oklab,var(--obj-dim) 60%,transparent),color-mix(in oklab,var(--obj-dim) 10%,transparent))}
+.lay .wd{position:absolute;font:600 max(12px,8.8cqw)/.94 "Spectral SC",serif;color:var(--bone);text-transform:uppercase}
+.lay .wd b{display:block;font-weight:600;color:var(--need)}
+.lay .wd.r{text-align:right}
+.lay .tag{position:absolute;left:3%;top:5%;padding:4px 7px 2px;background:var(--a-deep);color:var(--ash);font:600 12px/1 "Josefin Sans",sans-serif;letter-spacing:.12em;text-transform:uppercase}
+.yt{--yt-bg:#0f0f0f;--yt-fg:#f1f1f1;--yt-2:#aaaaaa;--yt-chip:#272727;--yt-ring:#3ea6ff;position:relative;flex:1;min-height:0;overflow:auto;background:var(--yt-bg);color:var(--yt-fg);font:400 14px/1.4 Roboto,Arial,"Helvetica Neue",sans-serif;box-shadow:0 0 0 2px var(--frame-lo),0 0 0 3px #000,0 0 0 5px var(--frame),var(--shadow);transition:filter .25s}
+.yt.light{--yt-bg:#ffffff;--yt-fg:#0f0f0f;--yt-2:#606060;--yt-chip:#f2f2f2}
+.yt.squint .feed{filter:blur(3.2px) saturate(1.1)}
+.yt .bar{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:16px;height:52px;padding:0 18px;background:var(--yt-bg)}
+.yt .bar .srch{flex:0 1 480px;height:36px;margin:0 auto;border-radius:18px;box-shadow:inset 0 0 0 1px var(--yt-chip)}
+.yt .bar .me{flex:none;width:30px;height:30px;border-radius:50%;background:#3b6fd8}
+.yt .bar .burger{width:20px;height:14px;background:linear-gradient(var(--yt-fg) 0 2px,transparent 2px 6px,var(--yt-fg) 6px 8px,transparent 8px 12px,var(--yt-fg) 12px 14px)}
+.feed{padding:12px 22px 28px}
+.it{position:relative;align-self:start;cursor:pointer;border:0;background:none;color:inherit;text-align:left;font:inherit;padding:0;display:block;width:100%}
+.it .th{position:relative;display:block;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:var(--yt-chip)}
+.it .th img{width:100%;height:100%;object-fit:cover;display:block}
+.it .len{position:absolute;right:6px;bottom:6px;width:40px;height:18px;border-radius:4px;background:rgba(0,0,0,.8)}
+.it .row2{display:grid;grid-template-columns:36px 1fr;gap:12px;margin-top:12px}
+.it .av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#5f6b7a;color:#fff;font:500 16px/1 Roboto,Arial,sans-serif}
+.it .tt{font:500 16px/22px Roboto,Arial,sans-serif;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.it .ch{display:block;color:var(--yt-2);font-size:14px;margin-top:4px}
+.it.ours .tt{cursor:text}
+.it.ours.ring .th{box-shadow:0 0 0 3px var(--yt-ring)}
+.it.blank .th>*{visibility:hidden} .it.blank .row2{visibility:hidden}
+.it.blank .th{background:var(--yt-chip)}
+.it.answer .th{box-shadow:0 0 0 4px var(--need)}
+.home .feed{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:36px 16px}
+.phone .feed{max-width:400px;margin:0 auto;padding:0;display:grid;gap:22px}
+.phone .it .th{border-radius:0}
+.phone .it .row2{padding:0 12px}
+.side .feed{display:grid;grid-template-columns:minmax(0,1fr) 402px;gap:24px}
+.side .player{aspect-ratio:16/9;border-radius:12px;background:#000;display:grid;place-items:center;color:#777}
+.side .player .glyph{width:54px;height:54px}
+.side .rail2{display:grid;gap:10px;align-content:start}
+.side .it{display:grid;grid-template-columns:168px 1fr;gap:10px}
+.side .it .th{width:168px;height:94px;aspect-ratio:auto;border-radius:8px}
+.side .it .row2{grid-template-columns:1fr;margin-top:0}
+.side .it .av{display:none}
+.side .it .tt{font-size:14px;line-height:20px}
+.side .it .ch{font-size:12px}
+.tv{--yt-bg:#0f0f0f}
+.tv .feed{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:30px 22px;padding:30px 34px}
+.tv .it .th{border-radius:6px}
+.tv .it .len{width:54px;height:24px}
+.tv .it .row2{grid-template-columns:1fr}.tv .it .av{display:none}
+.tv .it .tt{font-size:18px;line-height:24px}
+.cover{position:absolute;inset:0;z-index:6;display:grid;place-items:center;align-content:center;gap:12px;background:var(--void);color:var(--bone);font:600 24px/1.2 "Spectral SC",serif}
+.cover .cat{width:72px;height:72px}
+.cover.ask{inset:auto 0 0 0;height:auto;padding:14px;background:color-mix(in oklab,var(--void) 88%,transparent);font-size:20px;position:sticky;bottom:0}
+/* ---- the room ---- */
+.fs-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.fs-top .tabs{flex:none}
+.fs-top .tab .dot{display:inline-block;vertical-align:middle;width:7px;height:7px;margin-left:4px;background:var(--need);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.fs-top .tools2{display:flex;gap:4px;margin-left:auto}
+.fs-top .tools2 .btn[aria-pressed=true]{color:var(--act)}
+.vsq{display:flex;gap:8px}
+.vsq button{position:relative;width:96px;aspect-ratio:16/9;padding:0;border:0;cursor:pointer;background:var(--a-well);box-shadow:0 0 0 2px var(--line);overflow:hidden}
+.vsq button.on{box-shadow:0 0 0 3px var(--act),0 0 16px var(--act-glow)}
+.vsq button .n{position:absolute;left:4px;bottom:3px;z-index:2;font:600 13px/1 "JetBrains Mono",monospace;color:var(--bone-fixed);text-shadow:0 1px 2px #000}
+.vsq button.struck::after{content:"";position:absolute;inset:0;background:linear-gradient(to top right,transparent calc(50% - 2px),var(--stop) calc(50% - 2px),var(--stop) calc(50% + 2px),transparent calc(50% + 2px))}
+.vsq button .plate{position:absolute;inset:0;aspect-ratio:auto;min-height:0}
+.vsq .chk{position:absolute;right:3px;top:3px;z-index:2}
+.eye{font:600 14px/1.2 "Lato",sans-serif;color:var(--ash)}
+.eye b{color:var(--work);font-family:"JetBrains Mono",monospace}
+.tedit{position:absolute;z-index:7;left:0;right:0;padding:8px;background:var(--lift);box-shadow:var(--shadow)}
+.tedit input{width:100%;min-height:48px;padding:0 12px;border:0;background:var(--a-well);color:var(--bone);font:500 16px/1.3 Roboto,Arial,sans-serif;box-shadow:inset 0 0 0 2px var(--act)}
+.sheet .their{display:grid;grid-template-columns:200px 1fr;gap:16px;margin-top:12px}
+.sheet .their img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.sheet dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:15px;align-content:start}
+.sheet dt{font:600 12.5px/1.5 "Josefin Sans",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--smoke)}
+.sheet dd.num{color:var(--work)}
+.deck .under{flex:none}
+.floor{min-height:0}
+.fs-line{display:flex;justify-content:center;min-height:0}
+.fs-line:empty{display:none}
+@media (min-width:761px){.room .main{height:100vh;height:100dvh}.floor{overflow:hidden}}
+@media (max-width:760px){
+  .toasts{bottom:calc(300px + env(safe-area-inset-bottom))}
+  .fs-top{display:grid;gap:8px}
+  .fs-top .tabs{width:100%}
+  .fs-top .tabs .tab{flex:1}
+  .fs-top .tools2{margin:0;display:grid;grid-template-columns:repeat(4,1fr)}
+  .fs-top .tools2 .btn{flex-direction:column;gap:2px;padding:4px 2px 2px;min-height:52px;font-size:12.5px}
+  .yt{flex:none;height:max(260px,calc(100dvh - 500px));overflow:auto;box-shadow:0 0 0 1px var(--line)}
+  .vsq{gap:6px}.vsq button{width:56px;height:56px;aspect-ratio:auto}
+  .vsq button .plate .says{display:none}
+  .deck .aside .btn{white-space:nowrap;font-size:14px;padding:0 8px}
+  .home .feed{grid-template-columns:repeat(3,300px);width:max-content}
+  .tv .feed{grid-template-columns:repeat(4,240px);width:max-content}
+  .side .feed{grid-template-columns:1fr;width:auto}
+  .side .player{display:none}
+  .deck .aside{flex-wrap:nowrap}
+  .sheet .their{grid-template-columns:1fr}
+  .deck .under{order:3;width:100%;justify-content:center}
+}
+</style>
+</head>
+<body data-skin="nocturne" data-room="feed-sight" data-title="Feed Sight" data-channel="Library of Tehuti" data-chan-state="need" data-back="mirror-bend.html" data-back-label="Mirror Bend" data-tank="asleep" data-who="A" style="--focus-x:55%;--focus-y:50%">
+<main>
+  <div class="fs-top">
+    <div class="tabs" data-tabs id="views" data-u="u1">
+      <button class="tab" data-view="home">Home</button><button class="tab" data-view="phone">Phone</button><button class="tab" data-view="side">Side</button><button class="tab" data-view="tv">TV</button>
+    </div>
+    <div class="fs-line" id="line"></div><span class="eye" id="eye"></span>
+    <div class="tools2">
+      <button class="btn bare" id="blink" data-u="u4"><span data-art="glyph" data-name="play"></span>Blink</button>
+      <button class="btn bare" id="squint" aria-pressed="false" data-u="u6"><span data-art="emblem" data-name="watcher"></span>Squint</button>
+      <button class="btn bare" id="light" aria-pressed="false" data-u="u7"><span data-art="glyph" data-name="swap"></span>Light</button>
+      <button class="btn bare" id="move" data-u="u8"><span data-art="glyph" data-name="retry"></span>Move</button>
+    </div>
+  </div>
+  <div class="yt" id="yt" data-u="u3" data-scroll><div class="bar"><span class="burger"></span><span class="srch"></span><span class="me"></span></div><div class="feed" id="feed"></div></div>
+</main>
+<footer class="deck">
+  <div class="aside" id="aside"><div class="vsq" id="vsq" data-u="u2"></div><a class="btn bare" id="bendagain" href="mirror-bend.html?from=feed-sight" data-u="u12"><span data-art="emblem" data-name="mirror-bend"></span>Bend again</a></div>
+  <button class="primary" id="go">Use it</button>
+  <a class="btn bare under" id="none" href="pact.html?from=feed-sight&amp;thumb=none" data-u="u24" hidden>Take none</a>
+</footer>
+
+<section class="sheet" id="compsheet" hidden>
+  <h3 data-d id="cs-t"></h3>
+  <div class="their"><img id="cs-img" alt="" src="../../../../context-repo/09-assets/library/069-4_lsxy5fsac-outlier.jpg"><dl><dt>Channel</dt><dd data-d id="cs-ch"></dd><dt>Views</dt><dd class="num" data-d id="cs-v"></dd><dt>Usual</dt><dd class="num" data-d id="cs-u"></dd><dt>Read</dt><dd>undated</dd></dl></div>
+  <div class="acts"><a class="btn need" id="cs-bend" href="#" data-u="u11"><span data-art="emblem" data-name="mirror-bend"></span>Bend this one</a></div>
+</section>
+
+<script>
+(()=>{
+const LIB='../../../../context-repo/09-assets/library/';
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+/* who sits beside us: shelf outliers 039 to 104 (outliers.json); view counts are left out until read, so none show */
+const C=[["069","4_lsxy5fsac","Bygone Philosophy",709000,17.08,41500,"The Highest State a Human Can Reach"],["075","KJg1-FCweWI","The Opening",2800000,8.19,342000,"What you'll see when you die"],["088","xU60JQSjxLc","Universe Dimensions",10000000,81.3,123000,"What TON 618 Would Look Like at Different Distances"],["070","vvLRZOHdNqA","Bygone Philosophy",349000,8.41,41500,"The Art of Not Trying"],["100","ylnTesFVoOo","AFTER THE DOOR",2600000,60.47,43000,"What If Every Step Made You Twice as Big?"],["082","gpLC_ELulyg","Minute Zero",2400000,48.0,50000,"What If You Sped Up and Couldn't Stop?"],["095","gcQNBKYhuUo","Stargaze",4800000,8.63,556500,"What If a Black Hole Entered Our Solar System? (Simulation)"],["091","51ZathOeW2E","Server History",3100000,10.88,285000,"IF WW2 WAS A DISCORD CHAT (HISTORICALLY ACCURATE)"],["098","lyRHFOcNMTU","Planet B",1700000,20.24,84000,"Why Scientists Fear the Great Himalayan Earthquake"],["071","v90SZKGbMRo","Bygone Philosophy",309000,7.45,41500,"You Will Never Procrastinate Again After Watching This Video"],["089","7c_qUXqRZFo","Universe Dimensions",1300000,10.57,123000,"The Night Sky When BETELGEUSE Goes SUPERNOVA (Simulation)"],["066","eWu92oXtxsw","ExtinctZoo",3400000,4.09,832000,"The Deadliest Sea Animal From Every Single Period"],["079","TAsqnXcCqRI","WhatIfAnimations",441000,81.67,5400,"What If Light Kept Getting Slower and Couldn't Stop?"],["042","LqvlFsTaZgE","Mapocalypse",392000,8.0,49000,"I Simulated Yellowstone Erupting, Day by Day"],["102","uYcWVAOV-bI","Whatfinity",1500000,833.33,1800,"What If You Never Stopped Running?"]].map(r=>({n:r[0],id:r[1],ch:r[2],v:r[3],x:r[4],u:r[5],t:r[6]}));
+const img=s=>LIB+s.n+'-'+s.id+'-outlier.jpg';
+const kf=v=>v.toLocaleString('en-US');
+const ST=Kit.state||'layout', FROM=Kit.param('from')||'mirror-bend', DOOR=Kit.param('door')||FROM;
+const ROOMS={'mirror-bend':'Mirror Bend',crossroads:'Crossroads',pact:'Pact','publish-kit':'Kit'};
+const b=document.body;b.dataset.back=FROM+'.html?from=feed-sight';b.dataset.backLabel=ROOMS[FROM]||'Mirror Bend';
+/* our film: the sample film's own title and thumbnail words (runs/first-film/film.json) */
+const OURS={t:'The ENTIRE Journey After Death in 52 Minutes',w:['He came','back'],ch:'Library of Tehuti'};
+const GEO=[{s:[.56,.12,.36],w:[.06,.3,.48]},{s:[.03,.04,.45],w:[.46,.3,.48]},{s:[.6,.3,.26],w:[.06,.36,.48]}];
+const ON_PHONE=matchMedia('(max-width:760px)').matches;
+const M={view:['home','phone','side','tv'].includes(ST)?ST:Kit.param('view')||(ON_PHONE?'phone':'home'),seen:new Set(),v:Kit.param('v')?(+Kit.param('v')-1):0,pos:ON_PHONE?0:1,title:OURS.t,
+ slots:['layout','layout','layout'],eyes:[0,0,0],looks:[0,0,0],blink:null};
+const SL={ready:['painted','painted','painted'],checking:['checking','painted','painted'],'failed-check':['fix','painted','painted'],dropped:['painted','painted','dropped'],
+ held:['held','painted','painted'],'all-failed':['dropped','dropped','dropped'],'two-rounds':['dropped','dropped','dropped'],done:['painted','painted','painted'],'not-fixed':['painted','painted','painted'],mumu:['painted','painted','painted']}[ST];
+if(SL)M.slots=SL.slice();
+if(ST==='ready'){M.seen=new Set([M.view])}
+if(['done','not-fixed','mumu','checking','failed-check','dropped','held'].includes(ST))M.seen=new Set(['home','phone','side','tv']);
+if(ST==='light'){}
+const SAY={layout:['','Layout only'],'after-film':['','Film frame later'],stale:['work','Reading numbers'],offline:['','Offline'],locked:['need','Face check off'],
+ done:['work','In use'],'not-fixed':['stop','Not fixed'],mumu:['stop','Mumu took this card'],'all-failed':['stop','Too busy'],'two-rounds':['stop','Needs frames'],
+ held:['need','Same as last'],'failed-check':['need','Words at edge'],checking:['work','Checking'],ready:['need','Open all four']}[ST];
+
+const $=id=>document.getElementById(id);let go;
+const reduce=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+function lay(k,o={}){const g=GEO[k],pc=v=>(v*100).toFixed(1)+'%',ws=k===2?[OURS.w[1]]:OURS.w,right=g.w[0]>.4;
+ return `<span class="lay"><span class="mass" style="left:${pc(g.s[0])};top:${pc(g.s[1])};width:${pc(g.s[2])};bottom:0"></span>${o.words===false?'':`<span class="wd${right?' r':''}" data-d style="left:${pc(g.w[0])};top:${pc(g.w[1])};width:${pc(g.w[2])}">${ws.length>1?esc(ws[0]):''}<b>${esc(ws[ws.length-1])}</b></span>`}${o.tag?'<span class="tag">Layout</span>':''}</span>`}
+function ourThumb(k,o){const s=M.slots[k];
+ if(s==='painted'||s==='checking'||s==='fix'||s==='held')return `<span class="plate"><span data-art="plate" data-state="${s==='checking'?'working':'empty'}"></span><span class="says"><b>${s==='checking'?'Checking':'Painted'}</b></span></span>`;
+ return lay(k,o)}
+function itemHTML(c,i,blank){if(c==='ours'){return `<button class="it ours${M.ringOurs?' ring':''}${blank?' blank':''}" data-i="${i}" data-ours><span class="th">${ourThumb(M.v,{tag:1})}<span class="len"></span></span><span class="row2"><span class="av" data-d>L</span><span><span class="tt" data-d id="ourtitle" data-u="u9">${esc(M.title)}</span><span class="ch"><span data-d>${OURS.ch}</span><br>No views yet</span></span></span></button>`}
+ return `<button class="it${blank?' blank':''}" data-i="${i}" data-n="${c.n}" data-u="u10"><span class="th"><img src="${img(c)}" alt="" loading="lazy"><span class="len"></span></span><span class="row2"><span class="av" data-d>${esc(c.ch[0])}</span><span><span class="tt" data-d>${esc(c.t)}</span><span class="ch" data-d>${esc(c.ch)}</span></span></span></button>`}
+function feedItems(n,pos){const out=[];let k=0;for(let i=0;i<n;i++)out.push(i===pos?'ours':C[k++%C.length]);return out}
+function renderFeed(blank){const yt=$('yt');yt.className='yt '+M.view+(yt.classList.contains('light')&&M.view!=='tv'?' light':'')+(yt.classList.contains('squint')?' squint':'');
+ const f=$('feed');const n=M.view==='side'?10:M.view==='tv'?8:M.view==='phone'?6:9;const items=feedItems(n,M.pos);
+ if(M.view==='side')f.innerHTML=`<div class="player">${Art.glyph('play')}</div><div class="rail2">${items.map((c,i)=>itemHTML(c,i,blank)).join('')}</div>`;
+ else f.innerHTML=items.map((c,i)=>itemHTML(c,i,blank)).join('');
+ f.querySelectorAll('[data-art]').forEach(e=>Art.fill(e))}
+function renderTabs(){document.querySelectorAll('#views .tab').forEach(t=>{const v=t.dataset.view;t.setAttribute('aria-selected',v===M.view);t.querySelector('.dot')?.remove();if(!M.seen.has(v))t.insertAdjacentHTML('beforeend','<i class="dot" aria-label="not looked at yet"></i>')});
+ $('light').disabled=M.view==='tv'}
+function renderVsq(){$('vsq').innerHTML=M.slots.map((s,k)=>{const struck=s==='dropped';return `<button class="${k===M.v?'on':''}${struck?' struck':''}" data-v="${k}" aria-label="Version ${k+1}${struck?', dropped: too busy when small':''}">${ourThumb(k,{words:false})}<span class="n" data-d>${k+1}</span></button>`}).join('');$('vsq').querySelectorAll('[data-art]').forEach(e=>Art.fill(e))}
+function renderEye(){const n=M.looks[M.v];$('eye').innerHTML=n?`Eye <b data-d>${M.eyes[M.v]}/${n}</b>`:''}
+function renderDeck(){let label='Use it',fn=useIt,dis=false,u=DOOR==='pact'?'u20':DOOR==='publish-kit'?'u21':'u19';
+ const painted=['painted','checking','fix','held'].includes(M.slots[M.v]);
+ if(ST==='ready'&&M.seen.size<4){dis=true}
+ if(M.slots[M.v]==='held'){dis=true}
+ if(ST==='all-failed'){label='Make it simpler';fn=()=>nav('mirror-bend.html?from=feed-sight&state=ready&simpler=1');u='u23'}
+ if(ST==='two-rounds'){label='Take none';fn=()=>nav($('none').href);u='u24'}
+ if(ST==='mumu'){label='Crossroads';fn=()=>nav('crossroads.html?from=feed-sight')}
+ if(ST==='not-fixed')label='Use it again';
+ go.textContent=label;go.disabled=dis;go.onclick=fn;go.dataset.u=u;
+ $('none').hidden=!(ST==='all-failed')||DOOR==='publish-kit';
+ $('none').href=DOOR==='publish-kit'?'publish-kit.html?from=feed-sight':'pact.html?from=feed-sight&thumb=none';
+ $('bendagain').hidden=ST==='all-failed'||ST==='two-rounds';$('bendagain').href=`mirror-bend.html?from=feed-sight&door=${DOOR}`;
+ $('line').innerHTML=SAY&&!(ST==='ready'&&M.seen.size===4)?`<span class="say ${SAY[0]}" style="font-size:15px">${SAY[1]}</span>`:''}
+function render(){renderTabs();renderFeed();renderVsq();renderEye();renderDeck()}
+function nav(u){setTimeout(()=>location.href=u,160)}
+function useIt(){const o=document.querySelector('.it.ours .th');if(o){o.style.transition='transform .35s,opacity .35s';o.style.transform='translateY(-18px) scale(1.05)';o.style.opacity='.3'}
+ const painted=['painted','checking','fix'].includes(M.slots[M.v]);
+ Kit.finish(go,painted?'Fixed for the film':'Title fixed. No thumbnail yet.');
+ nav(DOOR==='publish-kit'?'publish-kit.html?from=feed-sight':'pact.html?from=feed-sight'+(painted?'':'&thumb=none'))}
+
+/* blink: cover, 0.4 s of feed with ours in a random place, cover, then a tap */
+function blink(){if(M.blink)return;if(ON_PHONE&&(M.view==='home'||M.view==='tv')){M.view='phone';M.seen.add('phone');renderTabs()}
+ const yt=$('yt'),cv=document.createElement('div');cv.className='cover';cv.innerHTML='<span class="cat"></span><span>Look here</span>';cv.querySelector('.cat').innerHTML=window.JujuCat;
+ const n=M.view==='side'?10:6;M.pos=Math.floor(Math.random()*(M.view==='phone'?2:Math.min(n,6)));M.blink=1;renderFeed();yt.scrollTop=0;yt.append(cv);
+ setTimeout(()=>{cv.remove();setTimeout(()=>{renderFeed(true);const ask=document.createElement('div');ask.className='cover ask';ask.textContent='Tap where yours was';yt.append(ask);M.blink=2},400)},reduce()?300:900)}
+/* u5: the tap where yours was */
+function answer(i){const right=i===M.pos;M.looks[M.v]++;if(right)M.eyes[M.v]++;M.blink=null;document.querySelector('.cover.ask')?.remove();renderFeed();
+ const o=document.querySelector('.it.ours');o.classList.add('answer');renderEye();
+ Kit.toast(`Eye found it ${M.eyes[M.v]} of ${M.looks[M.v]}`,{state:right?'':'need'})}
+
+document.addEventListener('DOMContentLoaded',()=>{
+ go=$('go');
+ document.querySelectorAll('.rail .door').forEach(d=>{const k=d.getAttribute('href').split('.')[0];d.dataset.u={altar:'u16',crossroads:'u17',cauldron:'u18'}[k]||''});{const bk=document.querySelector('.head .back');if(bk){bk.dataset.u={'mirror-bend':'u13',pact:'u14','publish-kit':'u15',crossroads:'u22'}[FROM]||'';if(FROM==='crossroads')bk.querySelector('span').textContent='Cards'}}M.seen.add(M.view);
+ if(ST==='blink'){render();const yt=$('yt'),cv=document.createElement('div');cv.className='cover';cv.innerHTML='<span class="cat"></span><span>Look here</span>';cv.querySelector('.cat').innerHTML=window.JujuCat;yt.append(cv)}
+ else render();
+ if(ST==='light')$('yt').classList.add('light'),$('light').setAttribute('aria-pressed','true'),renderFeed();
+ if(ST==='competitor')openComp('088');
+ $('views').addEventListener('click',e=>{const t=e.target.closest('.tab');if(!t)return;M.view=t.dataset.view;const was=M.seen.size;M.seen.add(M.view);if(M.view==='tv'){$('yt').classList.remove('light');$('light').setAttribute('aria-pressed','false')}render();
+  if(ST==='ready'&&was===3&&M.seen.size===4)Kit.toast('All four views seen')});
+ $('vsq').addEventListener('click',e=>{const v=e.target.closest('[data-v]');if(!v)return;M.v=+v.dataset.v;if(M.slots[M.v]==='dropped')Kit.toast('Version '+(M.v+1)+' was dropped: too busy when small',{state:'stop'});render();Kit.press(v)});
+ $('blink').onclick=blink;
+ $('squint').onclick=e=>{const on=$('yt').classList.toggle('squint');e.currentTarget.setAttribute('aria-pressed',on)};
+ $('light').onclick=e=>{if(M.view==='tv')return;const on=$('yt').classList.toggle('light');e.currentTarget.setAttribute('aria-pressed',on)};
+ $('move').onclick=()=>{const n=6;let p;do{p=Math.floor(Math.random()*n)}while(p===M.pos);M.pos=p;M.ringOurs=1;renderFeed();M.ringOurs=0;Kit.toast('Moved')};
+ $('feed').addEventListener('click',e=>{const it=e.target.closest('.it');if(!it)return;
+  if(M.blink===2){answer(+it.dataset.i);return}if(M.blink)return;
+  if(it.hasAttribute('data-ours')){if(e.target.closest('#ourtitle'))editTitle(it);return}
+  openComp(it.dataset.n)});
+});
+function openComp(n){const c=C.find(x=>x.n===n);if(!c)return;$('cs-t').textContent=c.t;$('cs-img').src=img(c);$('cs-ch').textContent=c.ch;$('cs-v').textContent=kf(c.v);$('cs-u').textContent=kf(c.u);
+ $('cs-bend').href=`mirror-bend.html?from=feed-sight&door=${DOOR}&donor=${c.n}`;Kit.sheet('compsheet').open()}
+function editTitle(it){if(document.querySelector('.tedit'))return;const box=document.createElement('div');box.className='tedit';box.innerHTML=`<input aria-label="Our title" value="${esc(M.title)}">`;
+ const th=it.querySelector('.row2');th.style.position='relative';th.append(box);const inp=box.querySelector('input');inp.focus();inp.select();
+ inp.addEventListener('input',()=>{document.getElementById('ourtitle').textContent=inp.value});
+ const done=()=>{M.title=inp.value.trim()||M.title;box.remove();renderFeed();Kit.toast('Title saved. Checked again.')};
+ inp.addEventListener('keydown',e=>{if(e.key==='Enter')done();if(e.key==='Escape'){box.remove();renderFeed()}});inp.addEventListener('blur',done)}
+/* proof aid: ?do=<css>;<css>~<text> taps (or types into) those controls in order, so a still can show the state after a tap. Not part of the room. */
+document.addEventListener('DOMContentLoaded',()=>{(Kit.param('do')||'').split(';').filter(Boolean).forEach((q,i)=>setTimeout(()=>{const [c,v]=q.split('~'),e=document.querySelector(c);if(!e){console.error('do: nothing at '+c);return}if(v!=null){e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));return}e.click()},40+i*130))});
+})();
+</script>
+</body>
+</html>

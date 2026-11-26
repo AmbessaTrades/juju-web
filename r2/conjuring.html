@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Juju · Conjuring</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script><script>(function(){if(!('serviceWorker' in navigator))return;if(navigator.serviceWorker.controller)return;document.documentElement.style.visibility='hidden';navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(function(){return navigator.serviceWorker.ready}).then(function(){location.reload()})})()</script><script src="phone.js"></script><script src="api.js"></script>
+<style>
+/* Conjuring: one film being made. The stages are one vertical list at both sizes, minutes left on the right.
+   All state is read from GET /api/runs/{id}; closing the page loses nothing. Contract: runs/app/API.md.
+   Layout only; every colour is a kit token. */
+body{--focus-x:30%;--focus-y:46%}
+.cat{animation:none} .chip.tank{white-space:nowrap}
+.conj{flex:1;display:grid;grid-template-columns:400px minmax(0,1fr);gap:24px 72px;align-content:center;align-items:center;width:100%}
+.pot{grid-row:1/3;display:grid;justify-items:center}
+.pot .niche{width:336px;height:408px;--arch:168px}
+.pot .niche .art.jar{height:352px;width:auto;margin-bottom:-2px}
+.pot .ledge{width:400px}
+.info{display:grid;gap:8px;align-self:end;min-width:0}
+.info .h2{overflow-wrap:anywhere}
+.big[hidden]{display:none} .big{display:flex;align-items:center;gap:16px;min-height:64px;flex-wrap:wrap}
+.big .fig{font-size:56px;white-space:nowrap} .big .fig.warn{color:var(--need)}
+.stages{list-style:none;margin:0;padding:0;display:grid;align-self:start}
+.stg{position:relative;display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:0 16px;align-items:center;min-height:72px;border-top:2px solid var(--line)}
+.stg:last-child{border-bottom:2px solid var(--line)}
+.stg .art.seal{width:56px;height:56px}
+.stg b{font:600 22px/1.2 "Spectral SC",serif;letter-spacing:.015em}
+.stg .v{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:28px;color:var(--ash)}
+.stg .v .pip{width:24px;height:24px}
+.stg.now b{color:var(--work)} .stg.now .v{color:var(--bone)} .stg.next b{color:var(--smoke)} .stg.held b{color:var(--bone)} .stg.failed b{color:var(--stop-hi)} .stg.yours b{color:var(--need)}
+.why{text-wrap:balance;font:400 26px/1.35 "Spectral",serif;color:var(--bone)} .why:empty{display:none} .why.work{color:var(--work)} .why.stop{color:var(--stop-hi)} .why.need{color:var(--need)}
+.stg .bar{position:absolute;z-index:1;left:0;right:0;bottom:-2px;height:2px;background:transparent} .stg .bar i{display:block;height:2px;width:0;background:var(--work);transition:width .8s linear}
+.conj.wait .info,.conj.wait .stages{visibility:hidden}
+/* nothing to show: the sleeping jar stands alone in the middle */
+.conj.none{grid-template-columns:minmax(0,1fr);justify-items:center} .conj.none .info,.conj.none .stages{display:none}
+@media (max-width:760px){
+  .main{min-height:calc(100dvh - 74px - env(safe-area-inset-bottom))}
+  .conj{grid-template-columns:120px minmax(0,1fr);gap:24px 16px;align-content:start;padding-top:16px}
+  .pot{grid-row:1} .pot .niche{width:104px;height:144px;--arch:52px} .pot .niche .art.jar{height:124px} .pot .ledge{width:120px;height:16px}
+  .info{align-self:center;gap:8px}
+  .conj.none{grid-template-columns:minmax(0,1fr);align-content:center;padding:0} .conj.none .niche{width:208px;height:264px;--arch:104px} .conj.none .niche .art.jar{height:224px} .conj.none .ledge{width:248px;height:22px}
+  .info .h2{font-size:20px}
+  .why{font-size:20px}
+  .big{gap:8px;min-height:40px} .big .fig{font-size:40px}
+  .stages{grid-column:1/-1}
+  .stg{grid-template-columns:48px minmax(0,1fr) auto;min-height:72px} .stg .art.seal{width:48px;height:48px}
+  .stg b{font-size:20px}
+  #stop{width:100%}
+}
+</style>
+</head>
+<body data-skin="nocturne" data-room="conjuring" data-door="altar" data-title="Conjuring" data-channel="Library of Tehuti" data-back="altar.html" data-back-label="Altar" data-tank="ok" data-who="A">
+<main>
+ <div class="conj wait" id="conj">
+  <div class="pot"><div class="niche" id="niche"></div><i class="ledge"></i></div>
+  <div class="info">
+   <h2 class="h2" id="title" data-d></h2>
+   <p class="why" id="why" data-d role="status"></p>
+   <div class="big"><span class="fig" id="left" data-d aria-live="off"></span><span class="pill" id="state" role="status" hidden></span></div>
+  </div>
+  <ol class="stages" id="stages"></ol>
+ </div>
+</main>
+<footer class="deck"><div class="aside" id="aside"><button class="btn" id="stop" data-open="sh-stop" hidden>Stop</button></div><button class="primary" id="go" disabled>Leave it working</button></footer>
+<section class="sheet" id="sh-stop" hidden><h3>Stop</h3><div class="acts"><button class="btn stop" id="stopkeep">Stop it</button><button class="btn" data-close>Not now</button></div></section>
+<script>
+(()=>{
+const $=s=>document.querySelector(s),go=$('#go'),esc=JUJU.esc;
+const SEAL={'Facts':'reliquary','Words':'elder','Kit':'publish-kit','Script':'elder','Pictures':'reliquary','Film':'conjuring','Your turn':'spell-strip'};
+let id=JUJU.param('run'),R=null,other=null,cut=null,none=false,off=false,poll=null,shown='';
+const at=x=>'/api/runs/'+encodeURIComponent(id)+(x?'/'+x:''),
+ clock=s=>{s=Math.round(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')},
+ live=()=>!!R&&(R.state==='working'||R.state==='waiting');
+
+function stage(s){
+ /* bone = done, jade = now, gold = yours, ember = failed, blank = not reached */
+ const held=s.name==='Film'&&R.practice&&R.state==='stopped',yours=s.name==='Your turn'&&R.state==='done'&&s.state!=='done',failed=s.state==='failed';
+ const st=failed?'failed':yours?'yours':held?'held':s.state==='now'&&!live()?'next':s.state;
+ const seal=Art.seal({state:{done:'pressed',now:'live',failed:'void',yours:'pressed',held:'pressed'}[st]||'blank',emblem:st==='next'?undefined:SEAL[s.name]});
+ let v=st==='done'?Art.pip({state:'done'}):st==='yours'?Art.pip({state:'next'}):failed?Art.pip({state:'failed'}):
+  live()&&!off&&s.left_min!=null?`<span class="num" data-d>${JUJU.minutes(s.left_min)}</span>`:st==='now'?Art.pip({state:'now'}):'';
+ if(s.name==='Script'&&R.practice)v='<span class="pill dim">Practice</span>'+v;
+ const part=s.name==='Film'&&s.state!=='done'&&R.film_s&&R.drawn_s>0?Math.min(1,R.drawn_s/R.film_s):0;
+ return`<li class="stg ${st}" data-stage="${esc(s.name)}">${seal}<b>${esc(s.name)}</b><span class="v">${v}</span>${part?`<span class="bar"><i style="width:${(part*100).toFixed(1)}%"></i></span>`:''}</li>`}
+
+function draw(){
+ const st=R&&R.state,jar={working:'working',waiting:'working',stopped:'stopped',failed:'stopped',hold:'stopped',done:'done'}[st]||'asleep',n=$('#niche'),passed=st==='done'&&R.stages.some(s=>s.name==='Your turn'&&s.state==='done');
+ if(n.dataset.jar!==jar){n.dataset.jar=jar;n.className='niche '+(jar==='working'||jar==='done'?'work':'');n.innerHTML=Art.jar({state:jar,label:'LT'})}
+ $('#conj').className='conj'+(R?'':cut||none?' none':' wait');
+ if(R){
+  $('#title').textContent=R.title;
+  const big=$('#left'),late=R.left_min!=null&&R.used_min+R.left_min>R.line_min;
+  const real=!R.practice;
+  big.textContent=live()?(off||R.practice&&st==='waiting'?'':JUJU.minutes(R.left_min)): /* how long the line is, nobody knows: no figure while waiting */
+   !real&&st!=='done'&&R.drawn_s>0?clock(R.drawn_s)+' / '+clock(R.film_s):'';
+  big.hidden=!big.textContent;big.classList.toggle('warn',live()&&late);
+  $('#why').textContent=real&&st!=='done'?(off?'Offline':R.say):'';$('#why').className='why '+(off||st==='failed'?'stop':live()?'work':st==='hold'?'need':'');
+  const [t,k]=real&&st!=='done'?['','']:off?['Offline','stop']:{waiting:['Waiting',''],working:['Working','work'],stopped:['Stopped','stop'],failed:[real?'Failed':R.why||'Failed','stop'],done:passed?['Sealed','work']:['Ready','need']}[st]||['',''];
+  $('.big').hidden=!big.textContent&&!t;$('#state').textContent=t;$('#state').className='pill '+k;$('#state').hidden=!t;
+  const h=R.stages.filter(s=>!s.not_built).map(stage).join('');if(h!==shown){$('#stages').innerHTML=h;shown=h}
+  JUJU.ready(()=>JUJU.chan('Library of Tehuti',{working:'work',waiting:'work',stopped:'stop',failed:'stop',hold:'need',done:passed?'':'need'}[st]))}
+ $('#stop').hidden=!live();
+ go.classList.toggle('need',st==='hold'&&!R.again||st==='done'&&!passed);
+ go.disabled=!R&&!cut&&!none;
+ const word=other?'Open Conjuring':R?{stopped:'Carry on',failed:'Try again',hold:R.again?'Try again':'Try another idea',done:'Watch the film'}[st]||'Leave it working':cut?'Try again':none?'Make a film':'Leave it working';
+ if(go.textContent!==word)go.textContent=word}
+
+/* ---------- reading the run: each 2 s while it works, then no more; closing the page changes nothing ---------- */
+function watch(){
+ if(!live()){if(poll){poll.stop();poll=null}return}
+ if(!poll)poll=JUJU.poll(at(),d=>{off=false;R=d;draw();if(!R.practice&&R.state==='done'){JUJU.go(JUJU.to.room(R.film));return false}if(!live()){poll=null;return false}},{fail:()=>{off=true;draw()}})}
+async function load(){
+ try{
+  if(!id){const d=await JUJU.get('/api/runs?vessel='+JUJU.vessel);cut=null;
+   if(!d.runs.length){none=true;return}
+   none=false;id=d.runs[0].id;history.replaceState(null,'',JUJU.to.run(id))}
+  R=await JUJU.get(at());cut=other=null;off=false;JUJU.unsay(go)}
+ catch(e){if(R)off=true;else{cut=e;if(e.status===404){id=null;history.replaceState(null,'','conjuring.html')}if(go.dataset.sending)throw e;JUJU.say(go,e.say)}}
+ finally{draw();watch()}}
+
+/* a refusal means the run moved on without us: say it, then show what is true now */
+const again=e=>{if(e.error==='busy'&&e.run&&e.run!==id){other=e.run;draw();JUJU.say(go,e.say,'need');return true}
+ if(e.status===409){load();return true}};
+go.addEventListener('click',()=>{
+ if(other){JUJU.go(JUJU.to.run(other));return}
+ if(R&&R.state==='done'){JUJU.go(R.practice?JUJU.to.strip(R.film):JUJU.to.room(R.film));return}
+ if(R&&R.state==='hold'&&!R.again){JUJU.once(go,async()=>{await JUJU.post(at('leave'));JUJU.go('altar.html?idea=new')});return}
+ if(live()){JUJU.go('altar.html');return}
+ if(!R&&none&&!cut){JUJU.go('altar.html');return}
+ JUJU.once(go,async()=>{if(!R)return load();R=await JUJU.post(at('resume'));off=false;draw();watch()},{done:again})});
+$('#stopkeep').addEventListener('click',()=>JUJU.once($('#stopkeep'),async()=>{R=await JUJU.post(at('stop'));draw();watch();Kit.sheet('sh-stop').close()},
+ {done:e=>{if(e.status===409){Kit.sheet('sh-stop').close();load();return true}}}));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&R&&!live())load()});
+addEventListener('online',load);
+draw();load();
+})();
+</script>
+</body></html>

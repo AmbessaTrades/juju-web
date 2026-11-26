@@ -1,0 +1,274 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Juju · Parts</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script>
+<style>
+/* sheet-only layout. Every part on this page comes from kit2.css, kit2.js and art.js. Notes on each part live in PARTS.md, never on this page. */
+.floor{gap:46px;padding-bottom:30px}
+.intro{display:flex;justify-content:flex-end;align-items:flex-end;gap:18px;flex-wrap:wrap}
+.skins{display:flex;flex-wrap:wrap;max-width:100%;gap:4px;padding:4px;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line)}
+.skins button{min-height:44px;padding:2px 14px 0;border:0;background:none;color:var(--ash);cursor:pointer;font:600 13px/1 "Josefin Sans",sans-serif;letter-spacing:.1em;text-transform:uppercase}
+.skins button[aria-pressed=true]{background:var(--lift);color:var(--act);box-shadow:inset 0 -2px 0 var(--act)}
+.shelf{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.shelf .cell{width:150px}
+.shelf .niche{width:150px;height:226px;--arch:75px;padding-top:12px}
+.shelf .niche .art.jar{height:206px;width:auto;margin-bottom:-2px}
+.shelf .ledge{width:150px}
+.rackwrap{padding:26px 22px 14px;display:grid;gap:30px}
+.rack.states .wal .objname{font-size:16px}
+.treewrap{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:22px;align-items:start}
+.treewrap .art.tree{width:100%;height:auto}
+.treewrap .panel.sunk{padding:10px 10px 14px}
+.boughs{position:relative;height:22px;margin-top:8px}
+.boughs b{position:absolute;top:0;left:var(--x);transform:translateX(-50%);white-space:nowrap;font:600 14px/1.2 "Spectral SC",serif}
+.boughs .b-bloom{color:var(--work)} .boughs .b-gold{color:var(--keep)} .boughs .b-bud{color:var(--bone)} .boughs .b-bare{color:var(--smoke)} .boughs .b-prune{color:var(--stop-hi)}
+.treewrap .flower>g:last-child:not(.chk){display:none} /* no multiples exist yet: blossoms without their number badge; a kept blossom shows its check */
+body .deck{position:relative} /* on the sheet the deck sits at the end, never over a part */
+.rack.states .padlock{align-self:end;gap:10px} .rack.states .padlock .art.lock{width:64px;height:auto}
+.cards .cap:empty{min-height:15px}
+.card .proof{justify-content:flex-end}
+.treewrap .today{display:grid;justify-items:center;gap:6px}
+.frames{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.frames .panel{min-height:120px}
+.line{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.sheet.static{position:relative;left:auto;bottom:auto;transform:none;animation:none;max-height:none;width:100%;z-index:auto}
+.plates{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.cards{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-end}
+.cards .card{width:188px}
+.objs{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end}
+.objs .cell .art{width:132px;height:auto}
+.objs .cell .art.voice{width:150px} .objs .cell .art.lock{width:76px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;align-items:start}
+.sounds{display:grid;gap:10px} .sounds .row{grid-template-columns:minmax(0,1fr) auto;cursor:default} .sounds .art.sound{width:100%;max-width:460px;height:auto}
+.marks{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:14px 8px}
+.marks .cell .cap{white-space:nowrap}
+.marks .cell .emblem{width:34px;height:34px;color:var(--bone)} .marks .cell .medal{width:64px;height:64px}
+.marks .cell .cap{font-size:12px}
+.motion{display:flex;gap:12px;flex-wrap:wrap}
+.demo-seal{width:90px;height:90px}
+.hand.sample .card{width:176px}
+.card .proof{gap:6px} .card .proof>span:first-child{white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.prims{display:flex;gap:22px;flex-wrap:wrap;align-items:center}
+@media (max-width:760px){
+  .floor{gap:36px}
+  .shelf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 8px} .shelf .cell,.shelf .niche,.shelf .ledge{width:100%} .shelf .niche{height:150px;--arch:52px} .shelf .niche .art.jar{height:136px}
+  .treewrap,.frames,.plates,.two,.three{grid-template-columns:1fr}
+  .frames{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px} .frames .panel{min-height:96px}
+  .boughs{height:40px} .boughs b{font-size:12.5px} .boughs b:nth-child(even){top:20px}
+  .rackwrap{padding:22px 10px 12px}
+  .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px} .cards .card{width:100%} .cards .cell{width:100%}
+  .skins{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%} .skins button{padding:2px 4px 0;font-size:12px;letter-spacing:.06em}
+  .objs .cell .art{width:100px} .objs .cell .art.voice{width:120px}
+  .prims .primary{width:auto;min-width:0}
+}
+</style></head>
+<body data-catalogue data-skin="nocturne" data-room="kit" data-mark="arcana" data-title="The Parts" data-back="altar.html" data-back-label="Altar" data-tank="asleep" data-who="A">
+<main>
+ <section class="intro" data-part="a">
+  <div class="skins" role="group" aria-label="Skin"><button data-skin="nocturne">Nocturne</button><button data-skin="codex">Codex</button><button data-skin="atelier">Atelier</button><button data-skin="daylight">Daylight</button></div>
+ </section>
+
+ <section class="spec" data-part="a"><h2>Channel jars</h2>
+  <div class="shelf">
+   <div class="cell"><div class="niche"><span data-art="jar" data-state="asleep" data-label="II" data-near="l" data-d></span></div><i class="ledge"></i><b class="objname">Asleep</b></div>
+   <div class="cell need"><div class="niche need"><span data-art="jar" data-state="needs" data-label="LT" data-d></span></div><i class="ledge need"></i><b class="objname on">Needs you</b></div>
+   <div class="cell work"><div class="niche work"><span data-art="jar" data-state="working" data-label="III" data-d></span></div><i class="ledge"></i><b class="objname">Working</b></div>
+   <div class="cell work"><div class="niche"><span data-art="jar" data-state="done" data-label="LT" data-badge="large" data-d></span></div><i class="ledge"></i><b class="objname">Done</b></div>
+   <div class="cell stop"><div class="niche"><span data-art="jar" data-state="stopped" data-label="II" data-d></span></div><i class="ledge"></i><b class="objname">Stopped</b></div>
+   <div class="cell"><div class="niche pick"><span data-art="jar" data-state="new"></span></div><i class="ledge"></i><b class="objname">New</b></div>
+  </div>
+ </section>
+
+ <section class="spec" data-part="a"><h2>Wallets</h2>
+  <div class="panel sunk rackwrap" data-frame>
+   <div class="rack" data-pick>
+    <button class="wal asleep" data-card><span data-art="wallet" data-mind="tongue" data-state="asleep"></span><span data-art="medal" data-name="tongue" data-state="off" class="medal"></span><b class="objname">Tongue</b></button>
+    <button class="wal asleep" data-card><span data-art="wallet" data-mind="pigment" data-state="asleep"></span><span data-art="medal" data-name="pigment" data-state="off" class="medal"></span><b class="objname">Pigment</b></button>
+    <button class="wal asleep" data-card><span data-art="wallet" data-mind="elder" data-state="asleep"></span><span data-art="medal" data-name="elder" data-state="off" class="medal"></span><b class="objname">Elder</b></button>
+    <button class="wal asleep" data-card><span data-art="wallet" data-mind="griot" data-state="asleep"></span><span data-art="medal" data-name="griot" data-state="off" class="medal"></span><b class="objname">Griot</b></button>
+    <button class="wal asleep" data-card><span data-art="wallet" data-mind="scribe" data-state="asleep"></span><span data-art="medal" data-name="scribe" data-state="off" class="medal"></span><b class="objname">Scribe</b></button>
+    <button class="wal asleep" data-card><span data-art="wallet" data-mind="watcher" data-state="asleep"></span><span data-art="medal" data-name="watcher" data-state="off" class="medal"></span><b class="objname">Watcher</b></button>
+   </div>
+   <div class="rack states">
+    <div class="wal"><span data-art="wallet" data-mind="pigment" data-state="ok" data-level=".55"></span><span data-art="medal" data-name="pigment" class="medal"></span><b class="objname">Awake</b></div>
+    <div class="wal low"><span data-art="wallet" data-mind="elder" data-state="low" data-level=".12"></span><span data-art="medal" data-name="elder" data-state="need" class="medal"></span><b class="objname">Low</b></div>
+    <div class="wal"><span data-art="wallet" data-mind="scribe" data-state="locked" data-level=".55"></span><span data-art="medal" data-name="scribe" data-state="stop" class="medal"></span><b class="objname">Locked</b></div>
+    <div class="cell padlock"><span data-art="lock"></span><span class="cap">open</span></div>
+    <div class="cell padlock"><span data-art="lock" data-locked="true"></span><span class="cap">locked</span></div>
+   </div>
+  </div>
+ </section>
+
+ <section class="spec" data-part="a"><h2>Tree</h2>
+  <div class="treewrap">
+   <div class="panel sunk"><span data-art="tree" data-focus="0" data-boughs='[{"state":"bloom","flowers":["",""]},{"state":"gold","flowers":[""],"check":true},{"state":"bud"},{"state":"bare"},{"state":"prune"}]'></span>
+    <div class="boughs"><b class="b-bloom" style="--x:14.7%">Titles</b><b class="b-gold" style="--x:30%">Thumbnails</b><b class="b-bud" style="--x:50.4%">Shapes</b><b class="b-bare" style="--x:70.7%">Layers</b><b class="b-prune" style="--x:84.8%">Offering</b></div></div>
+   <div class="panel sunk today"><span data-art="tree" data-boughs='[{},{},{},{},{}]'></span><b class="objname">Bare</b></div>
+  </div>
+ </section>
+
+ <section class="spec" data-part="b"><h2>Frames</h2>
+  <div class="frames">
+   <div class="panel" data-frame><p class="lab">Panel</p></div>
+   <div class="panel focus" data-frame="crest"><p class="lab">Focus</p></div>
+   <div class="panel need" data-frame><p class="lab warn">Needs you</p></div>
+   <div class="panel stop" data-frame><p class="lab down">Stopped</p></div>
+   <div class="panel sunk" data-frame><p class="lab">Sunk</p></div>
+   <div class="panel flat"><p class="lab">Flat</p></div>
+  </div>
+ </section>
+
+ <section class="spec" data-part="b"><h2>Actions</h2>
+  <div class="prims" aria-hidden="true"><button class="primary">Make a film</button><button class="primary need">Wake it</button><button class="primary breach">Open spending</button><button class="primary busy">Making</button><button class="primary off" disabled>Idle</button></div>
+  <div class="line"><button class="btn">Open</button><button class="btn need">Read</button><button class="btn stop">Stop</button><button class="btn bare icon" aria-label="More"><span data-art="glyph" data-name="more"></span></button><button class="btn icon" aria-label="Find"><span data-art="glyph" data-name="search"></span></button><button class="btn" disabled>Not yet</button><a class="chip" href="#">Films</a></div>
+ </section>
+
+ <section class="spec" data-part="b"><h2>Controls</h2>
+  <div class="two">
+   <div class="rows" data-pick>
+    <button class="row on" data-card><span class="tile"><span data-art="emblem" data-name="voice"></span></span><span><b class="name">Voice</b></span><span class="val pill work">set</span></button>
+    <button class="row need" data-card><span class="tile"><span data-art="emblem" data-name="pact"></span></span><span><b class="name">Opening</b></span><span class="val pill need">yours</span></button>
+    <button class="row" data-card><span class="tile"><span data-art="emblem" data-name="reliquary"></span></span><span><b class="name">Sources</b></span><span class="val num">0</span></button>
+    <button class="row off" data-card><span class="tile"><span data-art="emblem" data-name="offering"></span></span><span><b class="name">Offering</b></span><span class="val pill dim">asleep</span></button>
+    <button class="row stop" data-card><span class="tile"><span data-art="emblem" data-name="sound"></span></span><span><b class="name">Rain bed</b></span><span class="val pill stop">refused</span></button>
+   </div>
+   <div class="spec" style="gap:20px">
+    <div class="tabs" data-tabs data-scroll><button class="tab" aria-selected="true">Layers</button><button class="tab">Voice</button><button class="tab">Sources <span class="n">0</span></button><button class="tab">Tree</button></div>
+    <div class="line"><span class="pill work">running</span><span class="pill need">yours</span><span class="pill stop">locked</span><span class="pill">exists</span><span class="pill dim">asleep</span><span class="status"><span data-art="pip" data-state="now"></span></span></div>
+    <div class="line"><button class="switch" aria-checked="true">Spend</button><button class="switch">Stand-in</button><button class="switch" disabled>No key</button></div>
+    <div class="line"><div class="stepper" data-min="1" data-max="7" data-unit="per week"><output data-v="7">7</output></div></div>
+    <div class="toast still"><span data-art="seal" data-state="live"></span><span>Title copied</span></div>
+    <div class="toast still need"><span data-art="pip" data-state="next"></span><span>Script waiting</span></div>
+    <div class="toast still stop"><span data-art="pip" data-state="failed"></span><span>Key refused</span></div>
+   </div>
+  </div>
+ </section>
+
+ <section class="spec" data-part="b"><h2>Sheet</h2>
+  <div class="two">
+   <div class="sheet static"><i class="crest"></i><h3>Wake Pigment</h3><input class="field" style="margin-top:16px;width:100%;min-height:52px;padding:0 16px;border:0;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line);color:var(--bone)" placeholder="Key" aria-label="Key"><button class="btn bare icon x" aria-label="Close"><span data-art="glyph" data-name="close"></span></button><div class="acts"><button class="btn need">Save</button></div></div>
+   <div class="line" style="align-content:start"><button class="btn" data-open="demo">Open</button></div>
+  </div>
+ </section>
+
+ <section class="spec" data-part="c"><h2>Plates</h2>
+  <div class="plates">
+   <div class="plate empty"><span data-art="plate" data-state="empty"></span></div>
+   <div class="plate working"><span data-art="plate" data-state="working"></span><span class="says"><b>Drawing</b></span></div>
+   <div class="plate failed"><span data-art="plate" data-state="failed"></span><span class="says"><b>Failed</b><button class="btn" style="margin-top:6px"><span data-art="glyph" data-name="retry"></span>Try again</button></span></div>
+  </div>
+ </section>
+
+ <section class="spec" data-part="c"><h2>Cards</h2>
+  <div class="cards">
+   <div class="cell"><div class="card down"><span data-art="cardback"></span></div><span class="cap"></span></div>
+   <div class="cell"><button class="card"><span class="pic"><img src="../../../../context-repo/09-assets/library/049-sXyjakCgeVA-outlier.jpg" alt=""></span><span class="t" data-d>"POSSIBLE" Future of the World (2025 - 3066)</span><span class="proof"><span class="num">91.23x</span></span></button><span class="cap">dealt</span></div>
+   <div class="cell"><button class="card picked"><span class="pic"><img src="../../../../context-repo/09-assets/library/042-LqvlFsTaZgE-outlier.jpg" alt=""></span><span class="t" data-d>I Simulated Yellowstone Erupting, Day by Day</span><span class="proof"><span class="num">8.00x</span></span><span class="stamp" data-art="seal" data-state="pressed"></span></button><span class="cap">taken</span></div>
+   <div class="cell"><button class="card rejected"><span class="pic"><img src="../../../../context-repo/09-assets/library/047-F176VMxwc8s-outlier.jpg" alt=""></span><span class="t" data-d>EU Federalization Scenario (2030 - 2063)</span><i class="x-out"></i></button><span class="cap">rejected</span></div>
+   <div class="cell"><button class="card echo"><span class="pic"><span class="plate empty"><span data-art="plate" data-state="empty"></span></span></span><span class="link">Part 2</span><span class="t" data-d>The ENTIRE Journey After Death in 52 Minutes</span></button><span class="cap">echo</span></div>
+  </div>
+  <div class="hand sample" data-pick data-scroll>
+   <button class="card" data-card><span class="pic"><img src="../../../../context-repo/09-assets/library/045-fBXY_AyA0bo-outlier.jpg" alt=""></span><span class="t" data-d>ISOTOPE WARS - PART 0</span><span class="proof"><span class="num">11.33x</span></span></button>
+   <button class="card" data-card><span class="pic"><img src="../../../../context-repo/09-assets/library/040-MVIwvywuQpQ-outlier.jpg" alt=""></span><span class="t" data-d>A Hyper Realistic Alien Invasion</span><span class="proof"><span class="num">4.48x</span></span></button>
+   <button class="card on" data-card><span class="pic"><img src="../../../../context-repo/09-assets/library/049-sXyjakCgeVA-outlier.jpg" alt=""></span><span class="t" data-d>"POSSIBLE" Future of the World (2025 - 3066)</span><span class="proof"><span class="num">91.23x</span></span></button>
+   <button class="card" data-card><span class="pic"><img src="../../../../context-repo/09-assets/library/048-qxAIE8s9-NA-outlier.jpg" alt=""></span><span class="t" data-d>Most Undocumented Island I've Ever Found</span><span class="proof"><span class="num">3.38x</span></span></button>
+   <button class="card" data-card><span class="pic"><img src="../../../../context-repo/09-assets/library/042-LqvlFsTaZgE-outlier.jpg" alt=""></span><span class="t" data-d>I Simulated Yellowstone Erupting, Day by Day</span><span class="proof"><span class="num">8.00x</span></span></button>
+  </div>
+ </section>
+
+ <section class="spec" data-part="c"><h2>Scene strip</h2>
+  <div class="strip" data-scroll>
+   <div class="act"><span class="lab" data-d>Act I · The Waking</span><div class="scenes"><button class="scene drawn"><span class="plate"><span data-art="plate" data-state="empty"></span></span><span class="n">1</span></button><button class="scene drawn changed"><span class="plate"><span data-art="plate" data-state="empty"></span></span><span class="n">2</span></button><button class="scene picked"><span class="plate"><span data-art="plate" data-state="empty"></span></span><span class="n">3</span></button></div></div>
+   <div class="act"><span class="lab" data-d>Act II · The Meadow</span><div class="scenes"><button class="scene working"><span class="plate"><span data-art="plate" data-state="working"></span></span><span class="n">4</span></button><button class="scene failed"><span class="plate"><span data-art="plate" data-state="failed"></span></span><span class="n">5</span></button><button class="scene"><span class="plate"><span data-art="plate" data-state="empty"></span></span><span class="n">6</span></button></div></div>
+   <div class="act"><span class="lab" data-d>Act III · The Spindle</span><div class="scenes"><button class="scene"><span class="plate"><span data-art="plate" data-state="empty"></span></span><span class="n">7</span></button><button class="scene"><span class="plate"><span data-art="plate" data-state="empty"></span></span><span class="n">8</span></button></div></div>
+  </div>
+ </section>
+
+ <section class="spec" data-part="d"><h2>Dials</h2>
+  <div class="two">
+   <div class="panel" data-frame><div class="effort" data-effort="1">
+    <button class="step"><i class="pipx"></i><span><b>Quick</b></span><span class="cost">$1.74</span></button>
+    <button class="step"><i class="pipx"></i><span><b>Crafted</b></span><span class="cost">$2.00</span></button>
+    <button class="step"><i class="pipx"></i><span><b>Masterwork</b></span><span class="cost">$2.81</span></button>
+   </div></div>
+   <div class="panel" data-frame><div class="line" style="justify-content:space-around">
+    <div class="cell"><div class="dial" data-value=".8" data-min="10" data-max="60" data-unit="min"></div><span class="cap">Set</span></div>
+    <div class="cell"><div class="dial" data-value=".35" data-min="0" data-max="100" data-unit="%" data-state="held"></div><span class="cap">Held</span></div>
+    <div class="cell"><div class="dial" data-value=".5" data-min="0" data-max="2" data-unit="s" data-state="off"></div><span class="cap">Off</span></div>
+   </div></div>
+  </div>
+ </section>
+
+ <section class="spec" data-part="d"><h2>Sound, voice</h2>
+  <div class="two">
+   <div class="sounds">
+    <div class="row"><span data-art="sound" data-state="empty"></span></div>
+    <div class="row"><span data-art="sound" data-state="made" data-seed="3"></span><span class="pill">made</span></div>
+    <div class="row on"><span data-art="sound" data-state="playing" data-seed="3" data-progress=".46"></span><span class="pill work">playing</span></div>
+    <div class="row"><span data-art="sound" data-state="kept" data-seed="7"></span><span class="pill">kept</span></div>
+    <div class="row stop"><span data-art="sound" data-state="rejected" data-seed="11"></span><span class="pill stop">rejected</span></div>
+   </div>
+   <div class="objs">
+    <div class="cell"><span data-art="voice" data-state="none"></span><span class="cap">none</span></div>
+    <div class="cell"><span data-art="voice" data-state="standin"></span><span class="cap">stand-in</span></div>
+    <div class="cell"><span data-art="voice" data-state="chosen"></span><span class="cap">chosen</span></div>
+    <div class="cell"><span data-art="voice" data-state="speaking"></span><span class="cap">speaking</span></div>
+   </div>
+  </div>
+ </section>
+
+ <section class="spec" data-part="d"><h2>Scrolls, seals</h2>
+  <div class="three">
+   <div class="scroll"><div class="rod"></div><div class="paper"><h4 data-d>The ENTIRE Journey After Death in 52 Minutes</h4>
+    <div class="ln"><span class="k">Opens</span><span class="fill"></span><span class="v" data-d>He sits up</span></div><div class="ln"><span class="k">Sound</span><span class="fill"></span><span class="v">Full voice</span></div><div class="ln"><span class="k">Effort</span><span class="fill"></span><span class="v">Crafted</span></div>
+    <div class="total"><span>Total</span><span>$2.00</span></div><span class="wax" data-art="seal" data-state="blank"></span></div><div class="rod"></div></div>
+   <div class="scroll"><div class="rod"></div><div class="paper"><h4>Sealed</h4><div class="ln"><span class="k">Spent</span><span class="fill"></span><span class="v num">$0.00</span></div><div class="total"><span>Up to</span><span>$2.00</span></div><span class="wax" data-art="seal" data-state="live" data-emblem="pact"></span></div><div class="rod"></div></div>
+   <div class="scroll void"><div class="rod"></div><div class="paper"><h4>Stopped</h4><div class="total"><span>Nothing</span><span>$0.00</span></div><span class="wax" data-art="seal" data-state="void"></span></div><div class="rod"></div></div>
+  </div>
+  <div class="rows" style="max-width:720px">
+   <button class="copy" data-name="The title" data-text="The ENTIRE Journey After Death in 52 Minutes"><span class="slot" data-art="seal" data-state="blank"></span><span class="what"><b class="name">Title</b><span class="peek" data-d>The ENTIRE Journey After Death in 52 Minutes</span></span><span data-art="glyph" data-name="copy"></span></button>
+   <button class="copy copied" data-name="The description"><span class="slot" data-art="seal" data-state="pressed"></span><span class="what"><b class="name">Description</b><span class="peek">Copied</span></span><span data-art="glyph" data-name="check"></span></button>
+   <button class="copy live" data-name="The pinned comment"><span class="slot" data-art="seal" data-state="live"></span><span class="what"><b class="name">Pinned comment</b><span class="peek">Live</span></span><span data-art="glyph" data-name="check"></span></button>
+  </div>
+ </section>
+
+ <section class="spec" data-part="d"><h2>Objects</h2>
+  <div class="objs">
+   <div class="cell"><span data-art="chest" data-state="asleep"></span><span class="cap">asleep</span></div>
+   <div class="cell"><span data-art="chest" data-state="wanted"></span><span class="cap">wanted</span></div>
+   <div class="cell"><span data-art="chest" data-state="ready"></span><span class="cap">ready</span></div>
+   <div class="cell"><span data-art="chest" data-state="live"></span><span class="cap">on sale</span></div>
+  </div>
+  <div class="line"><span data-art="path" data-steps="done next none none none" style="width:300px"></span><span data-art="path" data-steps="done done now none none" style="width:300px"></span><span data-art="path" data-steps="done done failed none none" style="width:300px"></span></div>
+ </section>
+
+ <section class="spec" data-part="d"><h2>Marks</h2>
+  <div class="marks" id="marks"></div>
+ </section>
+
+ <section class="spec" data-part="d"><h2>Feel</h2>
+  <div class="line"><span class="demo-seal" id="dseal" data-art="seal" data-state="blank"></span>
+   <div class="motion"><button class="btn" id="m-seal">Seal</button><button class="btn" id="m-void">Void</button><button class="btn" id="m-deal">Deal</button><button class="btn" id="m-wake">Wake</button><button class="btn" id="m-toast">Toast</button><button class="btn" id="m-finish">Finish</button></div></div>
+ </section>
+</main>
+<footer class="deck"><div class="aside"></div><button class="primary" id="go">Use these parts</button></footer>
+<section class="sheet" id="demo" hidden><h3>Wake Pigment</h3><div class="acts"><button class="btn need" data-close>Save</button></div></section>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+ document.querySelector('.head .chan')?.setAttribute('data-d','');
+ const sk=document.documentElement.dataset.skin||'nocturne';
+ document.querySelectorAll('.skins button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.skin===sk);b.onclick=()=>{document.documentElement.dataset.skin=document.body.dataset.skin=b.dataset.skin;document.querySelectorAll('.skins button').forEach(x=>x.setAttribute('aria-pressed',x===b))}});
+ const part=Kit.param('part');if(part)document.querySelectorAll('[data-part]').forEach(s=>s.hidden=!part.includes(s.dataset.part));
+ document.getElementById('marks').innerHTML=Art.rooms.filter(n=>!Art.minds.includes(n)).map(n=>`<div class="cell">${Art.emblem(n)}<span class="cap">${n.replace('-',' ')}</span></div>`).join('')+Art.minds.map(n=>`<div class="cell"><span class="medal">${Art.medal(n)}</span><span class="cap">${n}</span></div>`).join('');
+ const ds=document.getElementById('dseal');
+ document.getElementById('m-seal').onclick=()=>Kit.seal(ds,'live',{emblem:'pact'});
+ document.getElementById('m-void').onclick=()=>Kit.seal(ds,'void');
+ document.getElementById('m-deal').onclick=()=>Kit.deal(document.querySelector('.hand'));
+ document.getElementById('m-wake').onclick=()=>{const w=document.querySelector('.wal [data-mind=tongue]');w.dataset.state='ok';w.dataset.level='.5';w.closest('.wal').classList.remove('asleep');Kit.wake(w)};
+ document.getElementById('m-toast').onclick=()=>Kit.toast('Title copied',{art:Art.seal({state:'live'})});
+ document.getElementById('go').onclick=e=>Kit.finish(e.currentTarget,'Parts sealed');
+ if(Kit.state==='sheet')Kit.sheet('demo').open();
+ if(Kit.state==='motion'){Kit.seal(ds,'live',{emblem:'pact'});document.getElementById('m-wake').click();Kit.deal(document.querySelector('.hand'));document.querySelector('.copy').click();Kit.finish(document.getElementById('go'),'Parts sealed')}
+ if(Kit.state==='toast')Kit.toast('Title copied',{art:Art.seal({state:'live'}),ms:60000});
+});
+</script>
+</body></html>

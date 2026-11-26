@@ -1,0 +1,267 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Juju · The Reliquary</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script>
+<style>
+/* Room layout only. Parts this room adds because the kit has none (named in the report):
+   .stamp      a licence stamp: an Art.seal with its word, pressed onto the big relic (button: opens the proof)
+   .wall/.tile a wall of real pictures, each with its seal in the corner and how many films use it
+   .trimbar    two handles that choose one part of one clip (one shot only)
+   .longpress  a hold-to-confirm fill (Never use; hold a tile to choose several)
+   .band       a thin line across the top that says who sent you here (a scene, a stopped film) */
+body{--focus-x:28%;--focus-y:44%}
+.stage{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:28px;align-items:start}
+.big{position:sticky;top:12px;display:grid;gap:14px;grid-template-columns:minmax(0,1fr);min-width:0}
+.frame{position:relative;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line),0 18px 40px -16px #000;aspect-ratio:4/3;display:grid;place-items:center;overflow:hidden}
+.frame img,.frame video{width:100%;height:100%;object-fit:contain;display:block;background:var(--a-deep)}
+.frame .plate{position:absolute;inset:0;aspect-ratio:auto}
+.frame .plate .says .btn{margin-top:10px}
+.frame.look img{filter:saturate(.75)}
+.stamp{position:absolute;left:14px;bottom:14px;display:flex;align-items:center;gap:10px;min-height:52px;padding:4px 16px 4px 6px;border:0;cursor:pointer;color:var(--paper-ink);background:var(--l-grain) 0 0/128px,var(--paper);box-shadow:0 8px 18px -6px #000;font:600 15px/1 "Spectral SC",serif;letter-spacing:.04em;transform:rotate(-2deg);clip-path:polygon(0 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,0 100%)}
+.stamp .art{width:42px;height:42px}
+.stamp.stop{background:var(--stop-lo);color:#fff} .stamp.look{background:var(--lift);color:var(--need);box-shadow:inset 0 0 0 2px var(--need),0 8px 18px -6px #000}
+.who{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.who .name{font-size:21px}
+.who .num{color:var(--ash);font-size:14px}
+.big .acts{display:flex;gap:10px;flex-wrap:wrap}
+.trimbar{position:relative;height:48px;margin-top:2px;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line);touch-action:none}
+.trimbar .sel{position:absolute;top:0;bottom:0;background:color-mix(in oklab,var(--need) 18%,transparent);box-shadow:inset 0 2px 0 var(--need),inset 0 -2px 0 var(--need)}
+.trimbar .h{position:absolute;top:-2px;width:44px;height:52px;margin-left:-22px;border:0;cursor:ew-resize;background:linear-gradient(180deg,var(--need-hi),var(--need));clip-path:polygon(40% 0,60% 0,60% 100%,40% 100%)}
+.trimbar .h::after{content:"";position:absolute;inset:-4px -12px}
+.wallp{padding:18px 18px 20px}
+.wallbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.wallbar .field{flex:1;min-width:180px}
+.field{min-height:48px;padding:10px 14px;border:0;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line);color:var(--bone);font:400 16px/1.4 "Lato",sans-serif}
+.wallp .tabs{margin-top:14px}
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px}
+.tile{position:relative;display:block;aspect-ratio:1;padding:0;border:0;cursor:pointer;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line);overflow:hidden;transition:transform .14s}
+.tile img,.tile video{width:100%;height:100%;object-fit:cover;display:block}
+.tile .sl{position:absolute;right:6px;top:6px;width:34px;height:34px}
+.tile .in{position:absolute;left:0;right:0;bottom:0;padding:16px 8px 6px;background:linear-gradient(0deg,rgba(0,0,0,.85),transparent);color:var(--bone-fixed);font:600 12px/1 "JetBrains Mono",monospace;text-align:left}
+.tile:hover{transform:translateY(-2px)}
+.tile.on{box-shadow:inset 0 0 0 3px var(--act),0 0 18px var(--act-glow)}
+.tile.chosen{box-shadow:inset 0 0 0 3px var(--need)} .tile.chosen::after{content:"";position:absolute;left:8px;top:8px;width:22px;height:22px;background:var(--need);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.tile.look img{filter:saturate(.7) brightness(.85)}
+.tile.never{opacity:.35}
+.tile .plate{position:absolute;inset:0;aspect-ratio:auto;min-height:0}
+.tile.arrive{animation:arrive .4s cubic-bezier(.2,.9,.3,1.2) backwards}
+@keyframes arrive{from{transform:translateY(16px) scale(.92);opacity:0}}
+.grp{grid-column:1/-1;margin-top:6px}
+.empty{grid-column:1/-1;aspect-ratio:auto;min-height:200px}
+.band{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 16px;background:linear-gradient(90deg,color-mix(in oklab,var(--need) 16%,var(--lift)),var(--card));box-shadow:inset 3px 0 0 var(--need)}
+.band.stop{background:linear-gradient(90deg,color-mix(in oklab,var(--stop) 16%,var(--lift)),var(--card));box-shadow:inset 3px 0 0 var(--stop)}
+.band .q{font:italic 400 17px/1.4 "Spectral",serif;color:var(--bone);flex:1;min-width:200px}
+.selbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.longpress{position:relative;overflow:hidden}
+.longpress .fillbar{position:absolute;left:0;bottom:0;height:5px;width:0;background:var(--stop);pointer-events:none}
+.longpress.holding .fillbar{width:100%;transition:width 1s linear}
+.prooft{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin-top:14px;font-size:14.5px}
+.prooft dt{color:var(--smoke)} .prooft dd{margin:0;overflow-wrap:anywhere}
+.yesno{display:grid;gap:8px;margin-top:12px}
+.yesno div{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.files{display:grid;gap:8px;margin-top:12px}
+.files .row{cursor:default;min-height:60px} .files .row:hover{transform:none}
+.bar{height:6px;background:var(--a-well);margin-top:6px} .bar i{display:block;height:100%;background:var(--work)}
+.srcrows{display:grid;gap:8px;margin-top:12px}
+.strip{margin-top:12px}
+@media (max-width:760px){
+  .stage{grid-template-columns:minmax(0,1fr);gap:14px}
+  .big{top:0;z-index:4;background:var(--void);margin:0 -16px;padding:6px 16px 10px;box-shadow:0 10px 18px -10px #000}
+  .frame{aspect-ratio:auto;height:var(--bh,230px);transition:height .12s}
+  .stamp{min-height:44px;font-size:14px;left:10px;bottom:10px}
+  .stamp .art{width:34px;height:34px}
+  .who .name{font-size:18px}
+  .wallp{padding:12px 10px 14px}
+  .wall{grid-template-columns:1fr 1fr;gap:8px}
+  .wallbar .field{min-width:0}
+  .hide-phone{display:none!important}
+  .big.small .acts{display:none}
+  .who{flex-wrap:nowrap} .who .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0} .who .num{display:none}
+  .wallbar{flex-wrap:nowrap} .wallbar .btn.icon .emblem{width:22px;height:22px}
+}
+</style></head>
+<body data-skin="nocturne" data-room="reliquary" data-title="The Reliquary" data-channel="Library of Tehuti" data-chan-state="" data-back="vessel.html" data-back-label="Vessel" data-tank="asleep" data-who="A">
+<main>
+ <div id="bandbox"></div>
+ <div class="stage">
+  <section class="big" id="big"></section>
+  <section class="panel wallp" data-frame>
+   <div class="wallbar"><input class="field" id="find" type="search" placeholder="Find" aria-label="Find" data-u="u12"><button class="btn need" id="archives" data-u="u13"></button><button class="btn hide-phone" id="sort" data-u="u15">Newest</button><button class="btn" data-open="add" data-u="u16">Add</button><button class="btn icon only-phone" data-open="sources" aria-label="Sources"><span data-art="emblem" data-name="vessel"></span></button></div>
+   <div class="tabs" id="tabs" data-tabs data-scroll data-u="u14"></div>
+   <div class="wall" id="wall" data-u="u20"></div>
+  </section>
+ </div>
+</main>
+<div data-tools><button class="chip only-desk" data-open="sources" data-u="u23">Sources</button></div>
+<footer class="deck"><div class="aside" id="aside"></div><button class="primary" id="go">Use this relic</button></footer>
+
+<section class="sheet" id="proof" hidden><h3 id="ptitle">The proof</h3><p class="small" id="pline"></p><dl class="prooft" id="pdl"></dl>
+ <div class="acts" id="pacts"></div></section>
+<section class="sheet" id="eye" hidden><h3>Look at it yourself</h3><p class="small">Four yes count</p><div class="yesno" id="yesno" data-u="u29"></div></section>
+<section class="sheet" id="perm" hidden><h3>I have permission</h3><p class="small">Who and when</p><input class="field" style="width:100%;margin-top:12px" id="permwho" placeholder="Who said yes" aria-label="Who said yes" data-u="u10"><input class="field" style="width:100%;margin-top:8px" id="permwhen" type="date" aria-label="When"><div class="acts"><button class="btn need" id="permsave">Save it as Yours</button></div></section>
+<section class="sheet" id="add" hidden><h3>Add</h3><div class="rows" style="margin-top:12px">
+ <label class="row" data-u="u17"><span class="tile0 rtile"><span data-art="glyph" data-name="plus"></span></span><span><b class="name">From this device</b><span class="sub">Pictures, clips, folders</span></span><input type="file" multiple id="devfiles" style="position:absolute;inset:0;opacity:0;cursor:pointer" aria-label="From this device"></label>
+ <label class="row only-phone" data-u="u18"><span class="tile0 rtile"><span data-art="glyph" data-name="plus"></span></span><span><b class="name">Take a picture</b><span class="sub">Added as Own.</span></span><input type="file" accept="image/*" capture="environment" style="position:absolute;inset:0;opacity:0" aria-label="Take a picture"></label>
+ </div><label class="small" style="display:grid;gap:6px;margin-top:14px">Paste a link<input class="field" id="link" placeholder="https://" data-u="u19"></label><p class="small" id="linkline" style="margin-top:6px">Licence read first</p>
+ <div class="acts"><button class="btn" id="newshelf" data-u="u22">New shelf</button><button class="btn" data-open="filmshelf" data-u="u28">The film's shelf</button></div></section>
+<section class="sheet" id="filmshelf" hidden><h3>The film's shelf</h3><p class="small" id="fsline"></p><div class="strip" id="fstrip" data-scroll></div></section>
+<section class="sheet" id="sources" hidden><h3>Sources</h3><p class="small" id="srcline"></p><div class="srcrows" id="srcrows" data-u="u25"></div><div class="acts" id="srcacts"></div></section>
+
+<script>
+(()=>{
+const S=Kit.state||'today', B=document.body, $=id=>document.getElementById(id);
+const SAMPLE=!['today','offline','lookonly','sources'].includes(S);
+const FROM=Kit.param('from')||({scene:'spell-strip',stopped:'conjuring',mirror:'mirror-bend'}[S]||'');
+const DOOR={'spell-strip':['spell-strip.html?from=reliquary','Scene','u32'],conjuring:['conjuring.html?from=reliquary','Film','u35'],'mirror-bend':['mirror-bend.html?from=reliquary','Mirror','u31'],tank:['tank.html','Tank','u31']}[FROM];
+if(DOOR){B.dataset.back=DOOR[0];B.dataset.backLabel=DOOR[1]}
+/* flow, shell parts: u36 the Altar door in the rail. a7 (credit lines at export) belongs to the publish kit; a8 re-reads a licence older than 90 days, its date shows in the proof. */
+const ST='../../runs/stage-y/',LIB='../../../../context-repo/09-assets/library/';
+/* real pictures found in an engine test, each with the licence read from its holder (runs/stage-y/pictures/candidates.json) */
+const SAMPLES=[
+ {id:'cma-127827',f:'pictures/cma-127827.jpg',t:'Hercules on his Pyre',d:'1548',h:'The Cleveland Museum of Art',n:'1950.470',lic:'CC0',url:'https://clevelandart.org/art/1950.470',cr:'Hans Sebald Beham, Hercules on his Pyre, 1548. The Cleveland Museum of Art, CC0.',s:'free',k:'museum'},
+ {id:'aic-77265',f:'pictures/aic-77265.jpg',t:'Ulysses, Penelope and Euryclea',d:'undated',h:'The Art Institute of Chicago',n:'1919.2148a',lic:'Public domain',url:'https://www.artic.edu/artworks/77265',cr:'John Flaxman, Ulysses, Penelope and Euryclea. The Art Institute of Chicago, public domain.',s:'free',k:'museum'},
+ {id:'getty-2010.8',f:'pictures/getty-2010.8.jpg',t:'Study for the Death of Socrates',d:'about 1787',h:'J. Paul Getty Museum',n:'2010.8',lic:'CC0',url:'https://www.getty.edu/art/collection/object/109EEN',cr:'Jean-Francois-Pierre Peyron, Study for the Death of Socrates, about 1787. J. Paul Getty Museum, CC0.',s:'free',k:'museum'},
+ {id:'cma-108557',f:'pictures/cma-108557.jpg',t:'Descent into Limbo',d:'c. 1490 to 1500',h:'The Cleveland Museum of Art',n:'1926.261',lic:'CC0',url:'https://clevelandart.org/art/1926.261',cr:'Giovanni Antonio da Brescia after Mantegna, Descent into Limbo. The Cleveland Museum of Art, CC0.',s:'free',k:'museum'},
+ {id:'wellcome-q52f2f3k',f:'pictures/wellcome-q52f2f3k.jpg',t:'Yellow asphodel',d:'undated',h:'Wellcome Collection',n:'nkhrfyfd',lic:'CC BY 4.0',url:'https://wellcomecollection.org/works/nkhrfyfd',cr:'Yellow asphodel. Dr Henry Oakeley, Wellcome Collection, CC BY 4.0.',s:'credit',k:'museum'},
+ {id:'wellcome-cftvurbw',f:'pictures/wellcome-cftvurbw.jpg',t:'Plato with others in the garden of the Academy',d:'1600s',h:'Wellcome Collection',n:'r6e2uc7z',lic:'Public Domain Mark',url:'https://wellcomecollection.org/works/r6e2uc7z',cr:'Salvator Rosa, etching. Wellcome Collection, Public Domain Mark.',s:'free',k:'museum'},
+ {id:'cma-141479',f:'pictures/cma-141479.jpg',t:'False Door of Nykara',d:'2408 to 2341 BCE',h:'The Cleveland Museum of Art',n:'1964.91',lic:'CC0',url:'https://clevelandart.org/art/1964.91',cr:'False Door of Nykara. The Cleveland Museum of Art, CC0.',s:'free',k:'museum'},
+ {id:'cma-160821',f:'pictures/cma-160821.jpg',t:'Leaf from a Book of Hours: The Last Judgment',d:'1430s',h:'The Cleveland Museum of Art',n:'1999.130',lic:'CC0',url:'https://clevelandart.org/art/1999.130',cr:'Master of Guillebert de Mets, The Last Judgment. The Cleveland Museum of Art, CC0.',s:'free',k:'museum'},
+ {id:'isle',f:'pics/isle.jpg',t:'Island of the Dead',d:'1880',h:'Wikimedia Commons',n:'MET DP-14201-003',lic:'CC0',url:'https://commons.wikimedia.org/wiki/File:Island_of_the_Dead_MET_DP-14201-003.jpg',cr:'Arnold Böcklin, Island of the Dead, 1880. CC0.',s:'free',k:'archive'},
+ {id:'charon',f:'pics/charon.jpg',t:'Crossing the River Styx',d:'between 1520 and 1524',h:'Wikimedia Commons',n:'Crossing_the_River_Styx.jpg',lic:'Public domain',url:'https://commons.wikimedia.org/wiki/File:Crossing_the_River_Styx.jpg',cr:'Joachim Patinir, Crossing the River Styx. Public domain.',s:'free',k:'archive'},
+ {id:'market',f:'pics/market-75.mp4',t:'A market street, one shot',d:'',h:'not saved',n:'',lic:'No licence line saved',url:'',cr:'',s:'stop',k:'footage',clip:1},
+ {id:'link',f:'',t:'A pasted link',d:'',h:'not read',n:'',lic:'Not read',url:'',cr:'',s:'stop',k:'archive',why:'The page did not say who may reuse it'}];
+/* look only: real plates from the one image library, with their true owners (outliers.json) */
+const LOOK=[['069-4_lsxy5fsac','The Highest State a Human Can Reach','Bygone Philosophy','17.08x'],['072-jP0D3gcqe5Q','The ENTIRE Chinese Hell Walkthrough in 10 Minutes','Jade Rabbit Hole','6.40x'],['075-KJg1-FCweWI',"What you'll see when you die",'The Opening','8.19x'],['070-vvLRZOHdNqA','The Art of Not Trying','Bygone Philosophy','8.41x'],['073-WbSkqFdLOxo','The ENTIRE Japanese Hell Walkthrough in 11 Minutes','Jade Rabbit Hole','2.33x'],['074-uvNQGq4JEf4','The ENTIRE Hindu Afterlife Walkthrough in 12 Minutes','Jade Rabbit Hole','2.10x']].map(([f,t,o,m])=>({id:f,f:LIB+f+'-outlier.jpg',t,h:o,m,s:'look',k:'look',lic:'Owned by '+o,url:'https://www.youtube.com/watch?v='+f.slice(4),cr:''}));
+const STAMP={free:['Free to use','pressed'],credit:['Use with credit','pressed','scribe'],own:['Yours','pressed','gate'],stop:['Not cleared','void'],look:['Look only','blank']};
+let items=[...LOOK];
+const withS=['filled','looking','scene','notcleared','several','down','done','stopped','mirror','adding','clip'].includes(S);
+if(withS)items=[...SAMPLES.map(x=>Object.assign({},x,{f:x.f?ST+x.f:''})),...LOOK];
+if(S==='looking'||S==='down')items=[...LOOK];
+let pick=null,filter='all',sort=0,chosen=new Set(),checked={};
+const pickFirst={filled:'cma-127827',scene:'cma-127827',notcleared:'market',lookonly:'069-4_lsxy5fsac',several:'cma-127827',done:'cma-127827',stopped:'charon',mirror:'getty-2010.8',clip:'market',adding:'cma-127827'}[S];
+if(pickFirst)pick=items.find(x=>x.id===pickFirst);
+
+/* the band: who sent you here */
+const SCENE='You are standing at a wood pile, close enough to touch it. The dead man on it sits up.';
+if(S==='scene')$('bandbox').innerHTML=`<div class="band"><span class="pill need" data-d>Scene 1</span><span class="q" data-d>${SCENE}</span><span class="pill sample">sample</span></div>`;
+if(S==='stopped')$('bandbox').innerHTML=`<div class="band stop"><span class="pill stop">Stopped</span><span class="q" data-d>The ENTIRE Journey After Death in 52 Minutes, 4.2 minutes without a picture</span><span class="pill sample">sample</span></div>`;
+if(S==='down')$('bandbox').innerHTML=`<div class="band stop"><span class="pill stop" data-a="a1"><span data-d>The Met</span>no answer</span><button class="btn" id="retry" data-u="u30">${Art.glyph('retry')}Try again</button></div>`;
+if(S==='offline')$('bandbox').innerHTML=`<div class="band"><span class="pill dim">No network</span></div>`;
+
+/* tabs */
+const TABS=[['all','All'],['museum','Museum'],['archive','Archive'],['footage','Footage'],['own','Own'],['look','Look only']];
+$('tabs').innerHTML=TABS.map(([k,n])=>`<button class="tab" data-f="${k}" aria-selected="${k==='all'}">${n}</button>`).join('');
+$('tabs').addEventListener('click',e=>{const t=e.target.closest('.tab');if(!t)return;filter=t.dataset.f;drawWall()});
+$('archives').textContent='';$('archives').insertAdjacentHTML('beforeend',Art.glyph('search')+'<span class="hide-phone">Archives</span>');
+
+/* the wall */
+function tileHTML(x,i){const st=STAMP[x.s]||STAMP.free,uses=x.uses||0;
+ const pic=x.clip?`<video src="${x.f}" muted preload="metadata" playsinline></video>`:x.f?`<img src="${x.f}" alt="${x.t}" loading="lazy">`:`<span class="plate empty"><span data-art="plate" data-state="failed"></span></span>`;
+ return `<button class="tile ${x.s==='look'?'look':''} ${pick&&pick.id===x.id?'on':''} ${chosen.has(x.id)?'chosen':''} ${x.never?'never':''} ${S==='looking'||S==='adding'?'arrive':''}" style="animation-delay:${i*60}ms" data-id="${x.id}" data-u="u1" aria-label="${x.t}, ${st[0]}">${pic}<span class="sl">${Art.seal({state:st[1],emblem:st[2]})}</span><span class="in" data-d>${x.s==='look'?x.h:'In '+uses+' films'}</span></button>`}
+function drawWall(){$('tabs').hidden=chosen.size>0;const w=$('wall'),q=$('find').value.trim().toLowerCase();
+ let L=items.filter(x=>filter==='all'||x.k===filter).filter(x=>!q||(x.t+' '+x.h).toLowerCase().includes(q));
+ if(sort===1)L=L.filter(x=>!x.uses);
+ L.sort((a,b)=>(a.s==='stop')-(b.s==='stop'));
+ let h='';
+ if(S==='looking'&&items.length<=LOOK.length)h+=`<div class="plate empty empty"><span data-art="plate" data-state="working"></span><span class="says"><b>Looking</b></span></div>`;
+ if(!withS&&(filter==='museum'||filter==='archive')&&!q)h+=`<div class="plate empty empty"><span data-art="plate" data-state="empty"></span><span class="says"><b>Nothing here yet</b></span></div>`;
+ if(filter==='footage'&&!L.length)h+=`<div class="plate empty empty"><span data-art="plate" data-state="empty"></span><span class="says"><b>No footage yet</b></span></div>`;
+ if(filter==='own'&&!L.length)h+=`<div class="plate empty empty"><span data-art="plate" data-state="empty"></span><span class="says"><b>No files yet</b></span></div>`;
+ const own=L.filter(x=>x.s!=='look'),lk=L.filter(x=>x.s==='look');
+ h+=own.map(tileHTML).join('');if(lk.length&&filter==='all')h+=`<p class="lab grp">Look only</p>`;h+=lk.map((x,i)=>tileHTML(x,i+own.length)).join('');
+ w.innerHTML=h;w.querySelectorAll('[data-art]').forEach(Art.fill)}
+$('find').addEventListener('input',drawWall);
+$('find').addEventListener('keydown',e=>{if(e.key==='Enter'){if(S==='offline'){Kit.toast('Needs a network. Your words are kept',{state:'need'});return}askArchives()}});
+$('sort').onclick=()=>{sort=(sort+1)%3;$('sort').textContent=['Newest','Not used yet','Used most'][sort];drawWall()};
+
+/* holding a tile starts choosing several */
+let ht=null,held=false;
+$('wall').addEventListener('pointerdown',e=>{const t=e.target.closest('.tile');if(!t)return;held=false;ht=setTimeout(()=>{held=true;choose(t.dataset.id)},600)});
+['pointerup','pointerleave','pointercancel'].forEach(x=>$('wall').addEventListener(x,()=>clearTimeout(ht)));
+$('wall').addEventListener('click',e=>{const t=e.target.closest('.tile');if(!t)return;if(held){held=false;return}const id=t.dataset.id;if(chosen.size){choose(id);return}pick=items.find(x=>x.id===id);drawWall();drawBig();setGo();Kit.press(t)});
+function choose(id){chosen.has(id)?chosen.delete(id):chosen.add(id);drawWall();setGo()}
+
+/* the big place */
+function drawBig(){const el=$('big');
+ if(!pick){el.innerHTML=`<div class="frame"><span class="plate empty"><span data-art="plate" data-state="empty"></span><span class="says"><b>${withS?'Nothing picked':'Nothing here yet'}</b><button class="btn need" id="ask2" data-u="u13">${Art.glyph('search')}Search archives</button></span></span></div>`;el.querySelectorAll('[data-art]').forEach(Art.fill);$('ask2').onclick=askArchives;return}
+ const x=pick,st=STAMP[x.s];
+ const pic=x.clip?`<video id="clipv" src="${x.f}" muted preload="metadata" playsinline></video>`:x.f?`<img src="${x.f}" alt="${x.t}">`:`<span class="plate failed"><span data-art="plate" data-state="failed"></span><span class="says"><b>Nothing fetched</b></span></span>`;
+ const eye=x.s==='look'||x.s==='stop'?'':checked[x.id]?`<span class="pill work">Checked by eye</span>`:`<button class="btn" data-open="eye" data-a="a2" data-u="u29" aria-label="Look at it yourself">${Art.glyph('check')}Check</button>`;
+ el.innerHTML=`<div class="frame ${x.s==='look'?'look':''}">${pic}<button class="stamp ${x.s==='stop'?'stop':x.s==='look'?'look':''}" data-open="proof" data-u="u7" aria-label="${st[0]}: the proof">${Art.seal({state:st[1],emblem:st[2]})}${st[0]}</button></div>
+ <div class="who"><b class="name" data-d>${x.t}</b><span class="num" data-d>${x.s==='look'?x.h+', '+x.m:(x.h||'')+(x.d?', '+x.d:'')}</span></div>
+ ${x.clip?`<div class="trimbar" id="trim" data-u="u27" aria-label="Choose the part"><i class="sel" id="sel"></i><button class="h" id="h0" aria-label="Start"></button><button class="h" id="h1" aria-label="End"></button></div>`:''}
+ <div class="acts">${eye}${S==='scene'?`<a class="btn" href="spell-strip.html?from=reliquary&amp;drawn=1" data-u="u5">Drawn scene</a>`:''}</div>`;
+ el.querySelectorAll('[data-art]').forEach(Art.fill);
+ const v=$('clipv');if(v){v.play&&v.play().catch(()=>{});v.onended=()=>{}}
+ if(x.clip)trim();fillProof()}
+
+/* trim one clip: two handles, one shot only */
+function trim(){const bar=$('trim'),h0=$('h0'),h1=$('h1'),sel=$('sel');let a=.18,b=.62;const draw=()=>{h0.style.left=a*100+'%';h1.style.left=b*100+'%';sel.style.left=a*100+'%';sel.style.width=(b-a)*100+'%'};draw();
+ [[h0,0],[h1,1]].forEach(([h,k])=>h.addEventListener('pointerdown',e=>{h.setPointerCapture(e.pointerId);const r=bar.getBoundingClientRect();const mv=ev=>{const p=Math.max(0,Math.min(1,(ev.clientX-r.left)/r.width));if(k)b=Math.max(a+.05,p);else a=Math.min(b-.05,p);draw()};h.onpointermove=mv;h.onpointerup=()=>{h.onpointermove=null;if(b-a>.6)Kit.toast('Two shots in this part. Drag the handles again',{state:'stop'});else Kit.toast('Cutting. One shot, 24 frames a second')/* a5 */}}))}
+
+/* the proof sheet */
+function fillProof(){const x=pick;if(!x)return;const st=STAMP[x.s];$('ptitle').textContent=st[0];
+ $('pline').innerHTML=(SAMPLE&&x.s!=='look'?'<span class="pill sample">sample</span> ':'')+(x.s==='look'?'Study, never show':x.s==='stop'?'No licence line saved':x.s==='credit'?'Credit under the film':'Given away by holder');
+ const rows=[['Holder',x.h],['Its number',x.n||'none'],['Licence',x.lic],['Licence read',x.s==='stop'?'never':'24 Nov'],['Credit line',x.cr||'none needed'],['Found',x.s==='look'?'The image library, 24 Nov':'A test search, 24 Nov'],['The check saw',checked[x.id]?'Checked by eye, 24 Nov':'Not checked'],['Films using it',x.s==='look'?'None, never':'0']];
+ $('pdl').innerHTML=rows.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('');
+ const a=[];if(x.url)a.push(`<a class="btn" href="${x.url}" target="_blank" rel="noopener" data-u="u8">Open the source page</a>`);
+ if(x.s==='stop')a.push(`<button class="btn need" id="checklic" data-u="u9">Check the licence</button>`,`<button class="btn" data-open="perm" data-u="u10">I have permission</button>`);
+ if(x.s!=='look')a.push(`<button class="btn stop longpress" id="never" data-u="u11"><i class="fillbar"></i>Never use (hold)</button>`);
+ $('pacts').innerHTML=a.join('');hold($('never'),()=>{x.never=1;Kit.sheet('proof').close();Kit.toast('Never used on this channel. Put it back is in Sources',{state:'stop'});drawWall()});
+ const c=$('checklic');if(c)c.onclick=()=>{c.disabled=true;c.textContent='Reading the licence';setTimeout(()=>{c.disabled=false;c.textContent='Check the licence';Kit.toast('Still not cleared: no reuse line on its page',{state:'stop'})},1200)}}
+$('yesno').innerHTML=['Right thing','Right time and place','No watermark','Nothing modern in it'].map((q,i)=>`<div><span>${q}</span><span class="picks" data-q="${i}"><button class="btn">Yes</button><button class="btn">No</button></span></div>`).join('');
+$('yesno').addEventListener('click',e=>{const b=e.target.closest('.btn');if(!b)return;const g=b.parentElement;g.querySelectorAll('.btn').forEach(x=>x.classList.toggle('need',x===b));g.dataset.a=b.textContent;Kit.press(b);
+ const all=[...$('yesno').querySelectorAll('[data-q]')];if(all.every(x=>x.dataset.a)){if(all.every(x=>x.dataset.a==='Yes')){checked[pick.id]=1;Kit.sheet('eye').close();Kit.toast('Checked by eye',{art:Art.seal({state:'pressed'})});drawBig();setGo()}else{Kit.sheet('eye').close();Kit.toast('Not checked: it failed one look',{state:'stop'})}}});
+$('permsave').onclick=()=>{if(!$('permwho').value){Kit.toast('Say who said yes',{state:'need'});return}pick.s='own';pick.lic='Permission from '+$('permwho').value;Kit.sheet('perm').close();Kit.toast('Yours, with that line as its proof',{art:Art.seal({state:'pressed'})});drawBig();drawWall();setGo()};
+
+/* the one action follows the door and the stamp */
+function setGo(){const go=$('go'),aside=$('aside');go.disabled=false;go.classList.remove('need');let t='Use this relic',u='u2',fn=()=>{Kit.seal(document.querySelector('.stamp .art'),'pressed');Kit.finish(go,'On this channel\'s shelf. The other device has not heard yet')/* a9 */;setTimeout(()=>{location.search='?state=done'},800)};
+ aside.innerHTML='';
+ if(chosen.size){aside.innerHTML=`<span class="selbar" data-u="u21"><span class="pill need" data-d>${chosen.size} chosen</span><button class="btn" id="mv">Shelf</button><button class="btn stop" id="nv">Never use</button></span>`;t='Use in this film';fn=()=>undo('Used in this film');$('mv').onclick=()=>undo('Moved to the shelf');$('nv').onclick=()=>undo('Never used on this channel')}
+ else if(!pick){go.disabled=true}
+ else if(pick.s==='look'){t='Study it';u='u6';fn=()=>location.href='mirror-bend.html?from=reliquary&outlier='+pick.id.slice(4)}
+ else if(pick.s==='stop'){t='Check the licence';u='u9';fn=()=>{go.classList.add('busy');setTimeout(()=>{go.classList.remove('busy');Kit.toast('Still not cleared: no reuse line on its page',{state:'stop'})},1100)}}
+ else if(FROM==='spell-strip'){t='Put in this scene';u='u3';fn=()=>{Kit.finish(go,'Only this scene is drawn again')/* a6 */;setTimeout(()=>location.href='spell-strip.html?from=reliquary',700)}}
+ else if(FROM==='mirror-bend'){t='Use as thumbnail subject';u='u4';fn=()=>location.href='mirror-bend.html?from=reliquary&subject='+pick.id}
+ else if(FROM==='conjuring'){t='Use it, carry on';u='u34';fn=()=>{Kit.finish(go,'It fills the first scene that lacks one');setTimeout(()=>location.href='conjuring.html?from=reliquary',700)}}
+ if(S==='done'&&!chosen.size){t='Back';u='u31';fn=()=>location.href=B.dataset.back;aside.innerHTML=`<span class="pill work">On the shelf</span>`}
+ go.textContent=t;go.dataset.u=u;go.onclick=fn;
+ if(S==='looking'&&!chosen.size)aside.innerHTML=`<span class="status" data-a="a1">${Art.pip({state:'now'})}Looking</span>`;
+ if(S==='adding')aside.innerHTML=`<span class="status" data-a="a4">${Art.pip({state:'now'})}<span data-d>2 of 3 ready</span></span>`}
+function undo(msg){chosen.clear();drawWall();setGo();Kit.toast(msg+'. Undo within 7 s',{ms:7000});const t=document.querySelector('.toast:last-child');if(t){t.style.pointerEvents='auto';t.insertAdjacentHTML('beforeend','<button class="btn bare">Undo</button>');t.querySelector('button').onclick=()=>{t.remove();Kit.toast('Undone')}}}
+
+/* asking the archives: results arrive in groups with their stamps, not cleared last */
+function askArchives(){if(S==='offline'){Kit.toast('Needs a network. Your words are kept',{state:'need'});return}location.search='?state=looking'}
+$('archives').onclick=askArchives;
+if(S==='looking'){let n=0;const G=SAMPLES.map(x=>Object.assign({},x,{f:x.f?ST+x.f:''}));const iv=setInterval(()=>{n+=3;items=[...G.slice(0,n),...LOOK];drawWall();if(n>=G.length){clearInterval(iv);document.querySelectorAll('.tabs .tab').length;$('aside').innerHTML=`<span class="status">${Art.pip({state:'done'})}<span data-d>${G.length} found</span></span><span class="pill sample">sample</span>`}},700)}
+
+/* adding files: a row per file with a real percentage */
+function addRows(files){const L=files.map(f=>({n:f.name||f,p:0}));Kit.sheet('add').close();$('bandbox').innerHTML=`<div class="files" id="files">${L.map((f,i)=>`<div class="row" data-i="${i}"><span class="tile">${Art.pip({state:'now'})}</span><span><b class="name" style="font-size:16px" data-d>${f.n}</b><span class="bar"><i style="width:0"></i></span></span><span class="val num" data-d>0%</span></div>`).join('')}</div>`;
+ const iv=setInterval(()=>{let done=0;L.forEach((f,i)=>{f.p=Math.min(100,f.p+18+i*7);const r=$('files').children[i];r.querySelector('i').style.width=f.p+'%';r.querySelector('.val').textContent=f.p>=100?(/\.(jpe?g|png|webp|mp4|mov)$/i.test(f.n)?'Ready':'Not a picture'):f.p+'%';if(f.p>=100){done++;r.querySelector('.tile').innerHTML=Art.pip({state:/\.(jpe?g|png|webp|mp4|mov)$/i.test(f.n)?'done':'failed'})}});if(done===L.length){clearInterval(iv);Kit.toast('Whose are they? Asked once for the lot',{state:'need'})}},300)}
+$('devfiles').addEventListener('change',e=>addRows([...e.target.files]));
+if(S==='adding')addRows(['er-pile-sketch.jpg','meadow-notes.png','voice-memo.m4a']);
+$('link').addEventListener('change',e=>{const u=e.target.value;$('linkline').innerHTML=`<span class="status" data-a="a3">${Art.pip({state:'now'})}Reading the licence</span>`;setTimeout(()=>{if(/youtu/.test(u)){$('linkline').textContent='The channel never said others may reuse it. Saved as Look only, with the owner\'s name.'}else{$('linkline').textContent='The page could not be read. Try again, or I have permission.'}},1200)});
+$('newshelf').onclick=()=>{Kit.sheet('add').close();Kit.toast('A new shelf, named when you add to it')};
+
+/* the film's shelf: the first film as scenes in acts */
+const ACTS=[['Cold Open',3],['The Waking and the Court',49],['The Meadow and the Mouth',44],['The King of the Dead',41],['Heaven Ends',45],['The Man From Heaven',47],['The Lion and the Armour',43],['The Last Lot',43],['The River and the Waking',49]];
+$('fsline').innerHTML='<span data-d>The ENTIRE Journey After Death in 52 Minutes</span>. No scene plan yet';
+$('fstrip').innerHTML=ACTS.map(([n,c],i)=>`<div class="act"><span class="lab">Act ${['I','II','III','IV','V','VI','VII','VIII','IX'][i]} · ${n}</span><div class="scenes">${Array.from({length:Math.min(3,c)},(_,j)=>`<button class="scene"><span class="plate"><span data-art="plate" data-state="empty"></span></span><span class="n">${j+1}</span></button>`).join('')}</div></div>`).join('');
+
+/* sources: shown here, set in the vessel or the sealed pact */
+const fromScene=FROM==='spell-strip'||S==='scene';
+$('srcline').innerHTML=fromScene?'<span class="pill stop">Locked</span> <span class="pill">Sealed pact</span>':'<span class="pill">Set in the vessel</span>';
+$('srcrows').innerHTML=[['Museums and archives','On'],['Free stock','Off'],['Own files','On'],['Open web','Off'],['Real clips','When proving','u26'],['Named people','Photographs'],['Never use','0']].map(([n,v,u])=>`<div class="row" style="cursor:default" ${u?'data-u="'+u+'"':''}><span class="tile">${Art.pip({state:v==='Off'?'none':'done'})}</span><b class="name">${n}</b><span class="val">${v}</span></div>`).join('');
+$('srcacts').innerHTML=fromScene?'':`<a class="btn need" href="vessel.html?from=reliquary&amp;tab=sources" data-u="u24">Change in vessel</a><a class="btn" href="tank.html?from=reliquary" data-u="u33">Tank</a>`;
+$('retry')&&($('retry').onclick=()=>{Kit.toast('Asked the Met again. The others are already here')});
+
+/* phone: the big one shrinks as the wall scrolls */
+addEventListener('scroll',()=>{if(!matchMedia('(max-width:760px)').matches)return;$('big').style.setProperty('--bh',Math.max(110,210-scrollY*.5)+'px');$('big').classList.toggle('small',scrollY>40)},{passive:true});
+
+function hold(btn,done){if(!btn)return;let t=null;const start=e=>{if(e.type==='keydown'&&e.key!=='Enter'&&e.key!==' ')return;if(e.repeat)return;e.preventDefault();btn.classList.add('holding');t=setTimeout(()=>{btn.classList.remove('holding');done()},1000)},stop=()=>{if(t){clearTimeout(t);t=null}btn.classList.remove('holding')};
+ btn.addEventListener('pointerdown',start);btn.addEventListener('keydown',start);['pointerup','pointerleave','pointercancel','keyup'].forEach(x=>btn.addEventListener(x,stop))}
+if(S==='several'){chosen=new Set(['cma-127827','isle','aic-77265'])}
+if(S==='sources')document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>Kit.sheet('sources').open(),50));
+if(Kit.param('sheet'))document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>Kit.sheet(Kit.param('sheet')).open(),50));
+document.addEventListener('DOMContentLoaded',()=>{drawWall();drawBig();setGo()});
+})();
+</script>
+</body></html>

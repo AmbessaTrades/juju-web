@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Juju · Shelf</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script><script>(function(){if(!('serviceWorker' in navigator))return;if(navigator.serviceWorker.controller)return;document.documentElement.style.visibility='hidden';navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(function(){return navigator.serviceWorker.ready}).then(function(){location.reload()})})()</script><script src="phone.js"></script><script src="api.js"></script><script src="flow.js"></script>
+<style>
+/* The Shelf: every finished film of the channel, made in the app or outside it, newest first, at feed size. A pick plays it.
+   Layout only; every colour is a kit token. Server: /api/tap/films?channel=. */
+body{--focus-x:50%;--focus-y:30%}
+.ribbon{align-self:start;margin:4px 0 20px;padding:8px 28px 6px 16px;background:color-mix(in oklab,var(--act) 14%,var(--card));color:var(--bone);font:600 15px/1 "Spectral SC",serif;letter-spacing:.08em;clip-path:polygon(0 0,100% 0,calc(100% - 12px) 50%,100% 100%,0 100%);box-shadow:inset 0 0 0 1px var(--act-lo)}
+.feed{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:24px 18px;padding-bottom:120px}
+.feed.wait{visibility:hidden}
+.fi{display:grid;gap:10px;padding:0;border:0;background:none;color:var(--bone);text-align:left;cursor:pointer;font:inherit;min-width:0}
+.fi .pic{position:relative;aspect-ratio:16/9;background:#000;overflow:hidden;border:2px solid var(--line)} .fi .pic img,.fi .pic video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.fi .pic .nopic{position:absolute;inset:0;display:grid;place-items:center;color:var(--smoke)} .fi .pic .nopic svg{width:30%;height:auto}
+.fi .len{position:absolute;right:6px;bottom:6px;padding:3px 6px 1px;background:rgba(0,0,0,.8);color:#fff;font:600 12.5px/1.2 "JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+.fi .kept{position:absolute;left:6px;top:6px}
+.fi .t{font:600 16.5px/1.3 "Spectral SC",serif;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.fi:hover .pic,.fi:focus-visible .pic,.fi.on .pic{border-color:var(--act)} .fi:focus-visible{outline:none}
+.empty{display:grid;justify-items:center;gap:14px;padding:64px 16px;color:var(--ash)} .empty .emblem{width:72px;height:72px;color:var(--smoke)} .empty b{font:600 22px/1.2 "Spectral SC",serif;color:var(--bone)}
+#play{width:min(880px,100%)}
+#play .screen{margin-top:28px;position:relative;aspect-ratio:16/9;background:#000;border:2px solid var(--line-hi)} #play video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+#play b{display:block;margin-top:14px;font:600 20px/1.25 "Spectral SC",serif}
+.sheetfoot{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:16px;flex-wrap:wrap}
+#kit{width:min(720px,100%)} #kit .part{display:grid;gap:8px;margin-top:18px} #kit .part .lab{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--ash);font:600 13px/1 "Josefin Sans",sans-serif;letter-spacing:.06em}
+#kit .part .txt{padding:12px 14px;background:var(--a-well);border:2px solid var(--line);color:var(--bone);font:400 15px/1.45 "Lato",sans-serif;white-space:pre-wrap;max-height:34vh;overflow:auto}
+#kit .part .txt.t{font:600 18px/1.3 "Spectral SC",serif} #kit .part img{width:100%;max-width:420px;aspect-ratio:16/9;object-fit:cover;border:2px solid var(--line)}
+@media (max-width:760px){.feed{grid-template-columns:minmax(0,1fr);gap:20px}}
+</style></head>
+<body data-skin="nocturne" data-room="shelf" data-mark="publish-kit" data-door="altar" data-title="Shelf" data-back="altar.html" data-back-label="Altar">
+<main>
+ <span class="ribbon">Ready</span>
+ <div class="feed wait" id="feed" role="list" aria-label="Films"></div>
+</main>
+<footer class="deck"><div class="aside"><a class="btn bare phone-off" id="pot" href="cauldron.html">Cauldron</a></div><button class="primary" id="go">Play</button></footer>
+<section class="sheet" id="play" hidden aria-label="Film">
+ <div class="screen"><video id="v" controls playsinline preload="metadata"></video></div>
+ <b id="pt" data-d></b>
+ <div class="sheetfoot"><a class="btn bare" id="save" download>Save</a><button class="btn" id="kitgo">Upload kit</button><button class="btn need" id="keep" hidden>Keep</button></div>
+</section>
+<section class="sheet" id="kit" hidden aria-labelledby="kitTitle"><h3 id="kitTitle">Upload kit</h3><div id="kitParts"></div></section>
+<script>
+(()=>{
+const $=id=>document.getElementById(id),esc=JUJU.esc,slug=Flow.ch();
+if(!slug){Flow.need('shelf');return}
+$('pot').href='cauldron.html?ch='+slug;
+let films=[],open=null;
+const card=f=>`<button class="fi" role="listitem" data-f="${esc(f.id)}"><span class="pic">${Flow.pic(f)}${f.seconds?`<span class="len" data-d>${Flow.clock(f.seconds)}</span>`:''}${f.kept?'<span class="pill need kept">Kept</span>':''}</span><span class="t" data-d>${esc(f.title||f.sentence||'')}</span></button>`;
+/* a title in capitals reads as shouting next to the others: shown in sentence case. A title two films share gets its number. */
+const calm=t=>t&&/[A-Z]/.test(t)&&t===t.toUpperCase()?t.charAt(0)+t.slice(1).toLowerCase():t;
+function names(l){const n={},seen={};for(const f of l){f.title=calm(f.title||f.sentence||'');n[f.title]=(n[f.title]||0)+1}
+ for(const f of [...l].reverse()){if(n[f.title]>1){seen[f.title]=(seen[f.title]||0)+1;f.title+=' ('+seen[f.title]+')'}}return l}
+async function load(){const a=await JUJU.get('/api/tap/films?channel='+slug);films=names(a.films.filter(f=>f.state==='done'&&f.film));
+ $('feed').innerHTML=films.length?films.map(card).join(''):`<div class="empty">${Art.emblem('publish-kit')}<b>Nothing ready yet</b></div>`;
+ $('feed').classList.remove('wait');Flow.lazy($('feed'));$('go').disabled=!films.length}
+function play(f){open=f;$('pt').textContent=f.title||f.sentence||'';$('v').src=f.film;$('save').href=f.film;$('keep').hidden=!!f.kept||!!f.gold;Kit.sheet('play').open();Flow.tell('play',f);$('v').play().catch(()=>{})}
+$('feed').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(!b)return;const f=films.find(x=>x.id===b.dataset.f);if(f){Kit.press(b);play(f)}});
+$('go').addEventListener('click',()=>{if(films[0])play(films[0])});
+$('keep').addEventListener('click',()=>{if(!open)return;JUJU.once($('keep'),async()=>{const x=await JUJU.post('/api/tap/films/'+encodeURIComponent(open.id)+'/keep');$('keep').hidden=true;Kit.toast('Kept');await load();return x})});
+/* the upload kit: only the parts Juju wrote for this film, each copied with one tap */
+$('kitgo').addEventListener('click',async()=>{if(!open)return;$('v').pause();const at=$('kitParts');at.innerHTML='';
+ /* one sheet at a time: the film's sheet gives way to its kit */
+ Kit.sheet('play').close();setTimeout(()=>Kit.sheet('kit').open(),220);
+ try{const k=await JUJU.get('/api/tap/films/'+encodeURIComponent(open.id)+'/kit');
+  const part=(lab,body,copy)=>`<div class="part"><div class="lab"><span>${lab}</span>${copy?`<button class="btn bare" data-copy="${lab}">Copy</button>`:''}</div>${body}</div>`,txt={};
+  let h='';if(k.title){txt.Title=k.title;h+=part('Title',`<div class="txt t">${esc(k.title)}</div>`,1)}
+  if(k.description){txt.Description=k.description;h+=part('Description',`<div class="txt">${esc(k.description)}</div>`,1)}
+  if(k.thumb)h+=part('Thumbnail',`<img src="${esc(k.thumb)}" alt=""><div><a class="btn bare" href="${esc(k.thumb)}" download>Save thumbnail</a></div>`);
+  if(k.film)h+=part('Film',`<div><a class="btn bare" href="${esc(k.film)}" download>Save film</a></div>`);
+  at.innerHTML=h;at.onclick=e=>{const b=e.target.closest('[data-copy]');if(!b)return;JUJU.copy(txt[b.dataset.copy]).then(ok=>{b.textContent=ok?'Copied':'Copy';if(ok)Kit.toast('Copied')})}}
+ catch(e){at.innerHTML='';JUJU.say($('kitParts'),e.say)}});
+document.addEventListener('click',e=>{if(e.target.closest('#play [data-close]')||e.target.closest('.veil'))$('v').pause()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('v').pause()});
+JUJU.ready(async()=>{JUJU.get('/api/tap/channels/'+slug).then(c=>{Flow.head(c);Flow.switcher('shelf',slug)}).catch(()=>{});
+ try{await load()}catch(e){$('feed').classList.remove('wait');JUJU.say($('go'),e.say)}JUJU.money&&JUJU.money()});
+})();
+</script>
+</body></html>

@@ -1,0 +1,36 @@
+[
+ {
+  "id": "kingdoms",
+  "name": "Kingdoms",
+  "themes": [
+   "duppy-time-night",
+   "lapis-choir",
+   "salt-road",
+   "fever-ward",
+   "green-ledger",
+   "long-ice"
+  ],
+  "rank": 1
+ },
+ {
+  "id": "wealth",
+  "name": "Wealth",
+  "themes": [
+   "duppy-time-night",
+   "lapis-choir",
+   "salt-road",
+   "fever-ward",
+   "green-ledger",
+   "long-ice"
+  ],
+  "rank": 1
+ },
+ {
+  "id": "states",
+  "name": "States",
+  "themes": [
+   "duppy-time-night"
+  ],
+  "rank": 3
+ }
+]

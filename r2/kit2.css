@@ -1,0 +1,478 @@
+/* Juju kit, round 2. The one base every room is built from: link kit2.css, then kit2.js, light.js, art.js.
+   Change a look here, never inside a room. Parts and how to use them: PARTS.md. Every colour is a token below.
+   The world: a carved stone hall at night. Things are real solids lit from the upper left; frames are struck metal;
+   the one primary action is a lit slab. Colour is state: need (gold) wants a person, work (jade) runs by itself or is
+   money that exists, stop (ember) is locked or failed, bone exists, dim is asleep. */
+
+@font-face{font-family:"Caesar Dressing";src:url("../fonts/CaesarDressing-Regular.ttf")}
+@font-face{font-family:"Spectral SC";font-weight:500;src:url("../fonts/SpectralSC-Medium.ttf")}
+@font-face{font-family:"Spectral SC";font-weight:600;src:url("../fonts/SpectralSC-SemiBold.ttf")}
+@font-face{font-family:"Spectral";src:url("../fonts/Spectral-Regular.ttf")}
+@font-face{font-family:"Spectral";font-style:italic;src:url("../fonts/Spectral-Italic.ttf")}
+@font-face{font-family:"Lato";font-weight:400;src:url("../fonts/Lato-Regular.ttf")}
+@font-face{font-family:"Lato";font-weight:700;src:url("../fonts/Lato-Bold.ttf")}
+@font-face{font-family:"Josefin Sans";font-weight:100 700;src:url("../fonts/JosefinSans-VF.ttf")}
+@font-face{font-family:"JetBrains Mono";font-weight:100 800;src:url("../fonts/JetBrainsMono-VF.ttf")}
+
+/* ---------- skins: four, every value a token ---------- */
+:root,[data-skin="nocturne"]{
+  --void:#07090C; --ink:#0B0F14; --card:#10161D; --lift:#18212B; --line:#2A3744; --line-hi:#3E5062;
+  --bone:#EFE8D6; --bone-fixed:#EFE8D6; --ash:#AEB7BC; --smoke:#808D96;
+  --act:#3BF0B8; --act-hi:#8FFFDA; --act-lo:#0E6B52; --on-act:#03140E; --act-glow:rgba(59,240,184,.34);
+  --need:#F5B942; --need-hi:#FFD887; --need-lo:#6A4A0E;
+  --work:#3BF0B8; --work-lo:#0F5A48;
+  --stop:#E14B5A; --stop-hi:#FF8E98; --stop-lo:#7A1C28;
+  --plum:#A855F7;
+  --keep:#F5B942; --obj-lit:#D9CFB6; --obj-dim:#4A5A6B; --metal:#B9AE93; --wax:#D9CFB6; --wood:#C2B79C; --leaf:#2FB89A; --leaf-dim:#2D5A55; --hot:#FFF4D6;
+  --rimc:#9CC4E4; --a-line:#5A6C7E; --a-shade:#1E2933; --a-well:#080C11; --a-deep:#05070A;
+  --plate:var(--a-well); --hatch:var(--a-shade); --wall-light:.075; --wall-dark:.55; --pool:rgba(64,88,112,.30); --fog-1:rgba(15,70,58,.22); --fog-2:rgba(38,22,58,.45);
+  --panel-a:#141B23; --panel-b:#0C1117; --frame:#8E8670; --frame-hi:#D8CCAA; --frame-lo:#2E2A22;
+  --paper:#E9DFC4; --paper-lo:#B7A982; --paper-ink:#1D1810;
+  --shadow:0 18px 40px -14px rgba(0,0,0,.9),0 3px 0 rgba(0,0,0,.6);
+  --veil:rgba(2,3,5,.74); --cat:#EFE8D6;
+  color-scheme:dark;
+}
+[data-skin="codex"]{
+  --void:#0D0B09; --ink:#14110E; --card:#1A1612; --lift:#241E18; --line:#3B3128; --line-hi:#57493B;
+  --bone:#F2EFE9; --bone-fixed:#F2EFE9; --ash:#BDB3A4; --smoke:#8F8576;
+  --act:#E5B84B; --act-hi:#FFE09A; --act-lo:#6B4E12; --on-act:#170F02; --act-glow:rgba(229,184,75,.30);
+  --need:#FF8A3D; --need-hi:#FFC08F; --need-lo:#6A2E0A;
+  --work:#E5B84B; --work-lo:#5C4514;
+  --stop:#D91E2A; --stop-hi:#FF6B73; --stop-lo:#5C0A10;
+  --plum:#D91E2A;
+  --keep:#F7EEDB; --obj-lit:#E2D7BF; --obj-dim:#5A4E44; --metal:#C9AD6A; --wax:#B4232F; --wood:#BBA98A; --leaf:#C9A043; --leaf-dim:#5A4A26; --hot:#FFF1CF;
+  --rimc:#E9B98A; --a-line:#7A6A58; --a-shade:#2A231C; --a-well:#0A0806; --a-deep:#060504;
+  --wall-light:.07; --wall-dark:.6; --pool:rgba(110,70,36,.24); --fog-1:rgba(90,20,20,.22); --fog-2:rgba(58,11,14,.45);
+  --panel-a:#1C1713; --panel-b:#110E0B; --frame:#A68A4E; --frame-hi:#F0D592; --frame-lo:#3A2A10;
+  --paper:#EADBB8; --paper-lo:#BBA474; --paper-ink:#1E140A;
+  --shadow:0 18px 40px -14px rgba(0,0,0,.9),0 3px 0 rgba(0,0,0,.6);
+  --veil:rgba(5,3,2,.76); --cat:#F2EFE9;
+  color-scheme:dark;
+}
+[data-skin="atelier"]{
+  --void:#0B0B0D; --ink:#101013; --card:#16161A; --lift:#1E1E24; --line:#2C2C34; --line-hi:#44444F;
+  --bone:#F1F1F3; --bone-fixed:#F1F1F3; --ash:#ABABB5; --smoke:#80808B;
+  --act:#3BF0B8; --act-hi:#9BFFE0; --act-lo:#0E5E48; --on-act:#03140E; --act-glow:rgba(59,240,184,.22);
+  --need:#EAB308; --need-hi:#FFDB6E; --need-lo:#5E4704;
+  --work:#3BF0B8; --work-lo:#0F4A3B;
+  --stop:#DC2626; --stop-hi:#FF7A7A; --stop-lo:#5C0E0E;
+  --plum:#8B8B99;
+  --keep:#EAB308; --obj-lit:#D7D7DC; --obj-dim:#4B4B55; --metal:#A9A9B3; --wax:#D7D7DC; --wood:#B9B9C1; --leaf:#3BC9A0; --leaf-dim:#2C4D45; --hot:#FFFFFF;
+  --rimc:#B8C2D4; --a-line:#62626E; --a-shade:#24242B; --a-well:#0A0A0C; --a-deep:#060607;
+  --wall-light:.035; --wall-dark:.35; --pool:rgba(90,90,110,.16); --fog-1:transparent; --fog-2:transparent;
+  --panel-a:#18181D; --panel-b:#121216; --frame:#77777F; --frame-hi:#C9C9D1; --frame-lo:#26262C;
+  --paper:#E6E6EA; --paper-lo:#A9A9B2; --paper-ink:#141417;
+  --shadow:0 14px 30px -14px rgba(0,0,0,.85);
+  --veil:rgba(4,4,6,.76); --cat:#F1F1F3;
+  color-scheme:dark;
+}
+[data-skin="daylight"]{
+  --void:#EFEADF; --ink:#E6DFD0; --card:#F8F5EE; --lift:#FFFFFF; --line:#C3B9A4; --line-hi:#9E927A;
+  --bone:#14161A; --bone-fixed:#F4EFE3; --ash:#41474D; --smoke:#5E646A;
+  --act:#0F766E; --act-hi:#3FB7A9; --act-lo:#07413C; --on-act:#FFFFFF; --act-glow:rgba(15,118,110,.18);
+  --need:#9A6A05; --need-hi:#C99A2E; --need-lo:#5A3D02;
+  --work:#0F766E; --work-lo:#CFE7E2;
+  --stop:#B4232F; --stop-hi:#D9545F; --stop-lo:#6E1018;
+  --plum:#6D28A8;
+  --keep:#C99A2E; --obj-lit:#C8B58C; --obj-dim:#8E979F; --metal:#8C7A55; --wax:#B4232F; --wood:#9C8B6C; --leaf:#1F8F7C; --leaf-dim:#7FA69C; --hot:#FFF8E6;
+  --rimc:#FFFFFF; --a-line:#8A8070; --a-shade:#CFC6B4; --a-well:#2A2F35; --a-deep:#1B1F24;
+  --plate:#E2DACB; --hatch:rgba(90,70,40,.13); --wall-light:.11; --wall-dark:.12; --pool:rgba(255,255,255,.55); --fog-1:rgba(15,118,110,.06); --fog-2:rgba(154,106,5,.06);
+  --panel-a:#FBF9F4; --panel-b:#F1ECE1; --frame:#A99B7C; --frame-hi:#E9DEC2; --frame-lo:#6E6250;
+  --paper:#FFFDF6; --paper-lo:#D9CDB0; --paper-ink:#1D1810;
+  --shadow:0 14px 28px -14px rgba(60,48,30,.45),0 2px 0 rgba(60,48,30,.18);
+  --veil:rgba(30,26,20,.45); --cat:#14161A;
+  color-scheme:light;
+}
+
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%;background:var(--void)}
+*,*::before,*::after{font-variant-numeric:lining-nums!important}
+.num,.fig,.stepper output,.wal .left,.effort .step .cost,.dial .read,.scroll .total{font-variant-numeric:lining-nums tabular-nums!important}
+body{background:var(--void);color:var(--bone);font:400 16px/1.5 "Lato",system-ui,sans-serif;min-height:100vh;min-height:100dvh;overflow-x:hidden;font-variant-numeric:lining-nums;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;color:inherit}
+button{-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--act);outline-offset:3px}
+.art{display:block;overflow:visible;flex:none}
+
+/* ---------- type ---------- */
+.crown{font:400 clamp(34px,5vw,64px)/1 "Caesar Dressing",serif;letter-spacing:.04em}          /* JUJU and CONJURING only */
+.title{font:600 32px/1.05 "Spectral SC",serif;letter-spacing:.015em}                            /* the room name */
+.h2{font:600 30px/1.08 "Spectral SC",serif;letter-spacing:.015em}                               /* the focused thing's name */
+.name{font:600 19px/1.2 "Spectral SC",serif;letter-spacing:.02em}                               /* a card, row or object name */
+.lab{font:600 12.5px/1 "Josefin Sans",sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--smoke)} /* a small label */
+.whisper{font:italic 400 16px/1.5 "Spectral",serif;color:var(--ash)}                            /* one flavour line per room, at most */
+.small{font-size:14px;color:var(--ash)}
+.say{font:700 17px/1.35 "Lato",sans-serif}                                                       /* the one sentence that says what to do */
+.say.need{color:var(--need)} .say.work{color:var(--work)} .say.stop{color:var(--stop-hi)}
+.num{font-family:"JetBrains Mono",monospace;font-variant-numeric:lining-nums tabular-nums;font-size:.94em;letter-spacing:-.01em}
+.fig{font:600 34px/1 "Spectral SC",serif;font-variant-numeric:lining-nums tabular-nums;letter-spacing:.01em} /* a hero figure */
+.fig small{display:block;font:400 13.5px/1.3 "Lato",sans-serif;color:var(--ash);margin-top:6px;letter-spacing:0}
+.up{color:var(--work)} .warn{color:var(--need)} .down{color:var(--stop-hi)}
+[data-skin="daylight"] .down{color:var(--stop)}
+
+/* ---------- the hall: far wall carved and lit, a pool of light at the focus, vignette ---------- */
+.room{position:relative;min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:88px minmax(0,1fr);isolation:isolate}
+.room::before{content:"";position:fixed;inset:0;z-index:-2;background:
+  radial-gradient(52% 46% at var(--focus-x,40%) var(--focus-y,44%),var(--pool),transparent 70%),
+  radial-gradient(70% 55% at 18% -8%,var(--fog-1),transparent 70%),radial-gradient(80% 60% at 86% 112%,var(--fog-2),transparent 70%),var(--void)}
+.room::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:var(--wall-light);background:var(--l-wall) 0 0/384px;mix-blend-mode:normal}
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(120% 100% at 50% 40%,transparent 50%,rgba(0,0,0,var(--wall-dark)) 100%)}
+.main{position:relative;z-index:1;min-width:0;display:flex;flex-direction:column;gap:22px;padding:22px 40px 0;min-height:100vh;min-height:100dvh;max-width:1352px;width:100%}
+.floor{flex:1;min-height:0;display:flex;flex-direction:column;gap:22px}
+
+/* ---------- shell: rail (desk) / bottom bar (phone) ---------- */
+.rail{position:sticky;top:0;height:100vh;height:100dvh;display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 0 18px;z-index:5;
+  background:linear-gradient(90deg,rgba(0,0,0,.28),rgba(0,0,0,.08));border-right:1px solid var(--line)}
+[data-skin="daylight"] .rail{background:linear-gradient(90deg,rgba(255,255,255,.55),rgba(255,255,255,.2))}
+.rail .mark{width:58px;height:58px;margin-bottom:18px;color:var(--cat);display:grid;place-items:center}
+.cat{display:inline-block;color:var(--cat)} .cat svg{width:100%;height:100%;display:block;overflow:visible}
+.cat{animation:breathe 4.6s ease-in-out infinite;transform-origin:50% 100%} @keyframes breathe{50%{transform:scale(1.02,.975)}}
+.cat .eyes{opacity:0;transition:opacity .4s} .cat.scan .eyes{opacity:1;animation:eye 1.6s ease-in-out infinite} @keyframes eye{50%{opacity:.35}}
+.door{position:relative;width:76px;min-height:70px;display:grid;place-items:center;align-content:center;gap:6px;color:var(--ash);text-decoration:none;font:600 12px/1 "Josefin Sans",sans-serif;letter-spacing:.08em;border-radius:2px;transition:color .15s}
+.door .emblem{width:28px;height:28px}
+.door:hover{color:var(--bone)}
+.door[aria-current]{color:var(--act)} .door[aria-current]::before{content:"";position:absolute;left:-6px;top:12px;bottom:12px;width:3px;background:var(--act);box-shadow:0 0 12px var(--act-glow)}
+.door[aria-current]::after{content:"";position:absolute;inset:4px 2px;z-index:-1;background:radial-gradient(60% 60% at 0 50%,var(--act-glow),transparent 75%)}
+.rail .who{margin-top:auto;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line-hi);background:var(--lift);font:600 16px/1 "Spectral SC",serif;color:var(--bone);cursor:pointer}
+
+/* head: back (the .back class belongs to the head only; a face-down card is .card.down),  room mark, room name over the channel, then tools and the tank chip. Same place in every room. */
+.head{display:flex;align-items:center;gap:16px;min-height:64px}
+.back{flex:none;height:48px;min-width:48px;display:inline-flex;align-items:center;gap:6px;padding:0 16px 0 10px;border:0;background:none;cursor:pointer;color:var(--bone);text-decoration:none;font:600 14px/1 "Josefin Sans",sans-serif;letter-spacing:.08em;position:relative}
+.back::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--lift);clip-path:polygon(14px 0,100% 0,100% 100%,14px 100%,0 50%);box-shadow:inset 0 0 0 2px var(--line)}
+.back::after{content:"";position:absolute;inset:0;z-index:-1;clip-path:polygon(14px 0,100% 0,100% 100%,14px 100%,0 50%,14px 0,14px 2px,1.6px 50%,14px calc(100% - 2px),calc(100% - 2px) calc(100% - 2px),calc(100% - 2px) 2px,14px 2px);background:var(--line-hi)}
+.back .glyph{width:20px;height:20px}
+.back:hover::before{background:var(--line)}
+.seal-mark{position:relative;flex:none;width:58px;height:58px;display:grid;place-items:center;color:var(--bone)}
+.seal-mark::before{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 36% 30%,var(--lift),var(--ink) 70%);box-shadow:inset 0 0 0 2px var(--frame),inset 0 0 0 5px var(--ink),inset 0 0 0 6px var(--line-hi),0 6px 14px -4px rgba(0,0,0,.8)}
+.seal-mark .emblem{position:relative;width:28px;height:28px}
+.place{min-width:0;display:grid;gap:4px}
+.place .title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.place .chan{display:flex;align-items:center;gap:8px;font:600 13px/1 "Josefin Sans",sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--ash);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.place .chan .dot{width:8px;height:10px;flex:none;background:var(--ash);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.place .chan .dot.need{background:var(--need)} .place .chan .dot.work{background:var(--work)} .place .chan .dot.stop{background:var(--stop)}
+.tools{display:flex;align-items:center;gap:10px;margin-left:auto}
+.chip{height:48px;min-width:48px;display:inline-flex;align-items:center;gap:10px;padding:0 14px;border:2px solid var(--line);background:color-mix(in oklab,var(--ink) 70%,transparent);color:var(--bone);cursor:pointer;text-decoration:none;font:600 14px/1 "Josefin Sans",sans-serif;letter-spacing:.06em}
+.chip:hover{border-color:var(--line-hi)} .chip .glyph{width:22px;height:22px}
+.chip.tank .emblem{width:24px;height:24px;color:var(--work)} .chip.tank.asleep .emblem{color:var(--smoke)} .chip.tank.asleep{color:var(--ash)} .chip.tank.low .emblem,.chip.tank.low{color:var(--need)}
+
+/* the deck: the room's one primary action, always bottom right (desk) or just above the bottom bar (phone) */
+.deck{position:sticky;bottom:0;z-index:6;display:flex;align-items:center;gap:18px;margin:auto -40px 0;padding:16px 40px 22px;background:linear-gradient(0deg,var(--void) 62%,transparent)}
+.deck .aside{display:flex;align-items:center;gap:12px;min-width:0;flex-wrap:wrap}
+.deck .hold{margin-left:auto;position:relative;flex:none}
+
+/* ---------- the primary: a lit slab with a lip. Press sinks it; finishing rings it. Exactly one per room. ---------- */
+.primary{--lip:7px;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:14px;min-width:320px;min-height:64px;padding:0 44px var(--lip);border:0;cursor:pointer;text-decoration:none;color:var(--on-act);
+  font:700 18px/1 "Josefin Sans",sans-serif;letter-spacing:.14em;text-transform:uppercase;
+  clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% calc(100% - 12px),calc(100% - 12px) 100%,12px 100%,0 calc(100% - 12px),0 12px);
+  background:linear-gradient(180deg,rgba(255,255,255,.42),rgba(255,255,255,0) 2px) top/100% calc(100% - var(--lip)) no-repeat,
+    linear-gradient(180deg,var(--act-hi) -40%,var(--act) 48%,color-mix(in oklab,var(--act) 82%,#000) calc(100% - var(--lip)),var(--act-lo) calc(100% - var(--lip)));
+  transition:transform .07s ease-out,filter .2s;filter:drop-shadow(0 0 18px var(--act-glow))}
+.primary::before,.primary::after{content:"";width:9px;height:12px;background:currentColor;opacity:.55;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.primary:hover{filter:drop-shadow(0 0 26px var(--act-glow)) brightness(1.06)}
+.primary:active,.primary.pressed{transform:translateY(5px);--lip:2px}
+.primary[disabled],.primary.off{cursor:default;color:var(--smoke);filter:none;background:linear-gradient(180deg,var(--lift),var(--card) calc(100% - var(--lip)),var(--ink) calc(100% - var(--lip)));box-shadow:none}
+.primary.busy{color:var(--on-act)} .primary.busy::after{opacity:1;animation:beat 1s ease-in-out infinite}
+.primary.breach{--act:var(--stop);--act-hi:var(--stop-hi);--act-lo:var(--stop-lo);--act-glow:rgba(225,75,90,.3);color:#fff}
+.primary.need{--act:var(--need);--act-hi:var(--need-hi);--act-lo:var(--need-lo);--act-glow:rgba(245,185,66,.3);color:#1A1203}
+[data-skin="daylight"] .primary.need{color:#fff}
+.primary .glyph{width:20px;height:20px}
+.ring-out{position:absolute;inset:-6px;pointer-events:none;border:2px solid var(--act);opacity:0;clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px),0 14px)}
+.finish .ring-out{animation:ringout .7s ease-out}
+@keyframes ringout{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.16,1.5)}}
+
+/* ---------- buttons ---------- */
+.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 20px 3px;border:0;cursor:pointer;text-decoration:none;color:var(--bone);font:600 15px/1 "Josefin Sans",sans-serif;letter-spacing:.08em;
+  background:linear-gradient(180deg,var(--line-hi),var(--line) 2px,var(--lift) 3px,var(--card) calc(100% - 3px),#000 calc(100% - 3px));
+  clip-path:polygon(6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px),0 6px);transition:transform .07s}
+.btn::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 2px var(--line);clip-path:inherit}
+.btn:hover{background:linear-gradient(180deg,var(--line-hi),var(--line) 2px,var(--line) 3px,var(--lift) calc(100% - 3px),#000 calc(100% - 3px))}
+.btn:active,.btn.pressed{transform:translateY(2px)}
+.btn .glyph{width:20px;height:20px} .btn .emblem{width:20px;height:20px}
+.btn.need{color:var(--need)} .btn.need::after{box-shadow:inset 0 0 0 2px var(--need)} .btn.need{background:linear-gradient(180deg,color-mix(in oklab,var(--need) 16%,var(--card)),var(--card) calc(100% - 3px),#000 calc(100% - 3px))}
+.btn.stop{color:var(--stop-hi)} .btn.stop::after{box-shadow:inset 0 0 0 2px var(--stop)}
+[data-skin="daylight"] .btn.stop{color:var(--stop)}
+.btn.bare{background:none;padding:0 12px;color:var(--ash)} .btn.bare::after{display:none} .btn.bare:hover{color:var(--bone)}
+.btn[disabled]{color:var(--smoke);cursor:default}
+.icon{width:48px;height:48px;padding:0}
+
+/* ---------- the panel: a struck metal frame, chamfered, with lit corners. .focus = the one thing in view ---------- */
+.panel{position:relative;isolation:isolate;padding:24px 26px;color:var(--bone);--cut:12px;--fc:var(--line-hi);box-shadow:var(--shadow);border-radius:1px}
+.panel::before{content:"";position:absolute;inset:0;z-index:-2;clip-path:polygon(var(--cut) 0,calc(100% - var(--cut)) 0,100% var(--cut),100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,var(--cut) 100%,0 calc(100% - var(--cut)),0 var(--cut));
+  background:linear-gradient(135deg,color-mix(in oklab,var(--fc) 100%,#fff 18%),var(--fc) 40%,color-mix(in oklab,var(--fc) 55%,#000))}
+.panel::after{content:"";position:absolute;inset:2px;z-index:-1;clip-path:polygon(calc(var(--cut) - 1px) 0,calc(100% - var(--cut) + 1px) 0,100% calc(var(--cut) - 1px),100% calc(100% - var(--cut) + 1px),calc(100% - var(--cut) + 1px) 100%,calc(var(--cut) - 1px) 100%,0 calc(100% - var(--cut) + 1px),0 calc(var(--cut) - 1px));
+  background:var(--l-grain) 0 0/128px,linear-gradient(180deg,rgba(255,255,255,.045),transparent 30%),linear-gradient(180deg,var(--panel-a),var(--panel-b))}
+.panel.focus{--fc:var(--frame);padding:30px 30px 28px}
+.panel.focus::after{inset:3px;background:var(--l-grain) 0 0/128px,radial-gradient(90% 60% at 30% 0,rgba(255,255,255,.05),transparent 70%),linear-gradient(180deg,var(--panel-a),var(--panel-b))}
+.panel.need{--fc:var(--need)} .panel.work{--fc:var(--work-lo)} .panel.stop{--fc:var(--stop-lo)}
+.panel.flat{box-shadow:none} .panel.flat::before{background:var(--line)}
+.panel.sunk{box-shadow:none} .panel.sunk::after{background:linear-gradient(180deg,rgba(0,0,0,.45),transparent 30%),var(--a-well)}
+[data-skin="daylight"] .panel.sunk::after{background:linear-gradient(180deg,rgba(60,40,20,.12),transparent 30%),var(--ink)}
+.panel>.cn{position:absolute;width:34px;height:34px;pointer-events:none;z-index:1;background:var(--frame);-webkit-mask:var(--m) 0 0/100% 100%;mask:var(--m) 0 0/100% 100%}
+.panel>.cn::after{content:"";position:absolute;inset:0;background:var(--l) 0 0/100% 100%}
+.panel>.cn.tl{left:-4px;top:-4px;--m:var(--l-tl-a);--l:var(--l-tl)} .panel>.cn.tr{right:-4px;top:-4px;--m:var(--l-tr-a);--l:var(--l-tr)}
+.panel>.cn.br{right:-4px;bottom:-4px;--m:var(--l-br-a);--l:var(--l-br)} .panel>.cn.bl{left:-4px;bottom:-4px;--m:var(--l-bl-a);--l:var(--l-bl)}
+.panel.focus>.cn{width:46px;height:46px} .panel.focus>.cn.tl,.panel.focus>.cn.bl{left:-6px} .panel.focus>.cn.tr,.panel.focus>.cn.br{right:-6px} .panel.focus>.cn.tl,.panel.focus>.cn.tr{top:-6px} .panel.focus>.cn.bl,.panel.focus>.cn.br{bottom:-6px}
+.panel.need>.cn{background:var(--need)} .panel.stop>.cn{background:var(--stop)}
+.panel>.crest{position:absolute;left:50%;top:-19px;width:176px;height:45px;margin-left:-88px;z-index:1;pointer-events:none;background:var(--frame);-webkit-mask:var(--l-crest-a) 0 0/100% 100%;mask:var(--l-crest-a) 0 0/100% 100%}
+.panel>.crest::after{content:"";position:absolute;inset:0;background:var(--l-crest) 0 0/100% 100%}
+.panel.need>.crest{background:var(--need)}
+.rule{display:flex;align-items:center;gap:12px;color:var(--a-line);margin:4px 0} .rule::before,.rule::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,currentColor 40%)} .rule::after{transform:scaleX(-1)}
+.rule i{width:8px;height:10px;background:currentColor;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+
+/* ---------- niche and ledge: the hollow a thing stands in, lit by what is inside it ---------- */
+.niche{position:relative;display:flex;align-items:flex-end;justify-content:center;border-radius:50% 50% 0 0/var(--arch,96px) var(--arch,96px) 0 0;
+  background:radial-gradient(70% 50% at 50% 70%,var(--glow-in,transparent),transparent 72%),linear-gradient(180deg,var(--a-deep),var(--a-well) 60%,color-mix(in oklab,var(--a-well) 80%,var(--line)));
+  box-shadow:inset 0 0 0 2px color-mix(in oklab,var(--line) 70%,transparent),inset 14px 18px 26px rgba(0,0,0,.55),0 0 0 6px color-mix(in oklab,var(--lift) 55%,transparent),0 0 0 7px var(--line)}
+.niche.need{--glow-in:rgba(245,185,66,.26);box-shadow:inset 0 0 0 2px rgba(245,185,66,.65),inset 14px 18px 26px rgba(0,0,0,.45),0 0 0 6px color-mix(in oklab,var(--lift) 55%,transparent),0 0 0 7px rgba(245,185,66,.5)}
+.niche.work{--glow-in:color-mix(in oklab,var(--work) 18%,transparent)}
+.niche.pick{box-shadow:inset 0 0 0 2px var(--line-hi),inset 14px 18px 26px rgba(0,0,0,.5),0 0 0 6px color-mix(in oklab,var(--lift) 75%,transparent),0 0 0 7px var(--line-hi)}
+.ledge{display:block;height:22px;position:relative;z-index:1;background:linear-gradient(180deg,var(--frame-hi),var(--frame) 3px,var(--lift) 4px,var(--card) 60%,var(--ink));box-shadow:0 12px 16px -4px rgba(0,0,0,.7)}
+.ledge.need{background:radial-gradient(40% 160% at var(--lx,50%) 0,rgba(245,185,66,.55),transparent 70%),linear-gradient(180deg,var(--frame-hi),var(--frame) 3px,var(--lift) 4px,var(--card) 60%,var(--ink))}
+
+/* ---------- rows: a list item that bleeds to the right; the picked row is lit from its left edge ---------- */
+.rows{display:grid;gap:8px}
+.row{position:relative;display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:16px;align-items:center;width:100%;min-height:76px;padding:10px 44px 10px 12px;border:0;text-align:left;color:inherit;cursor:pointer;font:inherit;
+  background:linear-gradient(90deg,var(--lift),var(--card) 40%,color-mix(in oklab,var(--card) 60%,transparent));
+  -webkit-mask:linear-gradient(90deg,#000 calc(100% - 60px),transparent);mask:linear-gradient(90deg,#000 calc(100% - 60px),transparent);transition:transform .14s,background .2s}
+.row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--line-hi)}
+.row:hover{transform:translateX(4px)}
+.row.on{background:linear-gradient(90deg,color-mix(in oklab,var(--act) 30%,var(--lift)),color-mix(in oklab,var(--act) 10%,var(--card)) 45%,color-mix(in oklab,var(--card) 60%,transparent))} .row.on::before{background:var(--act);box-shadow:0 0 14px var(--act-glow)}
+.row.need::before{background:var(--need)} .row.stop::before{background:var(--stop)} .row.off{color:var(--smoke)} .row.off .name{color:var(--ash)}
+.row .tile{width:56px;height:56px;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,var(--lift),var(--ink));box-shadow:inset 0 0 0 2px var(--line),inset 0 -10px 16px rgba(0,0,0,.4)} .row .tile .art{width:72%;height:72%}
+.row .tile .emblem{width:28px;height:28px;color:var(--bone)} .row.on .tile .emblem{color:var(--act)}
+.row .sub{display:block;font-size:14px;color:var(--ash);margin-top:3px}
+.row .val{justify-self:end;text-align:right}
+
+/* ---------- tabs: plates on a bar; the open one is lit and sits forward ---------- */
+.tabs{display:flex;gap:4px;padding:0 0 0 2px;border-bottom:3px solid var(--line);max-width:100%;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{position:relative;flex:none;min-height:48px;padding:3px 20px 0;border:0;cursor:pointer;color:var(--ash);font:600 14px/1 "Josefin Sans",sans-serif;letter-spacing:.1em;text-transform:uppercase;background:linear-gradient(180deg,var(--lift),var(--card));clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 100%,0 100%);margin-bottom:-3px}
+.tab:hover{color:var(--bone)}
+.tab[aria-selected=true]{color:var(--on-act);background:linear-gradient(180deg,var(--act-hi) -60%,var(--act) 60%,var(--act-lo))}
+.tab .n{display:inline-block;margin-left:8px;font-family:"JetBrains Mono",monospace;letter-spacing:0;opacity:.8}
+
+/* ---------- pills: a small state word on a cut plate ---------- */
+.pill{display:inline-flex;align-items:center;gap:7px;min-height:28px;padding:3px 11px 0;background:var(--lift);color:var(--ash);white-space:nowrap;font:600 12.5px/1 "Josefin Sans",sans-serif;letter-spacing:.12em;text-transform:uppercase;clip-path:polygon(6px 0,calc(100% - 6px) 0,100% 50%,calc(100% - 6px) 100%,6px 100%,0 50%)}
+.pill::before{content:"";width:7px;height:9px;margin-top:-3px;background:currentColor;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.pill.need{color:var(--need);background:color-mix(in oklab,var(--need) 14%,var(--card))} .pill.work{color:var(--work);background:color-mix(in oklab,var(--work) 12%,var(--card))}
+.pill.stop{color:var(--stop-hi);background:color-mix(in oklab,var(--stop) 16%,var(--card))} .pill.dim{color:var(--smoke)}
+.pill.sample{color:var(--need);background:transparent;box-shadow:inset 0 0 0 1px var(--need);clip-path:none}
+[data-skin="daylight"] .pill.stop{color:var(--stop)}
+
+/* ---------- switch: a bolt in a slot. On = slid right and lit ---------- */
+.switch{position:relative;display:inline-flex;align-items:center;gap:12px;min-height:48px;border:0;background:none;cursor:pointer;color:var(--bone);font:600 15px/1.2 "Lato",sans-serif;padding:0}
+.switch .slot{position:relative;width:62px;height:30px;flex:none;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line),inset 0 6px 8px rgba(0,0,0,.6);clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 50%,calc(100% - 8px) 100%,8px 100%,0 50%)}
+.switch .bolt{position:absolute;top:3px;left:3px;width:30px;height:24px;background:linear-gradient(180deg,var(--frame-hi),var(--metal) 40%,var(--frame-lo));clip-path:polygon(7px 0,calc(100% - 7px) 0,100% 50%,calc(100% - 7px) 100%,7px 100%,0 50%);transition:transform .16s cubic-bezier(.3,1.4,.5,1),background .2s}
+.switch[aria-checked=true] .slot{background:color-mix(in oklab,var(--work) 30%,var(--a-well));box-shadow:inset 0 0 0 2px var(--work),inset 0 6px 8px rgba(0,0,0,.4)}
+.switch[aria-checked=true] .bolt{transform:translateX(26px);background:linear-gradient(180deg,var(--act-hi),var(--act) 45%,var(--act-lo))}
+.switch[disabled]{color:var(--smoke);cursor:default} .switch[disabled] .bolt{background:var(--line)}
+
+/* ---------- stepper: minus, a struck number, plus ---------- */
+.stepper{display:inline-flex;align-items:stretch;height:52px;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line)}
+.stepper button{width:52px;border:0;cursor:pointer;color:var(--bone);background:linear-gradient(180deg,var(--lift),var(--card));display:grid;place-items:center} .stepper button .glyph{width:20px;height:20px}
+.stepper button:active{background:var(--line)} .stepper button[disabled]{color:var(--smoke);cursor:default}
+.stepper output{min-width:96px;display:grid;place-items:center;align-content:center;padding:0 10px;font:600 22px/1 "Spectral SC",serif;font-variant-numeric:tabular-nums}
+.stepper output small{font:600 11.5px/1 "Josefin Sans",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--smoke);margin-top:3px;font-size:12px}
+.stepper output.bump{animation:stamp .22s cubic-bezier(.2,.9,.3,1.3)}
+
+/* ---------- sheet and veil: depth opens from below and says what it is ---------- */
+.veil{position:fixed;inset:0;z-index:30;background:var(--veil);backdrop-filter:blur(3px);animation:fadein .18s ease-out}
+.sheet{position:fixed;left:50%;bottom:0;z-index:31;width:min(600px,100%);max-height:86vh;overflow:auto;transform:translateX(-50%);padding:30px 28px calc(24px + env(safe-area-inset-bottom));color:var(--bone);animation:sheetup .26s cubic-bezier(.2,.9,.25,1.05);isolation:isolate}
+.sheet::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--l-grain) 0 0/128px,linear-gradient(180deg,var(--panel-a),var(--panel-b));box-shadow:inset 0 3px 0 var(--frame),inset 0 4px 0 #000,inset 0 5px 0 var(--line-hi);clip-path:polygon(16px 0,calc(100% - 16px) 0,100% 16px,100% 100%,0 100%,0 16px)}
+.sheet>.crest{position:absolute;left:50%;top:-12px;width:132px;height:34px;margin-left:-66px;background:var(--frame);-webkit-mask:var(--l-crest-a) 0 0/100% 100%;mask:var(--l-crest-a) 0 0/100% 100%}
+.sheet>.crest::after{content:"";position:absolute;inset:0;background:var(--l-crest) 0 0/100% 100%}
+.sheet:focus,.sheet:focus-visible{outline:none}
+.sheet h3{font:600 24px/1.15 "Spectral SC",serif;padding-right:56px;margin-bottom:6px}
+.sheet .x{position:absolute;right:14px;top:16px}
+.sheet .acts{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}
+@keyframes sheetup{from{transform:translate(-50%,40px);opacity:0}}
+@keyframes fadein{from{opacity:0}}
+.sheet.closing{animation:sheetdown .18s ease-in forwards} .veil.closing{animation:fadein .18s ease-in reverse forwards}
+@keyframes sheetdown{to{transform:translate(-50%,40px);opacity:0}}
+
+/* ---------- toast: a short ribbon that says what just happened, then leaves ---------- */
+.toasts{position:fixed;left:50%;bottom:118px;z-index:40;transform:translateX(-50%);display:grid;gap:8px;pointer-events:none;width:max-content;max-width:calc(100vw - 32px)}
+.toast{--tc:var(--work);display:flex;align-items:center;gap:12px;min-height:52px;padding:4px 30px 2px 16px;background:linear-gradient(90deg,color-mix(in oklab,var(--tc) 22%,var(--lift)),var(--lift) 30%,var(--ink));color:var(--bone);font:600 15px/1.3 "Lato",sans-serif;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%);border-left:3px solid var(--tc);animation:toastin .3s cubic-bezier(.2,.9,.3,1.2)}
+.toast .art{width:30px;height:30px} .toast.need{--tc:var(--need)} .toast.stop{--tc:var(--stop)}
+.toast.going{animation:toastout .3s ease-in forwards}
+@keyframes toastin{from{transform:translateY(18px) scale(.96);opacity:0}} @keyframes toastout{to{transform:translateY(10px);opacity:0}}
+.toast.still{position:relative;animation:none}
+
+/* ---------- plates: empty, working, failed. Where a picture or film will be, and why it is not there ---------- */
+.plate{position:relative;display:grid;place-items:center;aspect-ratio:16/9;min-height:96px;color:var(--ash);text-align:center}
+.plate>.art,.plate>.plate-art{position:absolute;inset:0;width:100%;height:100%}
+.plate .says{position:relative;display:grid;gap:6px;justify-items:center;padding:12px 18px;max-width:30ch}
+.plate .says b{font:600 17px/1.2 "Spectral SC",serif;color:var(--bone)}
+.plate.working .says b{color:var(--work)} .plate.failed .says b{color:var(--stop-hi)}
+
+.plate .art .sweep{animation:sweep 2.4s ease-in-out infinite} @keyframes sweep{to{transform:translateX(200%)}}
+
+/* ---------- cards and the dealt hand ---------- */
+.card{position:relative;width:208px;aspect-ratio:5/8;display:flex;flex-direction:column;padding:10px;border:0;cursor:pointer;color:var(--bone);text-align:left;font:inherit;isolation:isolate;transition:transform .24s cubic-bezier(.2,.9,.3,1.25),filter .2s}
+.card::before{content:"";position:absolute;inset:0;z-index:-2;clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px),0 10px);background:linear-gradient(135deg,var(--frame-hi),var(--frame) 30%,var(--frame-lo))}
+.card::after{content:"";position:absolute;inset:3px;z-index:-1;clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px),0 8px);background:var(--l-grain) 0 0/128px,linear-gradient(180deg,var(--panel-a),var(--panel-b))}
+.card .pic{position:relative;aspect-ratio:16/9;background:var(--a-well);overflow:hidden;box-shadow:inset 0 0 0 2px #000} .card .pic img{width:100%;height:100%;object-fit:cover;display:block}
+.card .pic .plate{position:absolute;inset:0;aspect-ratio:auto;min-height:0}
+.card .t{font:600 16.5px/1.2 "Spectral SC",serif;margin:12px 2px 0;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.card .proof{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 2px 2px;border-top:1px solid var(--line);font-size:13.5px;color:var(--ash)}
+.card .proof .num{color:var(--work);font-size:15px}
+.card.down{padding:0} .card.down .art{position:absolute;inset:0;width:100%;height:100%}
+.card.down::after{display:none} .card.down::before{background:var(--frame-lo)}
+.card.picked::before{background:linear-gradient(135deg,var(--need-hi),var(--need) 40%,var(--need-lo))} .card.picked{filter:drop-shadow(0 0 22px rgba(245,185,66,.35))}
+.card.picked .stamp{position:absolute;right:-14px;top:-14px;width:62px;height:62px}
+.card.rejected{color:var(--smoke)} .card.rejected .pic{opacity:.35} .card.rejected::before{background:var(--line)}
+.card.rejected .x-out{position:absolute;inset:14% 6%;pointer-events:none;background:linear-gradient(to top right,transparent calc(50% - 3px),var(--stop) calc(50% - 3px),var(--stop) calc(50% + 3px),transparent calc(50% + 3px))}
+.card.echo .link{position:absolute;left:14px;top:14px;display:flex;align-items:center;gap:6px;padding:4px 10px 2px 8px;background:var(--a-deep);color:var(--work);font:600 12px/1 "Josefin Sans",sans-serif;letter-spacing:.1em;text-transform:uppercase}
+.hand{position:relative;display:flex;justify-content:center;align-items:flex-end;min-height:388px;padding:40px 30px 0}
+.hand .card{margin:0 -22px;transform-origin:50% 140%;transform:rotate(calc((var(--i) - var(--mid))*5deg)) translateY(calc(var(--d)*8px))}
+.hand .card:hover{transform:rotate(calc((var(--i) - var(--mid))*5deg)) translateY(calc(var(--d)*8px - 16px));z-index:4}
+.hand .card.on{transform:translateY(-36px) rotate(0) scale(1.08);z-index:6}
+.hand .card.on::before{background:linear-gradient(135deg,var(--act-hi),var(--act) 40%,var(--act-lo))} .hand .card.on{filter:drop-shadow(0 0 22px var(--act-glow))}
+.dealing .card{animation:deal .46s cubic-bezier(.2,.8,.3,1.15) backwards;animation-delay:calc(var(--i)*70ms)}
+@keyframes deal{from{transform:translate(calc((var(--mid) - var(--i))*60px),260px) rotate(-14deg) scale(.7);opacity:0}}
+
+/* ---------- objects in HTML: jars on a shelf, wallets on a rack ---------- */
+.jarbox{display:grid;justify-items:center;gap:10px;border:0;background:none;color:inherit;cursor:pointer;padding:0;font:inherit}
+.jarbox .art.jar{height:var(--h,300px);width:auto}
+.jarbox:hover .art.jar{transform:translateY(-3px)} .jarbox .art.jar{transition:transform .16s}
+.objname{font:600 18px/1.15 "Spectral SC",serif;color:var(--ash);text-align:center} .on .objname,.objname.on{color:var(--bone)}
+.objstate{font:600 12.5px/1 "Josefin Sans",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke)}
+.need .objstate,.objstate.need{color:var(--need)} .work .objstate,.objstate.work{color:var(--work)} .stop .objstate,.objstate.stop{color:var(--stop-hi)}
+.rack{display:grid;grid-template-columns:repeat(var(--n,6),minmax(0,1fr));align-items:end;gap:6px}
+.wal{display:grid;justify-items:center;gap:8px;padding:0;border:0;background:none;color:inherit;cursor:pointer;font:inherit;text-align:center;position:relative}
+.wal .art.wallet{width:100%;max-width:170px;height:auto;transition:transform .16s}
+.wal:hover .art.wallet{transform:translateY(-3px)}
+.wal .medal{width:46px;height:46px;margin-top:-30px;position:relative}
+.wal .left{font:600 22px/1 "Spectral SC",serif;font-variant-numeric:tabular-nums} .wal .films{font-size:13.5px;color:var(--ash)}
+.wal.asleep .left{color:var(--smoke)} .wal.low .left{color:var(--need)}
+.wal.on::after{content:"";position:absolute;left:20%;right:20%;bottom:-10px;height:3px;background:var(--act);box-shadow:0 0 12px var(--act-glow)}
+
+/* ---------- dial and the effort knob ---------- */
+.dial{display:grid;justify-items:center;gap:8px}
+.dial .art.knob{width:var(--s,150px);height:var(--s,150px);cursor:grab;touch-action:none}
+.dial .read{font:600 26px/1 "Spectral SC",serif;font-variant-numeric:tabular-nums} .dial .read small{font:400 14px/1 "Lato",sans-serif;color:var(--ash);margin-left:4px}
+.effort{display:grid;grid-template-columns:auto 1fr;gap:10px 26px;align-items:center}
+.effort .art.knob{width:168px;height:168px;grid-row:span 3;transition:transform .2s}
+.effort .step{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:12px;min-height:60px;padding:8px 14px;border:0;cursor:pointer;text-align:left;color:var(--ash);font:inherit;background:none;box-shadow:inset 0 0 0 2px var(--line)}
+.effort .step .pipx{width:12px;height:15px;background:var(--line-hi);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.effort .step b{display:block;font:600 18px/1.1 "Spectral SC",serif;color:var(--bone)} .effort .step span{font-size:13.5px}
+.effort .step .cost{text-align:right;font:600 18px/1 "Spectral SC",serif;font-variant-numeric:tabular-nums;color:var(--bone)} .effort .step .cost small{display:block;font:400 12.5px/1.3 "Lato",sans-serif;color:var(--smoke);margin-top:4px}
+.effort .step[aria-checked=true]{color:var(--bone);background:linear-gradient(90deg,color-mix(in oklab,var(--act) 18%,transparent),transparent);box-shadow:inset 0 0 0 2px var(--act)}
+.effort .step[aria-checked=true] .pipx{background:var(--act);box-shadow:0 0 10px var(--act)}
+
+/* ---------- the scroll receipt: what will be spent, on paper, before anything is ---------- */
+.scroll{position:relative;max-width:460px;padding:0 14px;margin:0 30px 52px;filter:drop-shadow(0 18px 24px rgba(0,0,0,.55))}
+.scroll .rod{position:relative;height:30px;margin:0 -14px;background:linear-gradient(180deg,var(--frame-hi),var(--metal) 30%,var(--frame) 55%,var(--frame-lo));border-radius:15px}
+.scroll .rod::before,.scroll .rod::after{content:"";position:absolute;top:-8px;width:40px;height:46px;background:var(--metal);-webkit-mask:var(--fm) 0 50%/100% auto no-repeat;mask:var(--fm) 0 50%/100% auto no-repeat}
+.scroll .rod::before{left:-30px;--fm:var(--l-fin-l-a)} .scroll .rod::after{right:-30px;--fm:var(--l-fin-r-a)}
+.scroll .rod i{position:absolute;top:-8px;width:40px;height:46px;background:var(--fl) 0 50%/100% auto no-repeat;z-index:1} .scroll .rod i.l{left:-30px;--fl:var(--l-fin-l)} .scroll .rod i.r{right:-30px;--fl:var(--l-fin-r)}
+.scroll .paper{position:relative;padding:26px 30px 34px;color:var(--paper-ink);background:linear-gradient(180deg,rgba(0,0,0,.28),transparent 18px,transparent calc(100% - 18px),rgba(0,0,0,.28)),var(--l-grain) 0 0/128px,linear-gradient(90deg,var(--paper-lo),var(--paper) 7%,var(--paper) 93%,var(--paper-lo))}
+.scroll .paper h4{font:600 20px/1.2 "Spectral SC",serif;margin-bottom:14px;padding-right:76px}
+.scroll .ln{display:flex;align-items:baseline;gap:10px;padding:7px 0;font-size:15.5px;line-height:1.35}
+.scroll .ln .k{color:color-mix(in oklab,var(--paper-ink) 72%,var(--paper))} .scroll .ln .fill{flex:1;border-bottom:2px dotted color-mix(in oklab,var(--paper-ink) 30%,transparent);transform:translateY(-4px);min-width:12px}
+.scroll .ln .v{font-weight:700;text-align:right}
+.scroll .ln .v.num{font-weight:600}
+.scroll .total{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;padding-top:12px;border-top:2px solid var(--paper-ink);font:600 22px/1 "Spectral SC",serif}
+.scroll .wax{position:absolute;right:6px;bottom:-62px;width:96px;height:96px;z-index:2} .scroll .wax .art{width:100%;height:100%}
+.scroll.void .paper{opacity:.55} .scroll.void .paper h4,.scroll.void .ln{text-decoration:line-through;text-decoration-color:var(--stop);text-decoration-thickness:2px}
+
+/* ---------- copy seals: one thing to copy when publishing ---------- */
+.copy{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:16px;align-items:center;width:100%;min-height:84px;padding:10px 14px 10px 10px;border:0;text-align:left;cursor:pointer;color:inherit;font:inherit;background:linear-gradient(90deg,var(--lift),var(--card) 60%);box-shadow:inset 0 0 0 1px var(--line)}
+.copy .art.seal{width:64px;height:64px} .copy .what{min-width:0} .copy .what .name{display:block} .copy .what .peek{display:block;font-size:14px;color:var(--ash);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.copy .glyph{width:22px;height:22px;color:var(--ash)} .copy.copied .glyph{color:var(--bone)} .copy.live .glyph{color:var(--work)}
+
+/* ---------- scene strip: a film is scenes in acts ---------- */
+.strip{display:flex;gap:22px;overflow-x:auto;padding:6px 2px 12px;scroll-snap-type:x proximity}
+.act{flex:none;display:grid;gap:10px;scroll-snap-align:start}
+.act .lab{display:flex;align-items:center;gap:8px;color:var(--ash)} .act .lab::after{content:"";flex:1;height:1px;background:var(--line);min-width:20px}
+.act .scenes{display:flex;gap:8px}
+.scene{position:relative;width:112px;aspect-ratio:16/9;padding:0;border:0;cursor:pointer;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line);overflow:visible;flex:none}
+.scene .plate{position:absolute;inset:0;aspect-ratio:auto;min-height:0} .scene img{width:100%;height:100%;object-fit:cover;display:block}
+.scene .n{position:absolute;left:6px;bottom:5px;font:600 12px/1 "JetBrains Mono",monospace;color:var(--bone-fixed);text-shadow:0 1px 2px #000}
+.scene{outline:2px solid var(--line);outline-offset:-2px}
+.scene.drawn{outline-color:var(--obj-lit)}
+.scene.picked{outline:3px solid var(--need);outline-offset:0;box-shadow:0 0 18px rgba(245,185,66,.35)} .scene.picked::before{content:"";position:absolute;left:50%;top:-11px;width:16px;height:9px;margin-left:-8px;background:var(--need);clip-path:polygon(0 0,100% 0,50% 100%)}
+.scene.changed::after{content:"";position:absolute;right:-3px;top:-3px;width:16px;height:16px;background:var(--need);clip-path:polygon(0 0,100% 0,100% 100%)}
+.scene.failed{outline:3px solid var(--stop);outline-offset:-3px} .scene.working{outline-color:var(--work)}
+
+/* ---------- empty, working and failed words, and a light that moves ---------- */
+.status{display:flex;align-items:center;gap:10px;font:600 14px/1.3 "Lato",sans-serif;color:var(--ash)}
+.status .pip{width:20px;height:20px}
+
+/* ---------- motion: press, pick, deal, seal, wake, finish. Each is short and physical. ---------- */
+@keyframes stamp{0%{transform:scale(1.08)}55%{transform:scale(.985)}100%{transform:none}}
+@keyframes thud{0%{transform:scale(1.7) rotate(-16deg);opacity:0}55%{transform:scale(.92) rotate(0);opacity:1}75%{transform:scale(1.03)}100%{transform:none}}
+@keyframes shock{0%{box-shadow:0 0 0 0 var(--sc,var(--act-glow));}100%{box-shadow:0 0 0 26px transparent}}
+@keyframes beat{50%{opacity:.25}}
+@keyframes rise{from{transform:scaleY(.02)}}
+@keyframes flipf{to{transform:translateX(calc(var(--fw) * var(--n) * -1))}}
+@keyframes ray{50%{opacity:.62}}
+@keyframes speak{50%{opacity:.3}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.picked-now{animation:stamp .26s cubic-bezier(.2,.9,.3,1.3)}
+.thud{animation:thud .38s cubic-bezier(.2,.9,.3,1.2)}
+.shock{animation:shock .6s ease-out}
+.flip{animation:flipf 1s steps(var(--n)) infinite}
+.art .halo,.art .sparks{animation:ray 2.6s ease-in-out infinite}
+.art .beat,.art .ringing{animation:beat 1s ease-in-out infinite}
+.voice.speaking .waves path{animation:speak 1s ease-in-out infinite} .voice.speaking .waves path:nth-child(2){animation-delay:.15s} .voice.speaking .waves path:nth-child(3){animation-delay:.3s}
+.wallet .rise{transform-box:fill-box;transform-origin:50% 100%;animation:rise .7s cubic-bezier(.2,.9,.3,1.05)}
+.tree .ring{transform-box:fill-box;transform-origin:center;animation:spin 14s linear infinite}
+.tree .sap{stroke-dasharray:6 14;animation:sapflow 1.6s linear infinite} @keyframes sapflow{to{stroke-dashoffset:-40}}
+.tree .flower{transform-box:fill-box;transform-origin:center}
+.woke .art{animation:stamp .4s cubic-bezier(.2,.9,.3,1.3)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* ---------- the sheet of parts (kit-sheet.html only) ---------- */
+.spec{display:grid;gap:14px} .spec>h2{font:600 26px/1.1 "Spectral SC",serif;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap} .spec>h2 span{font:400 15px/1.4 "Lato",sans-serif;color:var(--ash)}
+.specs{display:flex;flex-wrap:wrap;gap:18px 22px;align-items:flex-end}
+.cell{display:grid;justify-items:center;gap:8px;text-align:center;min-width:0}
+.cell>.cap{font:600 12.5px/1.2 "Josefin Sans",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--smoke);max-width:22ch}
+
+/* a still page for full-length pictures (?flat) */
+.flat .deck{position:relative} .flat .rail{position:relative;height:auto;min-height:100vh} .flat .room::before,.flat .room::after,.flat .vignette{position:absolute}
+.toast.still{width:max-content;max-width:100%}
+
+/* ---------- phone ---------- */
+.only-phone{display:none!important}
+@media (max-width:760px){
+  .only-phone{display:revert!important} .only-desk{display:none!important}
+  .flat .rail{position:relative;order:3;min-height:0;top:auto;bottom:auto}
+  .room{grid-template-columns:1fr;padding-bottom:calc(74px + env(safe-area-inset-bottom))}
+  .rail{position:fixed;top:auto;left:0;right:0;bottom:0;height:auto;flex-direction:row;justify-content:space-around;gap:0;padding:4px 8px calc(4px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,var(--lift),var(--ink));border:0;box-shadow:0 -1px 0 var(--line),0 -3px 0 #000,0 -4px 0 var(--line-hi),0 -18px 30px rgba(0,0,0,.5);z-index:20}
+  [data-skin="daylight"] .rail{background:linear-gradient(180deg,#fff,var(--ink));box-shadow:0 -1px 0 var(--line),0 -10px 24px rgba(60,48,30,.12)}
+  .rail .mark,.rail .who{display:none}
+  .door{flex:1;max-width:120px;min-height:64px}
+  .door[aria-current]::before{left:22%;right:22%;top:-4px;bottom:auto;width:auto;height:3px}
+  .door[aria-current]::after{background:radial-gradient(60% 70% at 50% 0,var(--act-glow),transparent 75%)}
+  .main{padding:12px 16px 0;gap:14px}
+  .floor{gap:14px}
+  .head{gap:10px;min-height:52px}
+  .back{padding:0;width:44px;min-width:44px;height:44px;justify-content:center} .back span{display:none} .back .glyph{margin-left:4px}
+  .seal-mark{display:none}
+  .title{font-size:24px} .h2{font-size:24px} .fig{font-size:26px}
+  .place .chan{font-size:12px;letter-spacing:.08em}
+  .tools{gap:8px} .tools .only-desk{display:none!important} .chip{height:44px;min-width:44px;padding:0 10px} .chip .lbl{display:none}
+  .deck{position:sticky;bottom:calc(74px + env(safe-area-inset-bottom));margin:auto -16px 0;padding:12px 16px 14px;flex-wrap:wrap;gap:10px;background:linear-gradient(0deg,var(--void) 80%,transparent)}
+  .deck .aside{width:100%;justify-content:space-between} .deck .aside:empty{display:none}
+  .deck .hold{width:100%;margin:0}
+  .primary{width:100%;min-width:0;min-height:60px;padding:0 20px var(--lip)}
+  .panel{padding:18px 18px} .panel.focus{padding:22px 18px 20px}
+  .panel>.cn{width:26px;height:26px}
+  .row{grid-template-columns:48px minmax(0,1fr) auto;gap:12px;min-height:68px;padding:8px 30px 8px 10px;-webkit-mask:linear-gradient(90deg,#000 calc(100% - 34px),transparent);mask:linear-gradient(90deg,#000 calc(100% - 34px),transparent)} .row .tile{width:48px;height:48px}
+  .sheet{padding:28px 18px calc(20px + env(safe-area-inset-bottom));max-height:88vh}
+  .sheet::before{clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%,0 14px)}
+  .toasts{bottom:calc(150px + env(safe-area-inset-bottom))}
+  .hand{overflow-x:auto;justify-content:flex-start;gap:14px;min-height:0;padding:36px 16px 14px;margin:0 -16px;scroll-snap-type:x mandatory}
+  .hand .card,.hand .card:hover{margin:0;transform:none;flex:0 0 68%;scroll-snap-align:center}
+  .hand .card.on{transform:translateY(-12px)}
+  .card{width:100%;aspect-ratio:auto;min-height:0} .card.down{aspect-ratio:5/8} .card .proof{margin-top:14px} 
+  .effort{grid-template-columns:1fr;justify-items:stretch} .effort .art.knob{grid-row:auto;justify-self:center;width:136px;height:136px}
+  .rack{--n:3;row-gap:22px}
+  .scroll{max-width:none}
+  .scroll{margin:0 26px 50px} .scroll .paper{padding:22px 20px 30px} .scroll .wax{width:84px;height:84px;right:4px;bottom:-54px}
+  .copy{grid-template-columns:52px minmax(0,1fr) auto;gap:12px} .copy .art.seal{width:52px;height:52px}
+  .scene{width:96px}
+}

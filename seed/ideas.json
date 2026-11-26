@@ -1,0 +1,279 @@
+{
+ "kingdoms": [
+  {
+   "id": "live 20261126-1521",
+   "title": "Vietnam: Every Year (1471 \u2013 1862)",
+   "kind": "kingdoms",
+   "sentence": "Dai Viet starts small in the north, swallows Champa province by province, and takes the Mekong delta from Cambodia by 1862.",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "rule.region.southeast-asia"
+  },
+  {
+   "id": "live 20261126-1521",
+   "title": "Cambodia: Every Year (802 \u2013 1431)",
+   "kind": "kingdoms",
+   "sentence": "Khmer rule spreads from Angkor over most of mainland Southeast Asia, then shrinks back to Cambodia by the 1400s.",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "rule.region.southeast-asia"
+  },
+  {
+   "id": "live 20261126-1521",
+   "title": "Indonesia: Every Year (1293 \u2013 1527)",
+   "kind": "kingdoms",
+   "sentence": "Majapahit holds Java and claims tribute across the archipelago, then breaks apart into rival sultanates by 1527.",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "rule.region.southeast-asia"
+  },
+  {
+   "id": "live 20261126-1521",
+   "title": "Thailand: Every Year (1351 \u2013 1909)",
+   "kind": "kingdoms",
+   "sentence": "Siam expands over Laos and Cambodia, then treaties with Britain and France carve those lands away by 1909.",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "rule.region.southeast-asia"
+  },
+  {
+   "id": "live 20261126-1521",
+   "title": "Brunei: Every Year (1400 \u2013 1888)",
+   "kind": "kingdoms",
+   "sentence": "Brunei holds much of Borneo's coast, then loses Sarawak and Sabah piece by piece to British adventurers by 1888.",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "rule.region.southeast-asia"
+  }
+ ],
+ "night": [],
+ "states": [
+  {
+   "id": "stack/timeideas.json",
+   "title": "Where the world s output was made, year 1 to now",
+   "kind": "wealth",
+   "sentence": "Where the world s output was made, year 1 to now",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "wealth.race"
+  },
+  {
+   "id": "stack/timeideas.json",
+   "title": "Africa s richest country, 1950 to now",
+   "kind": "wealth",
+   "sentence": "Africa s richest country, 1950 to now",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "wealth.race.africa"
+  },
+  {
+   "id": "stack/timeideas.json",
+   "title": "Japan, Korea, Taiwan: the three that caught up",
+   "kind": "wealth",
+   "sentence": "Japan, Korea, Taiwan: the three that caught up",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "wealth.race.asia"
+  },
+  {
+   "id": "stack/timeideas.json",
+   "title": "The Caribbean islands that were richer than Britain",
+   "kind": "wealth",
+   "sentence": "The Caribbean islands that were richer than Britain",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "wealth.plantation.caribbean"
+  },
+  {
+   "id": "stack/timeideas.json",
+   "title": "Korea from rice fields to the world s shipyard",
+   "kind": "wealth",
+   "sentence": "Korea from rice fields to the world s shipyard",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "wealth.race"
+  },
+  {
+   "id": "stack/timeideas.json",
+   "title": "Shenzhen: from fishing villages to the world s workshop",
+   "kind": "wealth",
+   "sentence": "Shenzhen: from fishing villages to the world s workshop",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "wealth.race"
+  },
+  {
+   "id": "stack/timeideas.json",
+   "title": "The states that powered America, 1859 to now",
+   "kind": "wealth",
+   "sentence": "The states that powered America, 1859 to now",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "wealth.race"
+  },
+  {
+   "id": "stack/timeideas.json",
+   "title": "How Venezuela went from first to last",
+   "kind": "wealth",
+   "sentence": "How Venezuela went from first to last",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "energy.oil.venezuela"
+  },
+  {
+   "id": "stack/timeideas.json",
+   "title": "The American states that made the most things",
+   "kind": "states",
+   "sentence": "The American states that made the most things",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "border.inner.us"
+  },
+  {
+   "id": "stack/timeideas.json",
+   "title": "Canada s provinces and the oil of Alberta",
+   "kind": "states",
+   "sentence": "Canada s provinces and the oil of Alberta",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "border.inner.canada"
+  }
+ ],
+ "worlds": [
+  {
+   "id": "W04",
+   "title": "What If the Sahara NEVER Dried?!",
+   "kind": "worlds",
+   "sentence": "What if the Sahara Never Dried Out",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "deep.plates.med-dried"
+  },
+  {
+   "id": "W05",
+   "title": "A Hyper Realistic Plato's Atlantis",
+   "kind": "worlds",
+   "sentence": "I Simulated the Whole Life of Atlantis",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "lore.sunk.atlantis"
+  },
+  {
+   "id": "stack/worldideas.json",
+   "title": "I Simulated 10,000 Years of the Green Sahara",
+   "kind": "worlds",
+   "sentence": "Simulate the Sahara from 12,000 BC to 3,000 BC with lakes and grass as the old shores show",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "deep.ice.green-sahara"
+  },
+  {
+   "id": "stack/worldideas.json",
+   "title": "I Simulated Carthage Sailing West, Away From Rome",
+   "kind": "worlds",
+   "sentence": "From 300 BC let Carthage trade down the west coast of Africa and never fight Rome",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "whatif.rule.africa"
+  },
+  {
+   "id": "stack/worldideas.json",
+   "title": "I Simulated the Salt Road Across the Sahara",
+   "kind": "worlds",
+   "sentence": "From 300 BC run salt and grain caravans across the Sahara and let goods and sickness travel",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "deep.ice.green-sahara"
+  },
+  {
+   "id": "stack/worldideas.json",
+   "title": "I Simulated Madagascar Settled From Both Shores",
+   "kind": "worlds",
+   "sentence": "Let sailors from Borneo and from East Africa land on Madagascar together in 300 AD",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "whatif.rule.africa"
+  },
+  {
+   "id": "stack/worldideas.json",
+   "title": "I Simulated Towns Planted Down the Somali Coast",
+   "kind": "worlds",
+   "sentence": "Run the Somali coast from 100 AD to 800 AD with sailors founding ports for incense and cloth",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "whatif.rule.africa"
+  },
+  {
+   "id": "stack/worldideas.json",
+   "title": "What if the Sahara Never Dried Out",
+   "kind": "worlds",
+   "sentence": "Run the Sahara from 9,000 BC to today with the old rain and lakes kept",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "deep.plates.med-dried"
+  },
+  {
+   "id": "stack/worldideas.json",
+   "title": "What if Kush Had Broken Axum First",
+   "kind": "worlds",
+   "sentence": "From 200 AD let Kush attack Axum first and watch the Nile valley and the highlands",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "whatif.history.africa"
+  },
+  {
+   "id": "stack/worldideas.json",
+   "title": "What if Mali's Fleet Landed in Brazil",
+   "kind": "worlds",
+   "sentence": "From 1311 send the Malian fleet west across the Atlantic and let it make land",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "whatif.history.africa"
+  },
+  {
+   "id": "stack/worldideas.json",
+   "title": "What if the Adwa Victory Started a Union of Free States",
+   "kind": "worlds",
+   "sentence": "Run Africa from 1896 with a league of free states formed after the battle of Adwa",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "whatif.history.africa"
+  },
+  {
+   "id": "stack/worldideas.json",
+   "title": "What if Haiti's Freedom Spread Island to Island",
+   "kind": "worlds",
+   "sentence": "From 1804 let the news of Haitian freedom reach every island of the Antilles",
+   "theme": "duppy-time-night",
+   "thumb": null,
+   "steer": null,
+   "niche": "whatif.rule.made-island"
+  }
+ ]
+}

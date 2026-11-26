@@ -1,0 +1,87 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Juju · Cauldron</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script><script>(function(){if(!('serviceWorker' in navigator))return;if(navigator.serviceWorker.controller)return;document.documentElement.style.visibility='hidden';navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(function(){return navigator.serviceWorker.ready}).then(function(){location.reload()})})()</script><script src="phone.js"></script><script src="api.js"></script><script src="flow.js"></script>
+<style>
+/* The Cauldron: the channel's films being made, each with one bar and the plain words of its step; a failed one says why, with Again or Drop;
+   a finished take opens its first look, and Keep sends it to the shelf. Layout only; every colour is a kit token. Server: /api/tap/films. */
+body{--focus-x:40%;--focus-y:30%}
+.ribbon{align-self:start;margin:4px 0 20px;padding:8px 28px 6px 16px;background:color-mix(in oklab,var(--act) 14%,var(--card));color:var(--bone);font:600 15px/1 "Spectral SC",serif;letter-spacing:.08em;clip-path:polygon(0 0,100% 0,calc(100% - 12px) 50%,100% 100%,0 100%);box-shadow:inset 0 0 0 1px var(--act-lo)}
+.rows{display:grid;gap:12px;padding-bottom:120px}
+.rows.wait{visibility:hidden}
+.r{display:grid;grid-template-columns:160px minmax(0,1fr) auto;gap:20px;align-items:center;padding:10px 16px 10px 10px;border:2px solid var(--line);background:var(--a-well);color:var(--bone);text-align:left;font:inherit;width:100%;cursor:default}
+.r.on{border-color:var(--act);box-shadow:0 0 18px var(--act-glow)}
+.r.look{cursor:pointer} .r.look:hover{border-color:var(--need)}
+.r .pic{position:relative;aspect-ratio:16/9;background:#000;overflow:hidden} .r .pic img,.r .pic video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.r .pic .nopic{position:absolute;inset:0;display:grid;place-items:center;color:var(--smoke)} .r .pic .nopic svg{width:40%;height:auto}
+.r .mid{display:grid;gap:10px;min-width:0}
+.r .t{font:600 19px/1.25 "Spectral SC",serif;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.r .why{color:var(--stop-hi);font:400 15px/1.35 "Lato",sans-serif}
+.r .st{font-style:italic;color:var(--ash);font:italic 400 14px/1.3 "Spectral",serif}
+.r .bar{height:4px;background:var(--line);overflow:hidden} .r .bar i{display:block;height:100%;background:var(--work);transition:width .6s}
+.r .bar.run i{background:linear-gradient(90deg,var(--work),var(--need))}
+.r .end{display:flex;flex-direction:column;align-items:flex-end;gap:8px;min-width:120px}
+.r .say{font:600 14px/1.2 "Josefin Sans",sans-serif;color:var(--need);text-align:right}
+.r .say.done{color:var(--act)} .r .say.bad{color:var(--stop-hi)}
+.r .two{display:flex;gap:8px}
+.empty{display:grid;justify-items:center;gap:14px;padding:64px 16px;color:var(--ash)} .empty .emblem{width:72px;height:72px;color:var(--smoke)} .empty b{font:600 22px/1.2 "Spectral SC",serif;color:var(--bone)}
+/* first look */
+#first{width:min(880px,100%)}
+#first .screen{margin-top:28px;position:relative;aspect-ratio:16/9;background:#000;border:2px solid var(--line-hi)} #first video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+#first .meta{display:grid;grid-template-columns:minmax(0,1fr) 200px;gap:16px;align-items:center;margin-top:14px}
+#first .meta b{font:600 20px/1.25 "Spectral SC",serif}
+#first .thumb{aspect-ratio:16/9;background:#000;overflow:hidden} #first .thumb img{width:100%;height:100%;object-fit:cover} #first .thumb[hidden]{display:none}
+.sheetfoot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:16px}
+@media (max-width:760px){
+ .r{grid-template-columns:96px minmax(0,1fr);gap:12px;padding:8px}
+ .r .end{grid-column:1/-1;flex-direction:row;justify-content:space-between;align-items:center;min-width:0}
+ .r .t{font-size:16px}
+ #first .meta{grid-template-columns:minmax(0,1fr) 112px}
+}
+</style></head>
+<body data-skin="nocturne" data-room="cauldron" data-title="Cauldron" data-back="crossroads.html" data-back-label="Ideas">
+<main>
+ <span class="ribbon">Being made</span>
+ <div class="rows wait" id="rows" role="list" aria-label="Films"></div>
+</main>
+<footer class="deck"><div class="aside"><a class="btn bare phone-off" id="shelf" href="shelf.html">Shelf</a></div><button class="primary" id="go">More ideas</button></footer>
+<section class="sheet" id="first" hidden aria-label="First look">
+ <div class="screen"><video id="v" controls playsinline preload="metadata"></video></div>
+ <div class="meta"><b id="ft" data-d></b><span class="thumb" id="fthumb" hidden></span></div>
+ <div class="sheetfoot"><button class="btn bare" id="fdrop">Drop</button><button class="btn need" id="keep">Keep</button></div>
+</section>
+<script>
+(()=>{
+const $=id=>document.getElementById(id),esc=JUJU.esc,END=['done','stopped','failed','refused'];
+/* ?all=1, or no channel ever picked: every channel's films */
+const slug=JUJU.param('all')?'':Flow.ch(),films_url='/api/tap/films'+(slug?'?channel='+slug:'');
+$('shelf').href=slug?'shelf.html?ch='+slug:'shelf.html';document.body.dataset.back=slug?'crossroads.html?ch='+slug:'altar.html';
+let films=[],lit=JUJU.param('f'),open=null,poll=null;
+/* the cauldron holds what is being made, what failed, and finished takes not yet kept, from the last two days */
+const here=f=>!f.gold&&(f.state==='running'||['failed','stopped','refused'].includes(f.state)||(f.state==='done'&&!f.kept&&Date.now()/1000-(f.updated||0)<172800));
+function row(f){const run=f.state==='running',bad=['failed','stopped','refused'].includes(f.state),done=f.state==='done';
+ const pct=done?100:Math.max(4,Math.min(100,+f.pct||0));
+ return `<div class="r${done?' look':''}${f.id===lit?' on':''}" role="listitem" data-f="${esc(f.id)}"${done?' tabindex="0"':''}>
+  <span class="pic">${Flow.pic(f)}</span>
+  <span class="mid"><span class="t" data-d>${esc(f.title||f.sentence||'')}</span>${f.steer?`<span class="st" data-d>${esc(f.steer)}</span>`:''}${bad&&f.error?`<span class="why" data-d>${esc(f.error)}</span>`:`<span class="bar${run?' run':''}"><i style="width:${pct}%"></i></span>`}</span>
+  <span class="end"><span class="say${done?' done':bad?' bad':''}" data-d>${esc(done?'First look':f.say||'')}</span>${run?'<button class="btn stop" data-act="stop">Stop</button>':bad?'<span class="two"><button class="btn need" data-act="again">Again</button><button class="btn bare" data-act="drop">Drop</button></span>':''}</span></div>`}
+function draw(){const l=films.filter(here);
+ $('rows').innerHTML=l.length?l.map(row).join(''):`<div class="empty">${Art.emblem('cauldron')}<b>Nothing in the pot</b></div>`;
+ $('rows').classList.remove('wait');Flow.lazy($('rows'))}
+async function load(){const a=await JUJU.get(films_url);films=a.films;draw();return a}
+function watch(){if(poll)poll.stop();poll=JUJU.poll(films_url,a=>{const was=films.filter(f=>f.state==='running').map(f=>f.id);films=a.films;draw();
+ films.filter(f=>was.includes(f.id)&&f.state==='done').forEach(f=>Kit.toast(f.title||'Ready'));return true},{every:()=>films.some(f=>f.state==='running')?2500:9000,fail:()=>{}})}
+function first(f){open=f;$('ft').textContent=f.title||f.sentence||'';$('v').src=f.film;$('fthumb').hidden=!f.thumb;$('fthumb').innerHTML=f.thumb?`<img src="${esc(f.thumb)}" alt="">`:'';
+ Kit.sheet('first').open();Flow.tell('first',f);$('v').play().catch(()=>{})}
+$('rows').addEventListener('click',e=>{const b=e.target.closest('[data-act]'),r=e.target.closest('[data-f]');if(!r)return;const f=films.find(x=>x.id===r.dataset.f);if(!f)return;
+ if(b){const a=b.dataset.act;return JUJU.once(b,async()=>{const x=await JUJU.post('/api/tap/films/'+encodeURIComponent(f.id)+'/'+a);await load();return x})}
+ if(f.state==='done')first(f)});
+$('rows').addEventListener('keydown',e=>{if(e.key==='Enter'){const r=e.target.closest('.r.look');if(r)r.click()}});
+$('keep').addEventListener('click',()=>{if(!open)return;JUJU.once($('keep'),async()=>{const x=await JUJU.post('/api/tap/films/'+encodeURIComponent(open.id)+'/keep');$('v').pause();Kit.sheet('first').close();Kit.finish($('go'),'On the shelf');await load();return x})});
+$('fdrop').addEventListener('click',()=>{if(!open)return;JUJU.once($('fdrop'),async()=>{const x=await JUJU.post('/api/tap/films/'+encodeURIComponent(open.id)+'/drop');$('v').pause();Kit.sheet('first').close();await load();return x})});
+$('go').addEventListener('click',()=>JUJU.go(slug?'crossroads.html?ch='+slug:'crossroads.html'));
+document.addEventListener('click',e=>{if(e.target.closest('#first [data-close]')||e.target.closest('.veil'))$('v').pause()});
+JUJU.ready(async()=>{if(slug)JUJU.get('/api/tap/channels/'+slug).then(c=>{Flow.head(c);Flow.switcher('cauldron',slug,true)}).catch(()=>{});else{JUJU.chan('Every channel');Flow.switcher('cauldron','',true)}
+ try{await load()}catch(e){$('rows').classList.remove('wait');JUJU.say($('go'),e.say)}watch();JUJU.money&&JUJU.money();
+ const r=lit&&document.querySelector(`[data-f="${CSS.escape(lit)}"]`);if(r)r.scrollIntoView({block:'center'})});
+})();
+</script>
+</body></html>

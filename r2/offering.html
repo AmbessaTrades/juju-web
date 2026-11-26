@@ -1,0 +1,263 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Juju · The Offering</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script>
+<style>
+/* Room layout only. Parts this room adds because the kit has none (named in the report):
+   .longpress  a hold-to-confirm fill on any button (Approve it, Take it off sale)
+   .ladder     the four product states as tappable steps joined by a line
+   .facts      counted facts with a dotted lead, outside a scroll receipt
+   .picks      a row of small exclusive choices with nothing chosen at the start (refund days, $7/$9) */
+body{--focus-x:30%;--focus-y:46%}
+.floor{padding-bottom:12px}
+.stage{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:30px;align-items:start}
+.altar-of{display:grid;justify-items:center;gap:0}
+.altar-of .niche{width:min(100%,330px);height:330px;--arch:165px;padding-bottom:6px}
+.altar-of .niche .art.chest{width:86%;height:auto}
+.altar-of .ledge{width:min(100%,360px)}
+.altar-of .objname{margin-top:16px;font-size:22px}
+.altar-of .objstate{margin-top:8px}
+.ladder{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:26px;position:relative;width:100%}
+.ladder::before{content:"";position:absolute;left:12.5%;right:12.5%;top:23px;height:2px;background:var(--line)}
+.ladder button{position:relative;display:grid;justify-items:center;gap:8px;min-height:64px;padding:12px 2px 6px;border:0;background:none;color:var(--ash);cursor:pointer;font:600 13px/1 "Josefin Sans",sans-serif;letter-spacing:.1em;text-transform:uppercase}
+.ladder button .pip{width:26px;height:26px;background:var(--panel-b);box-shadow:0 0 0 6px var(--panel-b);border-radius:50%}
+.ladder button[aria-current]{color:var(--bone)} .ladder button[aria-current] .pip{filter:drop-shadow(0 0 8px rgba(245,185,66,.5))}
+.ladder button:hover{color:var(--bone)}
+.side{display:grid;gap:22px;grid-template-columns:minmax(0,1fr);min-width:0}
+.side .h2{margin-top:6px}
+.facts{display:grid;gap:2px;margin-top:16px}
+.facts div{display:flex;align-items:baseline;gap:10px;padding:6px 0;font-size:15.5px}
+.facts .k{color:var(--ash)} .facts .fill{flex:1;min-width:12px;border-bottom:2px dotted var(--line);transform:translateY(-4px)}
+.facts .v{font-weight:700;text-align:right} .facts .v.ok{color:var(--work)} .facts .v.wait{color:var(--smoke);font-weight:400}
+.kinds .row{min-height:58px;padding-top:6px;padding-bottom:6px}
+.kinds .row .sub{display:none} .kinds .row.on .sub{display:block}
+.kinds .row .tile{width:46px;height:46px}
+.kinds{gap:6px}
+.kinds .row .val{font-family:"JetBrains Mono",monospace;font-size:14.5px;color:var(--ash)}
+.kinds .row .why{display:block;margin-top:4px;font:600 12.5px/1.3 "Josefin Sans",sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--need)}
+.kinds .tile .emblem{width:26px;height:26px}
+.parts{display:grid;gap:10px;margin-top:14px}
+.parts .status{justify-content:space-between}
+.parts .status .num{color:var(--bone)}
+.settings{display:grid;gap:16px;margin-top:6px}
+.setline{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--line)}
+.setline:first-child{border-top:0}
+.setline .k{font-weight:700} .setline .k small{display:block;font-weight:400;font-size:13.5px;color:var(--ash);margin-top:2px}
+.picks{display:inline-flex;gap:6px;flex-wrap:wrap}
+.picks .btn{min-width:64px;padding:0 14px 3px}
+.picks .btn.on{color:var(--on-act);background:linear-gradient(180deg,var(--act-hi) -60%,var(--act) 60%,var(--act-lo))} .picks .btn.on::after{box-shadow:none}
+.picks .btn[disabled]{opacity:.45}
+.clicks{display:grid;gap:8px;margin-top:10px}
+.clicks .row{cursor:default} .clicks .row:hover{transform:none}
+.longpress{position:relative;overflow:hidden}
+.longpress .fillbar{position:absolute;left:0;bottom:0;height:5px;width:0;background:var(--hot);opacity:.85;pointer-events:none}
+.longpress.holding .fillbar{width:100%;transition:width 1s linear}
+.btn.longpress .fillbar{background:var(--stop)}
+.pages{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.pages .plate{aspect-ratio:3/4;min-height:0}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+.reasons{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.field,textarea.field{width:100%;min-height:52px;padding:12px 14px;border:0;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line);color:var(--bone);font:400 16px/1.45 "Lato",sans-serif;resize:vertical}
+textarea.field{min-height:120px}
+.count{margin-top:8px;font:600 14px/1.3 "Lato",sans-serif;color:var(--ash)} .count.over{color:var(--stop-hi)}
+.shop{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;margin-top:14px;align-items:start}
+.shop .plate.phone{aspect-ratio:9/16;min-height:0} .shop .plate.desk{aspect-ratio:16/10;min-height:0}
+.sentences{display:grid;gap:8px;margin-top:14px}
+.sentences .field{min-height:48px}
+.refused{font-size:14px;color:var(--stop-hi);min-height:0}
+.asks{display:grid;gap:8px;margin-top:12px}
+.note{margin-top:10px}
+.links{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:18px}
+.links .tree .emblem{width:22px;height:22px}
+.tagd{position:absolute;right:22px;top:22px}
+.panel .h2{padding-right:90px}
+.chip .emblem{width:24px;height:24px;color:var(--need)}
+.acts2{display:flex;gap:8px;flex-wrap:wrap}
+.facts.asbtn{cursor:pointer;padding:0 8px;margin-left:-8px;margin-right:-8px} .facts.asbtn:hover{background:var(--lift)}
+.clicks .row{grid-template-columns:56px minmax(0,1fr) auto}
+.facts .k .pip{display:inline-block;width:18px;height:18px;vertical-align:-3px;margin-right:8px}
+@media (max-width:760px){
+  .stage{grid-template-columns:minmax(0,1fr);gap:18px}
+  .altar-of .niche{width:184px;height:168px;--arch:92px}
+  .altar-of .ledge{width:214px;height:16px}
+  .panel.focus{padding-top:20px;padding-bottom:12px}
+  .altar-of .objname{font-size:20px;margin-top:12px}
+  .ladder{margin-top:16px}
+  .ladder button{font-size:12px;letter-spacing:.06em}
+  .kinds{display:flex;overflow-x:auto;gap:10px;margin:0 -16px;padding:0 16px 6px;scroll-snap-type:x mandatory}
+  .kinds .row{flex:0 0 78%;scroll-snap-align:start;-webkit-mask:none;mask:none;padding-right:14px;grid-template-columns:46px minmax(0,1fr)}
+  .kinds .row .val{grid-column:2;justify-self:start;margin-top:-4px}
+  .kinds .row .sub{display:block}
+  .setline{align-items:flex-start}
+  .shop{grid-template-columns:96px minmax(0,1fr)}
+  .facts div{font-size:15px}
+  .links .tree .w{display:none}
+  .tagd{right:16px;top:16px}
+}
+</style></head>
+<body data-skin="nocturne" data-room="offering" data-title="The Offering" data-channel="Library of Tehuti" data-chan-state="need" data-back="vessel.html" data-back-label="Vessel" data-tank="asleep" data-who="A">
+<main>
+ <div class="stage">
+  <section class="panel focus" data-frame="crest" aria-label="The product">
+   <div class="altar-of">
+    <div class="niche" id="niche"><span id="chest" data-art="chest" data-state="wanted"></span></div><i class="ledge" id="ledge"></i>
+    <b class="objname on" id="objname" data-d></b>
+    <div class="ladder" id="ladder" role="group" aria-label="Where the product stands" data-u="u1"></div>
+   </div>
+  </section>
+  <section class="side" id="side"></section>
+ </div>
+</main>
+<div data-tools><button class="chip" data-open="asked" data-u="u3" aria-label="What viewers asked"><span data-art="emblem" data-name="offering"></span><span class="lbl">Asks</span></button></div>
+<footer class="deck"><div class="aside" id="aside"></div><button class="primary" id="go">Make a film</button></footer>
+
+<section class="sheet" id="four" hidden><h3>Four states</h3><p class="small">Moved by facts only</p><div class="rows" id="fourrows" style="margin-top:14px"></div></section>
+<section class="sheet" id="kindsheet" hidden><h3>Six kinds</h3><p class="small">Prices in CAD</p><div class="rows" id="kindrows" data-pick style="margin-top:14px" data-u="u4"></div></section>
+<section class="sheet" id="asked" hidden><h3>What viewers asked</h3><p class="small" id="askedline">Names left out</p><div class="asks" id="asks"></div></section>
+<section class="sheet" id="book" hidden><h3>Open it</h3><p class="small">As a buyer gets it</p><div class="pages" id="pages"></div>
+ <div class="pager"><button class="btn" id="prev"><span data-art="glyph" data-name="back"></span>Back</button><span class="num" id="pageno"></span><button class="btn" id="next">Turn<span data-art="glyph" data-name="go"></span></button></div>
+ <div class="acts"><button class="btn stop" id="wrong" data-u="u8">Something is wrong on this page</button></div>
+ <div id="wrongbox" hidden><div class="reasons" id="reasons" data-pick></div><input class="field" style="margin-top:10px" id="wrongline" placeholder="Say what is wrong (optional)" aria-label="Say what is wrong" data-u="u9"><div class="acts"><button class="btn need" id="remake">Make this section again</button></div></div>
+</section>
+<section class="sheet" id="line" hidden><h3>What the film says</h3><p class="small">38 words at most</p>
+ <textarea class="field" id="say" style="margin-top:14px" aria-label="What the film says" data-u="u13">Every source in this film is in a book you can hold, with the passage and its page. The link is under this film.</textarea>
+ <p class="count" id="saycount"></p></section>
+<section class="sheet" id="shoppage" hidden><h3>The shop page</h3><p class="small">Counted from the file</p>
+ <div class="shop"><div class="plate empty phone"><span data-art="plate" data-state="empty"></span><span class="says"><span>Phone</span></span></div><div class="plate empty desk"><span data-art="plate" data-state="empty"></span><span class="says"><b>Not drawn yet</b><span>Desktop</span></span></div></div>
+ <div class="sentences" id="sentences" data-u="u17"></div><p class="refused" id="refused"></p></section>
+<section class="sheet" id="orders" hidden><h3>Orders</h3><p class="small">Read from the shop</p><div class="facts" id="orderfacts"></div></section>
+<section class="sheet" id="numbered" hidden><h3>The numbered object</h3><p class="small">All three, then approve</p>
+ <div class="settings" data-u="u16"><label class="setline"><span class="k">How many will be made</span><input class="field" style="max-width:160px" inputmode="numeric" id="nhow" placeholder="None"></label>
+ <label class="setline"><span class="k">Orders close on</span><input class="field" style="max-width:200px" type="date" id="nclose"></label>
+ <label class="setline"><span class="k">Supplier quote for 50</span><input class="field" style="max-width:260px" type="file" id="nquote"></label></div></section>
+
+<script>
+(()=>{
+const S=Kit.state||'today', B=document.body, $=id=>document.getElementById(id);
+const SAMPLE=!['today','asleep','offline'].includes(S);
+if(Kit.param('who')==='M')B.dataset.who='M';
+const FROM={canopy:['canopy.html','Canopy'],tank:['tank.html','Tank'],altar:['altar.html','Altar'],'publish-kit':['publish-kit.html','Kit']}[Kit.param('from')];
+if(FROM){B.dataset.back=FROM[0];B.dataset.backLabel=FROM[1]}
+if(S==='asleep'){B.dataset.channel='Vessel two';B.dataset.chanState=''}
+if(S==='stopped')B.dataset.chanState='stop';
+if(S==='live')B.dataset.chanState='work';
+/* the six kinds; bands are the brief's (14.3), CAD */
+const KINDS=[['Source book','a printed book of the sources behind the films','$37 to $47','arcana',37,47],['Wall chart','one chart from a film, poster size','$24 to $34','canopy',24,34],['Playable model','a model a buyer can run and change','$19 to $29','conjuring',19,29],['World file','the full world behind a series','$22 to $32','vessel',22,32],['Case box','the real papers of a case, indexed','$27 to $39','pact',27,39],['Numbered object','a small run, made only after 50 orders','$49 to $89','offering',49,89]];
+let kind=0;
+/* each state: chest, product name, ladder step, headline (4 words at most), counted facts, the one action */
+const V={
+ today:{chest:'wanted',at:1,h:'Nothing to build from',facts:[['Views','past 10,000','ok',1],['Asks','not read','wait'],['Sources','0','wait',1],['Films','0','wait',1]],go:['Make a film','cauldron.html?from=offering'],kinds:1},
+ asleep:{chest:'asleep',at:0,h:'Nothing to sell yet',facts:[['Films','0 of 5','wait',1],['Views','0 of 10,000','wait',1],['Asks','0 of 8','wait',1]],go:['Make a film','cauldron.html?from=offering'],kinds:1},
+ wanted:{chest:'wanted',at:1,name:'Source book',h:'Viewers asked',facts:[['Asks','11','ok',1],['Sources','212 pages','ok',1]],go:['Forge it'],kinds:1},
+ forging:{chest:'wanted',at:1,name:'Source book',h:'Forging',facts:[],go:['Forging',null,'busy'],aside:'Safe to leave'},
+ failed:{chest:'wanted',at:1,name:'Source book',h:'Too few sources',facts:[['Sources','41 pages','wait',1],['Needs','90 pages','wait',1]],go:['Make a film','cauldron.html?from=offering'],fail:1,kinds:1},
+ ready:{chest:'ready',at:2,name:'Source book',facts:[],go:['Approve it',null,'hold']},
+ clicks:{chest:'ready',at:2,name:'Source book',h:'2 clicks left',facts:[],go:['Open the next click']},
+ live:{chest:'live',at:3,name:'Source book',h:'On sale',facts:[['Orders','0','wait',1],['Sign ups','0','wait',1],['Carried by','0 films','wait',1]],go:['Copy the link line']},
+ stopped:{chest:'ready',at:2,name:'Source book',h:'Page and book differ',facts:[['Page says','112 pages','wait',1],['File has','108 pages','wait',1]],go:['Try again'],fail:1,aside:'Line is off'},
+ closed:{chest:'ready',at:2,name:'Source book',h:'Off sale',facts:[],go:['Open the next click']},
+ offline:{chest:'wanted',at:1,h:'No network',facts:[['Last read','24 Nov, 09:40','wait',1],['Views','past 10,000','ok',1]],go:['Make a film','cauldron.html?from=offering'],kinds:1}
+};
+const v=V[S]||V.today;
+const pip=st=>Art.pip({state:st});
+/* left: the chest and the four steps */
+$('chest').dataset.state=v.chest;$('objname').textContent=v.name||'';$('objname').hidden=!v.name;
+$('niche').className='niche '+(v.chest==='live'?'work':v.chest==='asleep'?'':'need');$('ledge').className='ledge '+(v.chest==='asleep'||v.chest==='live'?'':'need');
+const STEPS=[['Asleep','Nobody asked yet'],['Wanted','Asked, needs sources'],['Ready','Built, needs a price'],['Live','Public, price matches']];
+const stepState=i=>i<v.at?'done':i===v.at?(v.fail?'failed':v.chest==='live'?'now':'next'):'none';
+$('ladder').innerHTML=STEPS.map(([n],i)=>`<button data-open="four" data-i="${i}" ${i===v.at?'aria-current="step"':''}>${pip(stepState(i))}<span>${n}</span></button>`).join('');
+const need=['5 films or 10,000 views','checked sources','price and refund','your clicks'];
+$('fourrows').innerHTML=STEPS.map(([n,m],i)=>`<div class="row ${i===v.at?'on':''}" style="cursor:default"><span class="tile">${pip(stepState(i))}</span><span><b class="name">${n}</b><span class="sub">${m}</span><span class="sub">${i<v.at?'Reached':i===v.at?'Here now':'Needs '+need[i]}</span></span><span></span></div>`).join('');
+$('kindrows').innerHTML=KINDS.map((k,i)=>`<button class="row ${i===kind&&!v.kinds?'on':''}" data-card data-k="${i}"><span class="tile"><span data-art="emblem" data-name="${k[3]}"></span></span><span><b class="name">${k[0]}</b><span class="sub">${k[1]}</span>${i===0&&SAMPLE?'<span class="sub warn">Juju\'s pick: 11 viewers asked for the list of texts (sample)</span>':''}</span><span class="val num">${k[2]}</span></button>`).join('');
+
+/* right: one headline, counted facts, the controls of this state */
+const side=$('side');
+let h=`<div class="panel ${v.fail?'stop':S==='live'?'work':''}" data-frame>${SAMPLE?'<span class="pill sample tagd">sample</span>':''}${v.h?`<h2 class="h2">${v.h}</h2>`:''}`;
+if(v.facts.length)h+=`<div class="facts${S==='live'?' asbtn" role="button" tabindex="0" data-open="orders" data-u="u22':''}">${v.facts.map(([k,x,c,d])=>`<div><span class="k">${k}</span><span class="fill"></span><span class="v ${c} ${d?'num':''}" ${d?'data-d':''} data-a="${S==='live'?'a9':S==='stopped'?'a10':'a1'}">${x}</span></div>`).join('')}</div>`;
+if(S==='forging')h+=`<div class="facts" id="parts" data-a="a3"></div>`;
+if(S==='ready')h+=readyBlock();
+if(S==='clicks'||S==='closed')h+=clicksBlock();
+const tree=`<a class="btn bare tree" href="canopy.html?from=offering" data-u="u25" aria-label="See it on the tree"><span data-art="emblem" data-name="canopy"></span><span class="w">The tree</span></a>`;
+const links=[];
+if(v.kinds)links.push(`<button class="btn" data-open="kindsheet" data-u="u4">Kinds</button>`);
+if(S==='failed')links.push(`<button class="btn" id="smaller">Smaller kind</button>`);
+if(S==='live')links.push(`<button class="btn" id="edition" data-u="u24">Edition</button>`,`<button class="btn stop longpress" id="offsale" data-u="u23" aria-label="Take it off sale, hold one second"><i class="fillbar"></i>Off sale</button>`);
+links.push(tree);
+h+=`<div class="links">${links.join('')}</div></div>`;
+side.innerHTML=h;
+
+function readyBlock(){return `<div class="settings">
+ <div class="setline"><span class="acts2"><button class="btn" data-open="book" data-u="u7">${Art.emblem('arcana')}Open</button><button class="btn" data-open="shoppage" data-u="u15">${Art.glyph('go')}Page</button></span></div>
+ <div class="setline"><span class="k">Price</span><span id="pricebox"><button class="btn need" id="setprice" data-u="u10">Set</button></span></div>
+ <div class="setline"><span class="k">Refund</span><span class="picks" id="refund" data-u="u12"><button class="btn">7</button><button class="btn">14</button><button class="btn">30</button></span></div>
+ <div class="setline"><button class="switch" id="beside" data-u="u11">Beside it</button><span class="picks" id="besidep"><button class="btn" disabled>$7</button><button class="btn" disabled>$9</button></span></div>
+ <div class="setline"><button class="switch" aria-checked="true" data-u="u14">In films</button><button class="btn icon" data-open="line" data-u="u13" aria-label="What the film says">${Art.glyph('edit')}</button></div></div>`}
+function clicksBlock(){const L=S==='closed'?[['Close the page',0]]:[['Shop account',0],['Page public',0]];const nx=L.findIndex(x=>!x[1]);
+ return `<div class="clicks" id="clicks" data-u="u19" data-a="a5">${L.map(([n,d],i)=>`<div class="row ${!d&&i===nx?'need':''}"><span class="tile">${pip(d?'done':i===nx?'next':'none')}</span><b class="name">${n}</b><span class="val">${d?'':`<button class="btn" data-did="${i}" data-u="u20">I did it</button>`}</span></div>`).join('')}</div>${B.dataset.who==='M'?'<p class="say need note">Waiting for Ambi</p>':''}`}
+
+/* deck */
+const go=$('go'),aside=$('aside');
+go.textContent=v.go[0];if(v.go[2]==='busy'){go.classList.add('busy');go.disabled=true}
+aside.innerHTML=(v.aside?`<span class="status">${Art.pip({state:v.fail?'failed':S==='forging'?'now':'next'})}${v.aside}</span>`:'')+(S==='wanted'?`<button class="btn bare" id="notnow" data-u="u6">Not now</button>`:'');
+if(v.go[1])go.onclick=()=>{location.href=v.go[1]};
+if(v.go[0]==='Make a film')go.dataset.u='u2';if(S==='wanted')go.dataset.u='u5';if(S==='stopped')go.dataset.u='u26';
+/* flow, shell parts: u27 the Tank chip in the head (checkout, email and page are free services, not connected), u28 the Altar door, u29 back.
+   a1 moves the Asks count, a2 moves the state to Wanted, a6 to a8 run inside the film and the publish kit, nothing to show here. */
+
+/* kinds */
+$('kindrows').addEventListener('click',e=>{const r=e.target.closest('[data-k]');if(!r)return;kind=+r.dataset.k;
+ if(S==='ready'){Kit.toast(KINDS[kind][0]+': '+KINDS[kind][2]);if(kind===5){Kit.sheet('kindsheet').close();setTimeout(()=>Kit.sheet('numbered').open(),200)}if(typeof okToApprove==='function')okToApprove()}
+ else Kit.toast(KINDS[kind][0]+' fits '+KINDS[kind][2]+' CAD')});
+$('smaller')&&($('smaller').onclick=()=>{kind=1;Kit.toast('Wall chart picked. It needs one chart from a film.')});
+$('notnow')&&($('notnow').onclick=()=>Kit.toast('It rests for five more films, or until the asks double'));
+
+/* forge: the real parts appear one by one */
+if(S==='wanted')go.onclick=()=>{go.classList.add('busy');go.textContent='Forging';setTimeout(()=>{location.search='?state=forging'},500)};
+if(S==='forging'){const P=[['Sections',14,14],['Pages',0,108],['Sources',0,212],['Shop page',0,1]],box=$('parts');let t=0;
+ const draw=()=>{box.innerHTML=P.map(([n,a,b])=>`<div data-a="${n==='Shop page'?'a4':'a3'}"><span class="k">${Art.pip({state:a>=b?'done':a>0?'now':'none'})}${n}</span><span class="fill"></span><span class="v num" data-d>${b===1?(a?'set':'writing'):a+' of '+b}</span></div>`).join('')};
+ draw();const iv=setInterval(()=>{t++;if(t<6)P[1][1]=Math.min(108,P[1][1]+22);else if(t<10)P[2][1]=Math.min(212,P[2][1]+60);else P[3][1]=1;draw();if(P.every(p=>p[1]>=p[2])){clearInterval(iv);go.classList.remove('busy');go.disabled=false;go.textContent='Look at it';go.onclick=()=>{location.search='?state=ready'};Kit.finish(go,'The source book is built and counted')}},420)}
+
+/* ready: price, refund, beside; approve by holding one second */
+let price=null,refund=null;
+function okToApprove(){const nb=kind!==5||($('nhow').value&&$('nclose').value&&$('nquote').files.length);go.disabled=!(price&&refund&&nb);
+ aside.innerHTML=`<span class="status">${Art.pip({state:go.disabled?'next':'done'})}${go.disabled?(!price?'Set a price':!refund?'Pick refund days':'Fill the three boxes'):'Hold one second'}</span>`}
+if(S==='ready'){go.classList.add('longpress');go.insertAdjacentHTML('afterbegin','<i class="fillbar"></i>');go.dataset.u='u18';okToApprove();
+ $('setprice').onclick=()=>{const k=KINDS[kind];price=Math.round((k[4]+k[5])/2);$('pricebox').innerHTML=`<div class="stepper"><button aria-label="Lower">${Art.glyph('minus')}</button><output data-d>$${price}</output><button aria-label="Higher">${Art.glyph('plus')}</button></div>`;
+  const [mi,pl]=$('pricebox').querySelectorAll('button'),o=$('pricebox').querySelector('output'),set=x=>{price=Math.max(k[4],Math.min(k[5],x));o.textContent='$'+price;o.classList.remove('bump');void o.offsetWidth;o.classList.add('bump');mi.disabled=price<=k[4];pl.disabled=price>=k[5]};mi.onclick=()=>set(price-1);pl.onclick=()=>set(price+1);set(price);okToApprove()};
+ $('refund').addEventListener('click',e=>{const b=e.target.closest('.btn');if(!b)return;$('refund').querySelectorAll('.btn').forEach(x=>x.classList.toggle('on',x===b));refund=b.textContent;Kit.press(b);okToApprove()});
+ $('beside').addEventListener('click',()=>setTimeout(()=>{const on=$('beside').getAttribute('aria-checked')==='true';$('besidep').querySelectorAll('.btn').forEach(x=>{x.disabled=!on;if(!on)x.classList.remove('on')})}));
+ $('besidep').addEventListener('click',e=>{const b=e.target.closest('.btn');if(!b||b.disabled)return;$('besidep').querySelectorAll('.btn').forEach(x=>x.classList.toggle('on',x===b));Kit.press(b)});
+ ['nhow','nclose','nquote'].forEach(i=>$(i).addEventListener('change',okToApprove));
+ hold(go,()=>{if(B.dataset.who==='M'){Kit.toast('Only Ambi can approve. It waits for him.',{state:'need'});return}Kit.finish(go,'Approved. Juju lists your clicks');setTimeout(()=>{location.search='?state=clicks'},900)})}
+
+/* clicks: open the next one; I did it is proven on the public page */
+if(S==='clicks'||S==='closed'){go.onclick=()=>{const r=document.querySelector('.clicks .row.need .name');Kit.toast('Opens in your browser: '+(r?r.textContent.toLowerCase():'the page'))};
+ $('clicks').addEventListener('click',e=>{const b=e.target.closest('[data-did]');if(!b)return;b.textContent='Checking';b.disabled=true;
+  setTimeout(()=>{const row=b.closest('.row');row.classList.remove('need');row.querySelector('.tile').innerHTML=pip('done');b.remove();
+   const left=document.querySelectorAll('.clicks [data-did]').length;if(!left){Kit.finish(go,S==='closed'?'The page says it has closed':'Proven public. It is live');setTimeout(()=>{location.search=S==='closed'?'?state=today':'?state=live'},1200)}else{const n=document.querySelector('.clicks .row:has([data-did])');n&&n.classList.add('need');Kit.toast('Checked on the public page')}},900)})}
+
+/* live: copy the line; take it off sale by holding */
+if(S==='live'){go.dataset.u='u21';go.onclick=()=>{try{navigator.clipboard&&navigator.clipboard.writeText('The source book behind this film: libraryoftehuti.example (sample link)').catch(()=>{})}catch(e){}Kit.finish(go,'The link line is copied');aside.innerHTML=`<a class="btn bare" href="publish-kit.html?from=offering">Publish kit</a>`};
+ hold($('offsale'),()=>{Kit.toast('Off sale. The line is out of new films',{state:'stop'});setTimeout(()=>{location.search='?state=closed'},900)});
+ $('edition').onclick=()=>Kit.toast('Nothing changed since the first edition');
+ $('orderfacts').innerHTML=[['Orders','0'],['After fees','$0.00'],['Refunds','0'],['Email sign ups','0']].map(([k,x])=>`<div><span class="k">${k}</span><span class="fill"></span><span class="v num">${x}</span></div>`).join('')}
+if(S==='stopped')go.onclick=()=>{go.classList.add('busy');setTimeout(()=>{go.classList.remove('busy');Kit.toast('Still 112 against 108. The page is your click',{state:'stop'})},900)};
+
+/* sheets */
+$('asks').innerHTML=SAMPLE?[['The list of texts','11'],['A map of the road','3']].map(([a,n])=>`<div class="row" style="cursor:default"><span class="tile"><span data-art="emblem" data-name="offering"></span></span><span><b class="name">${a}</b><span class="sub">The ENTIRE Journey After Death in 52 Minutes</span></span><span class="val num">${n}</span></div>`).join(''):`<div class="plate empty" style="aspect-ratio:auto;min-height:140px"><span data-art="plate" data-state="empty"></span><span class="says"><b>Not read yet</b><span>No film of ours is up</span></span></div>`;
+if(SAMPLE)$('askedline').innerHTML='<span class="pill sample">sample</span> Names left out';
+let pg=0;const drawPages=()=>{$('pages').innerHTML=[0,1].map(j=>`<div class="plate empty"><span data-art="plate" data-state="empty"></span><span class="says"><b>Page ${pg*2+j+1}</b><span>${SAMPLE?'sample, not drawn':'not built'}</span></span></div>`).join('');$('pages').querySelectorAll('[data-art]').forEach(Art.fill);$('pageno').textContent=(pg*2+1)+' and '+(pg*2+2)+' of 108'};
+document.addEventListener('DOMContentLoaded',drawPages);
+$('next').onclick=()=>{if(pg<53){pg++;drawPages();Kit.press($('pages'))}};$('prev').onclick=()=>{if(pg>0){pg--;drawPages()}};
+$('reasons').innerHTML=['Wrong fact','Wrong picture','Wrong tone','Hard to read','Missing source'].map(r=>`<button class="btn" data-card>${r}</button>`).join('');
+$('wrong').onclick=()=>{$('wrongbox').hidden=false};
+$('remake').onclick=()=>{Kit.sheet('book').close();Kit.toast('Only that section is made again')};
+const countSay=()=>{const w=$('say').value.trim().split(/\s+/).filter(Boolean).length,s=Math.round(w/142*60),c=$('saycount');c.classList.toggle('over',w>38);c.textContent=w>38?`${w} words, ${w-38} too many`:`${w} words, about ${s} seconds at 142 words a minute (sample pace)`};$('say').addEventListener('input',countSay);countSay();
+$('sentences').innerHTML=['108 pages in 14 sections.','Every passage has its source and its page.','Refunds within the window you chose.'].map((t,i)=>`<input class="field" value="${t}" aria-label="Sentence ${i+1}">`).join('');
+$('sentences').addEventListener('change',e=>{const f=e.target,m=f.value.match(/(\d+) pages/),r=$('refused');if(m&&+m[1]!==108){r.textContent=`Refused: the file has 108 pages, not ${m[1]}.`;f.value=f.value.replace(m[1],'108')}else{r.textContent='';Kit.toast('The sentence is saved')}});
+$('ladder').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const i=+b.dataset.i;setTimeout(()=>{[...$('fourrows').children].forEach((r,j)=>r.classList.toggle('on',j===i))})});
+
+function hold(btn,done){let t=null;const start=e=>{if(btn.disabled)return;if(e.type==='keydown'&&e.key!=='Enter'&&e.key!==' ')return;if(e.repeat)return;e.preventDefault();btn.classList.add('holding');t=setTimeout(()=>{btn.classList.remove('holding');done()},1000)},stop=()=>{if(t){clearTimeout(t);t=null}btn.classList.remove('holding')};
+ btn.addEventListener('pointerdown',start);btn.addEventListener('keydown',start);['pointerup','pointerleave','pointercancel','keyup'].forEach(x=>btn.addEventListener(x,stop));btn.addEventListener('click',e=>{e.preventDefault();if(!btn.classList.contains('holding'))Kit.toast('Hold it for one second',{ms:1400})})}
+if(Kit.param('sheet'))document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>Kit.sheet(Kit.param('sheet')).open(),50));
+})();
+</script>
+</body></html>

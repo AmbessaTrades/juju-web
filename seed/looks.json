@@ -1,0 +1,55 @@
+[
+ {
+  "slug": "kingdoms",
+  "name": "Kingdoms From Inside",
+  "handle": null,
+  "kinds": [
+   "kingdoms"
+  ],
+  "system": "kingdoms",
+  "theme": "duppy-time-night",
+  "minutes": null,
+  "export": 1080,
+  "niche": null
+ },
+ {
+  "slug": "night",
+  "name": "Duppy Night",
+  "handle": null,
+  "kinds": [
+   "night"
+  ],
+  "system": "duppy-night",
+  "theme": null,
+  "minutes": null,
+  "export": 1080,
+  "niche": null
+ },
+ {
+  "slug": "states",
+  "name": "The Money Map",
+  "handle": null,
+  "kinds": [
+   "wealth",
+   "states"
+  ],
+  "system": "wealth",
+  "theme": "duppy-time-night",
+  "minutes": null,
+  "export": 1080,
+  "niche": null
+ },
+ {
+  "slug": "worlds",
+  "name": "The Simulated Atlas",
+  "handle": null,
+  "kinds": [
+   "worlds"
+  ],
+  "system": "worlds",
+  "theme": "duppy-time-night",
+  "minutes": null,
+  "export": 1080,
+  "niche": null
+ }
+]

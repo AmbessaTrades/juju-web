@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Juju · Mirror Bend</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script>
+<style>
+/* ---- room-own parts, missing from the kit (named in the report): .lay a layout plan, .theirs stamp, .box a dashed box ---- */
+.lay{position:absolute;inset:0;container-type:inline-size;overflow:hidden;background:var(--a-well)}
+.lay::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,transparent 0 9px,color-mix(in oklab,var(--a-line) 16%,transparent) 9px 10px)}
+.lay .mass{position:absolute;border:2px dashed var(--a-line);border-bottom:0;border-radius:50% 50% 0 0/34% 34% 0 0;background:linear-gradient(180deg,color-mix(in oklab,var(--obj-dim) 60%,transparent),color-mix(in oklab,var(--obj-dim) 10%,transparent));transition:all .3s cubic-bezier(.2,.9,.3,1.1)}
+.lay[data-style=tableau] .mass{border-style:solid;border-color:var(--obj-dim);background:color-mix(in oklab,var(--obj-dim) 70%,var(--a-well))}
+.lay[data-style=frame] .mass{border-radius:4px;border-style:dotted}
+.lay .wd{position:absolute;font:600 max(12px,8.8cqw)/.94 "Spectral SC",serif;color:var(--bone);text-transform:uppercase;transition:all .3s cubic-bezier(.2,.9,.3,1.1)}
+.lay .wd b{display:block;font-weight:600;color:var(--need)}
+.lay .wd.r{text-align:right}
+.lay .clock{position:absolute;right:3%;bottom:5%;width:12%;height:9%;box-shadow:inset 0 0 0 1px var(--line-hi);opacity:.7}
+.lay .tag{position:absolute;left:3%;bottom:5%;padding:4px 7px 2px;background:var(--a-deep);color:var(--ash);font:600 12px/1 "Josefin Sans",sans-serif;letter-spacing:.12em;text-transform:uppercase}
+.theirs{position:absolute;left:8px;bottom:8px;z-index:3;padding:5px 9px 3px;background:var(--a-deep);color:var(--bone);font:600 12px/1 "Josefin Sans",sans-serif;letter-spacing:.16em;text-transform:uppercase;box-shadow:inset 0 0 0 1px var(--line-hi)}
+.box{position:absolute;z-index:2;border:2px dashed var(--work);cursor:move;touch-action:none;animation:drop .3s cubic-bezier(.2,.9,.3,1.3)}
+.box.w{border-color:var(--need)}
+.box .grip{position:absolute;right:-12px;bottom:-12px;width:28px;height:28px;background:var(--work);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);cursor:nwse-resize}
+.box.w .grip{background:var(--need)}
+.box.held{border-width:3px;transform:scale(1.02)}
+@keyframes drop{from{transform:translateY(-14px);opacity:0}}
+
+/* ---- the bend ---- */
+.chip .emblem{width:22px;height:22px}
+@media (min-width:761px){
+  main.mb{display:grid;grid-template-columns:minmax(0,380px) 40px minmax(0,760px);grid-template-rows:auto auto 1fr;gap:18px 18px;align-items:start;justify-content:center}
+  main.mb .bend{display:contents}
+  main.mb .theirs-side{grid-column:1;grid-row:1}
+  main.mb .hinge{grid-column:2;grid-row:1/3;align-self:center}
+  main.mb .ours-side{grid-column:3;grid-row:1/3}
+  main.mb .knobs{grid-column:1;grid-row:2;grid-template-columns:1fr;gap:10px}
+  main.mb .vers{grid-column:3;grid-row:3}
+  main.mb .ver .nm{position:absolute;left:0;right:0;bottom:0;z-index:4;padding:16px 8px 6px;background:linear-gradient(0deg,var(--a-deep),transparent);color:var(--bone);font-size:13.5px}
+}
+}
+.bend{display:grid;grid-template-columns:minmax(0,.82fr) 56px minmax(0,1fr);align-items:center;gap:0}
+.side{position:relative;display:grid;gap:10px}
+.frame{position:relative;aspect-ratio:16/9;background:var(--a-well);box-shadow:0 0 0 2px var(--frame-lo),0 0 0 3px #000,0 0 0 5px var(--frame),var(--shadow);overflow:hidden}
+.frame img{width:100%;height:100%;object-fit:cover;display:block}
+.frame .plate{position:absolute;inset:0;aspect-ratio:auto;min-height:0}
+.frame.ours{box-shadow:0 0 0 2px var(--frame-lo),0 0 0 3px #000,0 0 0 5px var(--frame-hi),0 0 30px var(--act-glow),var(--shadow)}
+.frame.drop{box-shadow:0 0 0 3px var(--need),var(--shadow)}
+.frame .ctl{position:absolute;right:8px;bottom:8px;z-index:4;display:flex;gap:6px}
+.frame .ctl .btn{min-height:44px;background:var(--a-deep)}
+.frame .ctl .btn::after{box-shadow:inset 0 0 0 1px var(--line-hi)}
+.frame .stampx{position:absolute;right:8px;top:8px;z-index:3}.frame .stampx .art{width:100%;height:100%;display:block}
+.frame .says2{position:absolute;inset:0;display:grid;place-items:center;text-align:center;z-index:2}
+.frame .says2 b{font:600 20px/1.2 "Spectral SC",serif;color:var(--bone)}
+.meta{display:flex;align-items:center;gap:12px;min-height:28px;font-size:14.5px;color:var(--ash)}
+.meta .num{color:var(--work);font-size:17px}
+.meta .t{color:var(--bone);font:600 15px/1.25 "Spectral SC",serif;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0}
+.hinge{display:grid;place-items:center;color:var(--frame)}
+.hinge .emblem{width:34px;height:34px}
+.hinge i{width:2px;height:90px;background:linear-gradient(180deg,transparent,var(--frame),transparent)}
+.knobs{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:12px}
+.knobs .btn{justify-content:flex-start;min-height:56px;padding:0 18px 3px;text-align:left;overflow:hidden}
+.knobs .btn .v{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0;font:600 16px/1.2 "Spectral SC",serif;letter-spacing:.02em;text-transform:none}
+.knobs .btn.lit{color:var(--need)} .knobs .btn.lit::after{box-shadow:inset 0 0 0 2px var(--need)}
+.knobs .btn[disabled]{opacity:.45}
+.vers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.ver{position:relative;display:grid;gap:8px;padding:0;border:0;background:none;cursor:pointer;color:var(--ash);text-align:left;font:inherit}
+.ver .frame{box-shadow:0 0 0 2px var(--line)}
+.ver.on .frame{box-shadow:0 0 0 3px var(--act),0 0 22px var(--act-glow)}
+.ver.on{color:var(--bone)}
+.ver .nm{display:flex;align-items:center;gap:10px;font:600 15px/1.2 "Josefin Sans",sans-serif;letter-spacing:.06em}
+.ver .nm i{display:grid;place-items:center;width:26px;height:26px;font:600 14px/1 "JetBrains Mono",monospace;font-style:normal;background:var(--lift);color:var(--bone);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.ver.on .nm i{background:var(--act);color:var(--on-act)}
+.ver.struck .frame::after{content:"";position:absolute;inset:0;background:linear-gradient(to top right,transparent calc(50% - 2px),var(--stop) calc(50% - 2px),var(--stop) calc(50% + 2px),transparent calc(50% + 2px));z-index:3}
+.ver.struck{color:var(--stop-hi)}
+.ver.held .frame .lay{opacity:.4}
+.ver .flag{position:absolute;left:8px;top:8px;z-index:4}
+.ver.land .frame{animation:land .4s cubic-bezier(.2,.9,.3,1.3)}
+@keyframes land{from{transform:scale(.9);filter:brightness(2)}}
+.deck .under{flex:none}
+.deck .aside .btn{white-space:nowrap}
+.cat.mini{width:34px;height:34px}
+.cat.scan .eyes{animation:beat 1s ease-in-out infinite}
+.sheet .rows{margin-top:12px}
+.sheet .row{width:100%;text-align:left}
+.sheet #outlist .row{grid-template-columns:96px minmax(0,1fr) auto} .sheet .row .tile.pic{width:96px;height:54px;overflow:hidden;background:var(--a-well)} .sheet .row .tile.pic img{width:100%;height:100%;object-fit:cover}
+.sheet .row .name{font-size:16px}
+.paste{display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-top:14px}
+.field{width:100%;min-height:52px;padding:0 16px;border:0;background:var(--a-well);color:var(--bone);font:400 16px/1.3 "Lato",sans-serif;box-shadow:inset 0 0 0 2px var(--line)}
+.field:focus{outline:none;box-shadow:inset 0 0 0 2px var(--act)}
+.field.bad{box-shadow:inset 0 0 0 2px var(--stop)}
+.count{font:600 14px/1 "JetBrains Mono",monospace;color:var(--ash)}
+.styles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+.styles .sty{display:grid;gap:8px;padding:0;border:0;background:none;color:var(--ash);cursor:pointer;text-align:left;font:600 14px/1.2 "Josefin Sans",sans-serif;letter-spacing:.06em}
+.styles .sty .frame{box-shadow:0 0 0 2px var(--line)}
+.styles .sty.on{color:var(--bone)} .styles .sty.on .frame{box-shadow:0 0 0 3px var(--act)}
+.seg{display:flex;gap:6px;margin-top:14px;align-items:center}
+.seg .lab{margin-right:6px}
+.seg .btn[aria-pressed=true]{color:var(--act)} .seg .btn[aria-pressed=true]::after{box-shadow:inset 0 0 0 2px var(--act)}
+.sheet .acts .btn{min-height:48px}
+@media (max-width:760px){
+  .toasts{bottom:calc(300px + env(safe-area-inset-bottom))}
+  .bend{display:block;position:relative}
+  .bend .hinge,.bend .side.theirs-side .meta{display:none}
+  .bend .side.theirs-side{position:absolute;right:8px;bottom:8px;width:34%;z-index:5}
+  .bend .side.theirs-side .frame{box-shadow:0 0 0 2px #000,0 0 0 3px var(--frame),0 6px 16px rgba(0,0,0,.7)}
+  .bend .side.theirs-side .theirs{font-size:12px;padding:3px 6px 2px;left:4px;bottom:4px;letter-spacing:.1em}
+  .bend .side.theirs-side .ctl,.bend .side.theirs-side .box{display:none}
+  .bend.swap .side.theirs-side{position:relative;right:0;bottom:0;width:100%}
+  .bend.swap .side.theirs-side .ctl,.bend.swap .side.theirs-side .box{display:revert}
+  .bend.swap .side.ours-side{position:absolute;left:8px;top:8px;width:34%;z-index:5}
+  .bend.swap .side.ours-side .tag,.bend.swap .side.ours-side .wd{display:none}
+  .bend.swap .side.theirs-side .meta{display:flex}
+  .box .grip{width:44px;height:44px;right:-20px;bottom:-20px}
+  .knobs{grid-template-columns:1fr 1fr;gap:8px}
+  .knobs .idea{grid-column:1/-1}
+  .knobs .btn{min-height:52px;padding:0 12px 3px}
+  .vers{gap:8px}
+  .ver .nm span{display:none}
+  .ver .nm{justify-content:center}
+  .deck .under{order:3;width:100%;justify-content:center}
+  .deck .aside .btn{flex:1}
+  .styles{gap:8px}
+  .paste{grid-template-columns:1fr auto}
+  .paste .add{grid-column:1/-1}
+}
+</style>
+</head>
+<body data-skin="nocturne" data-room="mirror-bend" data-title="Mirror Bend" data-channel="Library of Tehuti" data-chan-state="need" data-back="crossroads.html" data-back-label="Crossroads" data-tank="asleep" data-who="A" style="--focus-x:58%;--focus-y:30%">
+<main class="mb">
+  <div class="bend" id="bend">
+    <div class="side theirs-side">
+      <div class="frame" id="theirs" data-u="u1" aria-label="Their picture"></div>
+      <div class="meta" id="meta"></div>
+    </div>
+    <div class="hinge"><i></i><span data-art="emblem" data-name="mirror-bend"></span><i></i></div>
+    <div class="side ours-side">
+      <div class="frame ours" id="ours" data-u="u21"></div>
+    </div>
+  </div>
+  <div class="knobs" id="knobs">
+    <button class="btn idea" data-open="ideasheet" data-u="u8" id="k-idea"><span data-art="emblem" data-name="scribe"></span><span class="v" id="k-idea-v" data-d></span></button>
+    <button class="btn" data-open="stylesheet" data-u="u10" id="k-style"><span data-art="emblem" data-name="pigment"></span><span class="v" id="k-style-v">Woodcut</span></button>
+    <button class="btn" data-open="subjsheet" data-u="u15" id="k-subj"><span data-art="emblem" data-name="watcher"></span><span class="v" id="k-subj-v">Juju picks</span></button>
+  </div>
+  <div class="vers" id="vers" data-scroll></div>
+</main>
+<div data-tools>
+  <a class="chip" id="feedchip" href="feed-sight.html?from=mirror-bend" data-u="u26" aria-label="Feed Sight"><span data-art="emblem" data-name="feed-sight"></span><span class="lbl">Feed</span></a>
+</div>
+<footer class="deck">
+  <div class="aside" id="aside"></div>
+  <button class="primary" id="go">Keep this version</button>
+  <a class="btn bare under" id="skip" href="pact.html?from=mirror-bend&amp;thumb=none" data-u="u27">Skip thumbnail</a>
+</footer>
+
+<section class="sheet" id="donorsheet" hidden>
+  <h3>Outliers</h3>
+  <div class="tabs" data-tabs><button class="tab" aria-selected="true" data-panel="d-out" data-u="u3">Outliers</button><button class="tab" data-panel="d-ch" data-u="u3">Channels</button></div>
+  <div class="paste"><input class="field" id="link" placeholder="Paste a YouTube link" inputmode="url" aria-label="A YouTube link" data-u="u4"><button class="btn" id="pastebtn">Paste</button>
+    <label class="btn add" data-u="u5">Add a picture<input type="file" accept="image/*" id="file" hidden></label></div>
+  <div id="d-out"><div id="filter"></div><div class="rows" id="outlist"></div></div>
+  <div id="d-ch" hidden><div class="rows" id="chlist"></div></div>
+</section>
+
+<section class="sheet" id="ideasheet" hidden>
+  <h3>Your idea</h3>
+  <div style="display:grid;gap:10px;margin-top:12px">
+    <input class="field" id="idea-in" aria-label="The idea in one line" placeholder="The idea, one line">
+    <div style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center"><input class="field" id="words-in" aria-label="Words on the picture, three at most" placeholder="Words on it"><span class="count" id="wcount" data-d>0/3</span></div>
+  </div>
+  <div class="acts"><button class="btn need" id="bendit" data-u="u9">Bend it this way</button></div>
+</section>
+
+<section class="sheet" id="stylesheet" hidden>
+  <h3>Style</h3>
+  <div class="styles" id="styles" data-u="u11"></div>
+  <div class="seg" id="wordsrule" data-u="u12"><span class="lab">Words</span><button class="btn" aria-pressed="true" data-w="theirs">like theirs</button><button class="btn" aria-pressed="false" data-w="always">always</button><button class="btn" aria-pressed="false" data-w="none">none</button></div>
+  <div class="acts"><button class="btn" id="keepch" data-u="u13">Keep for this channel</button></div>
+</section>
+
+<section class="sheet" id="subjsheet" hidden>
+  <h3>Subject</h3>
+  <div class="rows" data-pick id="subjrows">
+    <button class="row on" data-card data-s="juju" data-u="u17"><span class="tile"><span data-art="emblem" data-name="watcher"></span></span><b class="name">Juju picks</b></button>
+    <button class="row" data-card data-s="person" data-u="u16"><span class="tile"><span data-art="glyph" data-name="search"></span></span><b class="name">A real person</b></button>
+    <button class="row off" data-card data-s="frame" data-u="u18" id="framerow" disabled><span class="tile"><span data-art="emblem" data-name="spell-strip"></span></span><b class="name">A film frame</b><span class="val pill dim">later</span></button>
+    <button class="row" data-card data-s="relic" data-u="u19"><span class="tile"><span data-art="emblem" data-name="reliquary"></span></span><b class="name">A pinned relic</b><span class="val pill dim">none</span></button>
+  </div>
+  <div id="moments" class="styles" hidden></div>
+  <div id="personbox" hidden style="margin-top:12px"><input class="field" id="person-in" placeholder="@ a name" aria-label="A real person's name"></div>
+  <div id="relicbox" hidden class="acts"><a class="btn" href="reliquary.html?from=mirror-bend" data-u="u20"><span data-art="emblem" data-name="reliquary"></span>Open the reliquary</a></div>
+</section>
+
+<script>
+(()=>{
+const LIB='../../../../context-repo/09-assets/library/';
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+/* the shelf, copied by script from outliers.json in their own words. Left out: three titles with a long dash and two Shorts */
+const SHELF=[["039", "UOhcAV4GyRA", "Jacopist", 3600000, 8.49, 424000, "100 Ways To Kill Pagan Min - Part 2 - Far Cry 4 Map Editor"], ["040", "MVIwvywuQpQ", "Jacopist", 1900000, 4.48, 424000, "A Hyper Realistic Alien Invasion"], ["041", "hV988q6aT9E", "Jacopist", 1100000, 2.59, 424000, "100 Ways To Kill Pagan Min - Part 1 - Far Cry 4 Map Editor"], ["042", "LqvlFsTaZgE", "Mapocalypse", 392000, 8.0, 49000, "I Simulated Yellowstone Erupting, Day by Day"], ["044", "rST7kQtForw", "Mapocalypse", 179000, 3.65, 49000, "I Simulated World War III Until It Went Nuclear"], ["045", "fBXY_AyA0bo", "GRIORSK", 957000, 11.33, 84500, "ISOTOPE WARS - PART 0"], ["046", "SoyHBEdk8WQ", "1045HourVitality", 175000, 3.1, 56500, "World Peace Scenario (2026 - 2100)"], ["047", "F176VMxwc8s", "1045HourVitality", 133000, 2.35, 56500, "EU Federalization Scenario (2030 - 2063)"], ["048", "qxAIE8s9-NA", "Earthlore", 1700000, 3.38, 503500, "Most Undocumented Island I’ve Ever Found | Wooden Boy Island"], ["049", "sXyjakCgeVA", "Icosahedron God", 260000, 91.23, 2850, "\"POSSIBLE\" Future of the World (2025 - 3066)"], ["050", "x-qhTXWocxg", "Icosahedron God", 9800, 3.44, 2850, "Alternate History of Zambia (In Mars)"], ["051", "LJSV8p8gbmw", "Icosahedron God", 9400, 3.3, 2850, "Alternate History of India (in USA)"], ["052", "l086JClD1J0", "Aprento", 8100, 11.3, 717, "1,060 Years in Fantasy Map Simulator | Timelapse"], ["053", "DyTNqZunWQk", "Aprento", 5800, 8.09, 717, "4,300 Years in Fantasy Map Simulator | Timelapse"], ["054", "TeEbaaZvGiA", "Aprento", 3900, 5.44, 717, "1,111 Years in Fantasy Map Simulator | Timelapse"], ["055", "xfkfRfcs5DI", "Jir Mirza", 90000, 10.34, 8700, "2026 USA vs 1945 World | Hearts of Iron IV (HOI4) Timelapse"], ["056", "L0etjSHp3zg", "Jir Mirza", 62000, 7.13, 8700, "2026 China vs 1939 World | Hearts of Iron IV (HOI4) Timelapse"], ["057", "JueRHejb_xg", "Jir Mirza", 47000, 5.4, 8700, "2000s Modern Africa vs 1939 WW2 Europe! | Hearts of Iron IV (HOI4) Timelapse"], ["058", "ZFdf69VEo14", "GeoPanda", 599000, 66.56, 9000, "300,000 Years of People: Where humans lived, from the first Homo sapiens to 8 billion (4K) 🌍"], ["059", "umstrUXqmRg", "GeoPanda", 250000, 27.78, 9000, "Human Evolution: 2 Million Years of Human Species on One Map"], ["061", "aKxVZYL96bY", "Minute Zero Extra", 430000, 8.43, 51000, "What If You Got Heavier and Couldn't Stop?"], ["062", "t1-hzEz-4mk", "Minute Zero Extra", 124000, 2.43, 51000, "What If You Shrank and Couldn't Stop?"], ["064", "jw7x2RoeGIY", "Physics - problems and solutions", 878000, 20.9, 42000, "What If You Removed Every Electron From 1kg of Metal? (And Placed it on Earth)"], ["065", "FE9KPlBoqa0", "Physics - problems and solutions", 737000, 17.55, 42000, "What Happens If You Never Stop Accelerating?"], ["066", "eWu92oXtxsw", "ExtinctZoo", 3400000, 4.09, 832000, "The Deadliest Sea Animal From Every Single Period"], ["067", "fKizW6NlnoA", "ExtinctZoo", 2600000, 3.12, 832000, "Earth's Deadliest Predator From Every Single Period"], ["068", "--srD8vlfFE", "ExtinctZoo", 2200000, 2.64, 832000, "Prehistoric Human Deaths That Make Stubbing Your Toe Seem Pleasurable"], ["069", "4_lsxy5fsac", "Bygone Philosophy", 709000, 17.08, 41500, "The Highest State a Human Can Reach"], ["070", "vvLRZOHdNqA", "Bygone Philosophy", 349000, 8.41, 41500, "The Art of Not Trying"], ["071", "v90SZKGbMRo", "Bygone Philosophy", 309000, 7.45, 41500, "You Will Never Procrastinate Again After Watching This Video"], ["072", "jP0D3gcqe5Q", "Jade Rabbit Hole", 1100000, 6.4, 172000, "The ENTIRE Chinese Hell Walkthrough in 10 Minutes"], ["073", "WbSkqFdLOxo", "Jade Rabbit Hole", 401000, 2.33, 172000, "The ENTIRE Japanese Hell Walkthrough in 11 Minutes"], ["074", "uvNQGq4JEf4", "Jade Rabbit Hole", 362000, 2.1, 172000, "The ENTIRE Hindu Afterlife Walkthrough in 12 Minutes"], ["075", "KJg1-FCweWI", "The Opening", 2800000, 8.19, 342000, "What you'll see when you die"], ["076", "0Ei7uVIEfQg", "Δ Delta", 921000, 48.47, 19000, "What If the Human Population Kept Growing and Couldn't Stop?"], ["077", "l10gi_U-6rQ", "Δ Delta", 598000, 31.47, 19000, "What If You Became 1% More Radioactive Every Second?"], ["078", "seGAdDGd6cc", "Δ Delta", 75000, 3.95, 19000, "What If GTA 6 Kept Getting Delayed?"], ["079", "TAsqnXcCqRI", "WhatIfAnimations", 441000, 81.67, 5400, "What If Light Kept Getting Slower and Couldn’t Stop?"], ["080", "ahm5qX_DZNk", "WhatIfAnimations", 60000, 11.11, 5400, "What If The Speed Of Light Increased And Couldn't Stop?"], ["081", "iEz_FZzsk_k", "WhatIfAnimations", 51000, 9.44, 5400, "What If Friction Disappeared For 10 Seconds?"], ["082", "gpLC_ELulyg", "Minute Zero", 2400000, 48.0, 50000, "What If You Sped Up and Couldn’t Stop?"], ["083", "5gbgKYMEySI", "Minute Zero", 2100000, 42.0, 50000, "What If Time Sped Up and Couldn't Stop?"], ["084", "xxBeQuOn4vA", "Minute Zero", 623000, 12.46, 50000, "What if Your Car Couldn't Stop Speeding Up?"], ["085", "YVjN6p0BxzM", "The Cosmic Witness", 83000, 25.15, 3300, "We Replaced Our Sun With 12 Real Stars, Smallest to Biggest (Simulation)"], ["086", "QmsfTvqr2Ic", "The Cosmic Witness", 39000, 11.82, 3300, "What If the Moon Opened Its Eye... and Came for Us?"], ["087", "SctrE8px6pk", "The Cosmic Witness", 19000, 5.76, 3300, "What If a Rogue Planet Hit Earth? (30-Day Countdown Simulation)"], ["088", "xU60JQSjxLc", "Universe Dimensions", 10000000, 81.3, 123000, "What TON 618 Would Look Like at Different Distances"], ["089", "7c_qUXqRZFo", "Universe Dimensions", 1300000, 10.57, 123000, "The Night Sky When BETELGEUSE Goes SUPERNOVA (Simulation)"], ["090", "tcNxiPtd8G4", "Universe Dimensions", 369000, 3.0, 123000, "The Red Giant Sun Seen From Every Planet in the Solar System"], ["091", "51ZathOeW2E", "Server History", 3100000, 10.88, 285000, "IF WW2 WAS A DISCORD CHAT (HISTORICALLY ACCURATE)"], ["092", "fc5zremCbsU", "Server History", 736000, 2.58, 285000, "IF JULIUS CAESAR HAD A GROUP CHAT (HISTORICALLY ACCURATE)"], ["093", "VHHHH4N4Wqw", "History Is Online", 98000, 2.51, 39000, "IF COVID WAS A GROUP CHAT (HISTORICALLY ACCURATE)"], ["094", "BZrQiQJo2Ug", "History Is Online", 85000, 2.18, 39000, "IF THE SPACE RACE WAS A GROUP CHAT (HISTORICALLY ACCURATE)"], ["095", "gcQNBKYhuUo", "Stargaze", 4800000, 8.63, 556500, "What If a Black Hole Entered Our Solar System? (Simulation)"], ["096", "qkBoH5l-6EY", "Stargaze", 1700000, 3.05, 556500, "What If a Star Exploded Near Earth? (Simulation)"], ["097", "5XgbLCJMSpE", "Stargaze", 1600000, 2.88, 556500, "Falling Into the Most Dangerous Planet We Know (Simulation)"], ["098", "lyRHFOcNMTU", "Planet B", 1700000, 20.24, 84000, "Why Scientists Fear the Great Himalayan Earthquake"], ["099", "bjEr7L2Rj9s", "Planet B", 556000, 6.62, 84000, "Why India's Geography Is Too Perfect"], ["100", "ylnTesFVoOo", "AFTER THE DOOR", 2600000, 60.47, 43000, "What If Every Step Made You Twice as Big?"], ["101", "1G3irYCux_k", "AFTER THE DOOR", 369000, 8.58, 43000, "What If Every Blink Skipped 10x More Time"], ["102", "uYcWVAOV-bI", "Whatfinity", 1500000, 833.33, 1800, "What If You Never Stopped Running?"]].map(r=>({n:r[0],id:r[1],ch:r[2],v:r[3],x:r[4],u:r[5],t:r[6]}));
+const byN=Object.fromEntries(SHELF.map(s=>[s.n,s]));
+const img=s=>LIB+s.n+'-'+s.id+'-outlier.jpg';
+const x2=v=>v.toFixed(2)+'x', kf=v=>v.toLocaleString('en-US');
+/* the card that sent us here: ?card= is its place in the sample hand (titles from runs/first-film/film.json) */
+const CARDS=[['The ENTIRE Journey After Death in 52 Minutes','He came back'],['What the Night Sky Looks Like Without Electric Light','Electric light'],["You're Not Lazy. You're Fighting the Noonday Demon.",'Noonday demon'],['What Egypt Looks Like Without the Nile','Without the Nile'],["The Pharaoh's Day, Hour by Hour",'Hour by hour'],['Secret Parallels Between Hospital Deathbeds & the Trojan War','Trojan war'],["there's a witness inside you",'A witness']];
+const STYLES=[{k:'woodcut',n:'Woodcut',p:'about 6¢'},{k:'tableau',n:'Tableau',p:'about 8¢'},{k:'frame',n:'Film frame',p:'free'}];
+const NAMES=['Same place','Flipped, closer','Emptier'];
+const ROOMS={crossroads:'Crossroads','feed-sight':'Feed Sight',vessel:'Vessel',canopy:'Canopy',reliquary:'Reliquary',pact:'Pact','publish-kit':'Kit',tank:'Tank'};
+const ST=Kit.state||'practice', FROM=Kit.param('from')||(ST==='from-film'?'pact':'crossroads'), DOOR=Kit.param('door')||FROM;
+const b=document.body;b.dataset.back=FROM+'.html?from=mirror-bend';b.dataset.backLabel=ROOMS[FROM]||'Crossroads';
+
+/* the model */
+const M={donor:null,study:null,idea:'',words:'',style:'woodcut',wrule:'theirs',subject:'juju',boxes:null,v:0,
+ slots:[{s:'layout'},{s:'layout'},{s:'layout'}],kept:false,reading:false,rounds:0};
+const dn=Kit.param('donor')||(ST==='free-try'?'069':ST==='empty'||Kit.param('pick')||Kit.param('card')?null:'075');
+if(dn&&byN[dn])M.donor=byN[dn];
+const card=CARDS[+(Kit.param('card')??-1)]||null;
+if(card){M.idea=card[0];M.words=card[1]}
+if(ST==='from-film'){M.idea=CARDS[0][0];M.words=CARDS[0][1];M.donor=byN['074']}
+if(['ready','painting','painted','fewer','second','all-failed','held','old-idea','locked','fuse','refused','offline','failed-phone','two-rounds','after-film'].includes(ST)&&!M.idea){M.donor=byN['074'];M.idea=CARDS[0][0];M.words=CARDS[0][1]}
+if(ST==='reading'||ST==='pending'){M.donor=null;M.reading=true}
+if(ST==='after-film')M.style='frame';
+const SL={painted:['painted','painted','layout'],fewer:['painted','painted','dropped'],second:['painted','painted','painted'],'all-failed':['failed','failed','failed'],
+ held:['held','painted','painted'],'old-idea':['old','painted','painted'],refused:['painted','refused','refused'],'failed-phone':['tiny','tiny','tiny'],'two-rounds':['tiny','tiny','tiny']}[ST];
+if(SL)M.slots=SL.map(s=>({s}));
+if(ST==='held')M.v=0;
+if(ST==='kept'||Kit.param('kept')){M.kept=Math.max(0,(+Kit.param('kept')||1)-1);M.v=M.kept}
+if(ST==='painting')M.slots=[{s:'painted'},{s:'working'},{s:'working'}];
+if(['second','two-rounds'].includes(ST))M.rounds=ST==='two-rounds'?2:1;
+const canPay=['ready','painted','fewer','second','all-failed','held','old-idea','refused','failed-phone'].includes(ST);/* a future with a woken Pigment wallet */
+const SAY={practice:['need','Practice'],empty:['','Pick an outlier'],painting:['work','Painting'],
+ 'all-failed':['stop','Nothing landed. Charged 0¢'],second:['need','Last round'],locked:['stop','Spending is locked'],fuse:['stop','Test money used up'],
+ offline:['','No network'],refused:['stop','Refused. Charged 0¢'],'two-rounds':['stop','Needs real frames'],'after-film':['','From the film, later']}[ST];
+
+/* ---- layouts: three free plans drawn from the two boxes (or the style's own places when no box is set) ---- */
+function geo(k){const B=M.boxes||{s:{x:.56,y:.12,w:.36,h:.9},w:{x:.06,y:.3,w:.48,h:.36}};let s={...B.s},w={...B.w};
+ if(k===1){s.x=1-s.x-s.w;w.x=1-w.x-w.w;const c=s.x+s.w/2;s.w*=1.25;s.h*=1.15;s.x=c-s.w/2;s.y=Math.max(0,s.y-.08)}
+ if(k===2){const c=s.x+s.w/2;s.w*=.72;s.h*=.72;s.x=c-s.w/2;s.y+=.18}
+ return {s,w}}
+function lay(k,o={}){const g=geo(k),wds=(M.wrule==='none'?'':M.words||'').split(/\s+/).filter(Boolean);
+ const ws=k===2?wds.slice(-1):wds,first=ws.slice(0,-1).join(' '),last=ws.slice(-1)[0]||'',right=g.w.x>.5;
+ const pc=v=>(v*100).toFixed(1)+'%';
+ return `<span class="lay" data-style="${M.style}"><span class="mass" style="left:${pc(g.s.x)};top:${pc(g.s.y)};width:${pc(g.s.w)};height:${pc(Math.max(g.s.h,1.02-g.s.y))}"></span>`+
+  (o.words!==false&&ws.length?`<span class="wd${right?' r':''}" data-d style="left:${pc(g.w.x)};top:${pc(g.w.y)};width:${pc(g.w.w)}">${esc(first)}<b>${esc(last)}</b></span>`:'')+
+  `<span class="clock"></span>${o.tag?'<span class="tag">Layout</span>':''}</span>`}
+function slotHTML(k,big){const sl=M.slots[k];
+ if(sl.s==='working')return `<span class="plate working"><span data-art="plate" data-state="working"></span>${big?'<span class="says"><b>Painting</b></span>':''}</span>`;
+ if(sl.s==='painted')return `<span class="plate"><span data-art="plate" data-state="empty"></span>${big?'<span class="says"><b>Painted</b></span>':''}</span><span class="stampx num" data-d>${sl.alt?1:sl.before?2:''}</span>`;
+ if(['failed','refused'].includes(sl.s))return lay(k,{tag:big})+(big?'':'');
+ return lay(k,{tag:big})}
+
+const $=id=>document.getElementById(id);
+let go;
+function renderTheirs(){const t=$('theirs');
+ if(M.reading){t.innerHTML=`<span class="plate working"><span data-art="plate" data-state="working"></span><span class="says"><b>${ST==='pending'?'Picture in':'Reading'}</b></span></span>`;Art.fill&&t.querySelectorAll('[data-art]').forEach(e=>Art.fill(e));$('meta').innerHTML=`<span class="status"><span data-art="pip" data-state="now"></span>${ST==='pending'?'Mac asleep':'Reading views'}</span>`;fillArt($('meta'));return}
+ if(M.study){t.innerHTML=`<span class="theirs">Study only</span><img src="${M.study.src}" alt="">${boxesHTML()}<span class="ctl">${ctl()}</span>`;$('meta').innerHTML=M.study.small?'<span class="pill need">Too small</span>':'<span class="pill">Study only</span>';wireBoxes();return}
+ if(!M.donor){t.innerHTML=`<span class="plate"><span data-art="plate" data-state="empty"></span><span class="says"><b>Pick an outlier</b></span></span>`;fillArt(t);$('meta').innerHTML='';return}
+ const d=M.donor;t.innerHTML=`<span class="theirs">Theirs</span><img src="${img(d)}" alt="">${boxesHTML()}<span class="ctl">${ctl()}</span>`;
+ $('meta').innerHTML=`<span class="num" data-d>${x2(d.x)}</span><span class="t" data-d>${esc(d.ch)}</span>`;wireBoxes()}
+const ctl=()=>`<button class="btn" id="boxbtn" data-u="u7">${M.boxes?'Clear boxes':'Boxes'}</button><button class="btn icon" data-open="donorsheet" aria-label="Another outlier" data-u="u1">${Art.glyph('swap')}</button>`;
+const boxesHTML=()=>M.boxes?['s','w'].map(k=>{const r=M.boxes[k];return `<span class="box ${k}" data-k="${k}" style="left:${r.x*100}%;top:${r.y*100}%;width:${r.w*100}%;height:${r.h*100}%" aria-label="${k==='s'?'Subject box':'Words box'}"><span class="grip"></span></span>`}).join(''):'';
+function fillArt(el){el.querySelectorAll('[data-art]').forEach(e=>Art.fill(e))}
+function renderOurs(){const o=$('ours');o.innerHTML=slotHTML(M.v,true);fillArt(o)}
+function renderVers(anim){const sl=M.slots;
+ $('vers').innerHTML=NAMES.map((n,k)=>{const s=sl[k].s,struck=['dropped','tiny','failed','refused'].includes(s);
+  const flag=M.kept===k?'<span class="flag pill work">Kept</span>':s==='held'?'<span class="flag pill need">Repeat</span>':s==='dropped'?'<span class="flag pill stop">Busy</span>':s==='tiny'?'<span class="flag pill stop">Busy</span>':s==='old'?'<span class="flag pill need">Old idea</span>':s==='refused'?'':'';
+  return `<button class="ver${k===M.v?' on':''}${struck?' struck':''}${s==='held'?' held':''}${anim===k?' land':''}" data-v="${k}" data-u="u21"><span class="frame">${slotHTML(k,false)}${flag}</span><span class="nm"><i data-d>${k+1}</i><span>${n}</span></span></button>`}).join('');
+ fillArt($('vers'))}
+function renderKnobs(){const dim=!M.donor&&!M.study&&!M.reading;
+ $('k-idea-v').textContent=M.idea||'';if(!M.idea){$('k-idea-v').removeAttribute('data-d');$('k-idea-v').textContent='Your idea'}else $('k-idea-v').setAttribute('data-d','');
+ $('k-idea').classList.toggle('lit',!M.idea&&!dim);
+ $('k-style-v').textContent=STYLES.find(s=>s.k===M.style).n;$('k-subj-v').textContent={juju:'Juju picks',person:'A real person',relic:'Pinned relic'}[M.subject];
+ ['k-idea','k-style','k-subj'].forEach(k=>$(k).disabled=dim)}
+function renderDeck(){const sl=M.slots.map(x=>x.s),landed=sl.filter(s=>['painted','old','held'].includes(s)).length,price=STYLES.find(s=>s.k===M.style).p;
+ let a='',label='Keep this version',fn=keep,u='u25',cls='',dis=false;
+ const pay=(t,id,uu)=>`<button class="btn" id="${id}" data-u="${uu}">${Art.emblem('pigment')}${t}</button>`;
+ if(ST==='practice'||ST==='free-try'||ST==='empty'||ST==='no-photo'||ST==='from-film'||ST==='reading'||ST==='pending'){a=`<button class="btn" disabled>${Art.emblem('pigment')}Paint three</button>`}
+ else if(['locked','fuse'].includes(ST)){a=`<a class="btn need" href="tank.html?from=mirror-bend" data-u="u38">${Art.emblem('tank')}${ST==='fuse'?'Burnt out':'Spending is locked'}</a>`}
+ else if(ST==='offline'){a=`<button class="btn" disabled>No network</button>`}
+ else if(ST==='painting'){a=`<span class="status"><span class="cat mini scan"></span><span data-d>1/3</span></span>`}
+ else if(ST==='after-film'){a=''}
+ else if(['failed-phone'].includes(ST)){label='Make it simpler';fn=simpler;u='u39'}
+ else if(ST==='two-rounds'){label='Skip the thumbnail';fn=()=>nav($('skip').href);u='u27'}
+ else if(ST==='all-failed'){label='Again, about 6¢';fn=paint;u='u22'}
+ else if(ST==='second'){label='Make it simpler';fn=simpler;u='u39';a=`<button class="btn bare" id="again1" data-u="u23">${Art.glyph('retry')}Again, about 2¢</button><button class="btn bare" id="before" data-u="u24">Previous</button>`}
+ else if(landed){a=`<button class="btn bare" id="again1" data-u="u23">${Art.glyph('retry')}Again, about 2¢</button><button class="btn bare" id="before" data-u="u24">Previous</button>`}
+ else if(canPay||ST==='ready'){label=price==='free'?'Make three, free':'Paint three, '+price;fn=paint;u='u22';a=`<button class="btn" id="keeplay" data-u="u25">Keep layout</button>`}
+ if(sl[M.v]==='held'){dis=true}
+ aside.innerHTML=(SAY?`<span class="say ${SAY[0]}" style="font-size:15px">${SAY[1]}</span>`:'')+a;fillArt(aside);aside.querySelectorAll('.cat').forEach(e=>e.innerHTML=window.JujuCat);
+ go.textContent=label;go.onclick=fn;go.dataset.u=u;go.disabled=dis;go.className='primary'+(cls?' '+cls:'');
+ const k=$('keeplay');if(k)k.onclick=keep;const ag=$('again1');if(ag)ag.onclick=()=>{M.slots[M.v]={s:'working'};renderVers();renderOurs();setTimeout(()=>{M.slots[M.v]={s:'painted',before:1};renderVers(M.v);renderOurs();Kit.toast('Painted again. The one before is kept.')},reduce()?0:1400)};
+ const bf=$('before');if(bf)bf.onclick=()=>{const x=M.slots[M.v];x.alt=!x.alt;renderOurs();renderVers();Kit.toast(x.alt?'The one before is back. Free.':'The new one is back')};
+ $('skip').href=DOOR==='publish-kit'?'publish-kit.html?from=mirror-bend':'pact.html?from=mirror-bend&thumb=none';$('skip').dataset.u=DOOR==='publish-kit'?'u40':'u27';
+ $('feedchip').href=`feed-sight.html?from=mirror-bend&door=${DOOR}`}
+const aside=document.getElementById('aside');
+function render(anim){renderTheirs();renderOurs();renderVers(anim);renderKnobs();renderDeck();}
+const reduce=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+function nav(u){setTimeout(()=>location.href=u,160)}
+function keep(){if(M.slots[M.v].s==='held'){Kit.toast('Same layout as your last film',{state:'need'});return}
+ const f=$('ours');f.style.transition='transform .35s,opacity .35s';f.style.transform='translateY(-24px) scale(1.03)';f.style.opacity='.2';
+ Kit.finish(go,'Kept. To the feed.');nav(`feed-sight.html?from=mirror-bend&door=${DOOR}&v=${M.v+1}${M.slots[M.v].s==='painted'?'':'&layout=1'}`)}
+function paint(){if(!M.idea){Kit.toast('Write the idea first',{state:'need'});Kit.sheet('ideasheet').open();return}
+ go.classList.add('busy');M.slots=[{s:'working'},{s:'working'},{s:'working'}];renderVers();renderOurs();
+ let k=0;const land=()=>{M.slots[k]={s:'painted'};renderVers(k);renderOurs();renderDeck();k++;if(k<3)setTimeout(land,reduce()?0:700);else{go.classList.remove('busy');renderDeck();Kit.toast('Three landed')}};setTimeout(land,reduce()?0:900)}
+function simpler(){M.words=(M.words||'').split(/\s+/).slice(-2).join(' ');M.boxes={s:{x:.5,y:.08,w:.44,h:.92},w:{x:.05,y:.32,w:.42,h:.3}};M.slots=[{s:'layout'},{s:'layout'},{s:'layout'}];render();
+ go.textContent='Paint one, about 2¢';go.onclick=()=>{M.slots[0]={s:'working'};renderVers();renderOurs();setTimeout(()=>{M.slots[0]={s:'painted'};renderVers(0);renderOurs();go.textContent='Keep this version';go.onclick=keep},reduce()?0:1200)};Kit.toast('One big shape, two words')}
+
+/* boxes: drag to move, drag the corner to stretch; all three layouts follow at once */
+function wireBoxes(){const t=$('theirs');t.querySelectorAll('.box').forEach(bx=>{bx.onpointerdown=e=>{e.stopPropagation();const k=bx.dataset.k,R=t.getBoundingClientRect(),r={...M.boxes[k]},grip=e.target.classList.contains('grip'),x0=e.clientX,y0=e.clientY;
+  bx.setPointerCapture(e.pointerId);bx.classList.add('held');
+  bx.onpointermove=ev=>{const dx=(ev.clientX-x0)/R.width,dy=(ev.clientY-y0)/R.height,n=M.boxes[k];
+   if(grip){n.w=Math.max(.1,Math.min(1-r.x,r.w+dx));n.h=Math.max(.1,Math.min(1-r.y,r.h+dy))}else{n.x=Math.max(0,Math.min(1-r.w,r.x+dx));n.y=Math.max(0,Math.min(1-r.h,r.y+dy))}
+   bx.style.left=n.x*100+'%';bx.style.top=n.y*100+'%';bx.style.width=n.w*100+'%';bx.style.height=n.h*100+'%';renderOurs();renderVers()};
+  bx.onpointerup=()=>{bx.onpointermove=null;bx.classList.remove('held')}}});
+ const bb=$('boxbtn');if(bb)bb.onclick=e=>{e.stopPropagation();M.boxes=M.boxes?null:{s:{x:.55,y:.1,w:.38,h:.86},w:{x:.05,y:.28,w:.46,h:.38}};renderTheirs();renderOurs();renderVers()}}
+
+/* the donor sheet */
+let chFilter=null;
+function outList(){const L=SHELF.filter(s=>!chFilter||s.ch===chFilter).sort((a,b)=>b.x-a.x);
+ $('filter').innerHTML=chFilter?`<button class="btn bare" id="clearf" style="margin-top:10px">${Art.glyph('close')}<span data-d>${esc(chFilter)}</span></button>`:'';
+ $('outlist').innerHTML=L.map(s=>`<button class="row${M.donor&&M.donor.n===s.n?' on':''}" data-n="${s.n}" data-u="u2"><span class="tile pic"><img src="${img(s)}" alt="" loading="lazy"></span><b class="name" data-d>${esc(s.t)}</b><span class="val num" data-d>${x2(s.x)}</span></button>`).join('');
+ const cf=$('clearf');if(cf)cf.onclick=()=>{chFilter=null;outList()}}
+function chList(){const C={};SHELF.forEach(s=>C[s.ch]=(C[s.ch]||0)+1);
+ $('chlist').innerHTML=Object.entries(C).sort((a,b)=>b[1]-a[1]).map(([c,n])=>`<button class="row" data-ch="${esc(c)}" data-u="u3"><span class="tile">${Art.emblem('vessel')}</span><b class="name" data-d>${esc(c)}</b><span class="val num" data-d>${n}</span></button>`).join('')}
+function setDonor(s){M.donor=s;M.study=null;M.reading=false;M.boxes=null;M.slots=M.slots.map(x=>x.s==='painted'?{s:'old'}:x);Kit.sheet('donorsheet').close();render();Kit.toast('Three layouts redrawn')}
+function pasteLink(v){const inp=$('link');v=(v||'').trim();inp.classList.remove('bad');
+ const m=v.match(/^(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/watch\?(?:.*&)?v=|youtu\.be\/)([\w-]{11})/);
+ if(/\/shorts\/|\/live\//.test(v)){inp.classList.add('bad');Kit.toast('YouTube would not show this one',{state:'stop'});return}
+ if(!m){inp.classList.add('bad');Kit.toast('That is not a normal YouTube video',{state:'stop'});return}
+ const s=SHELF.find(x=>x.id===m[1]);if(s){setDonor(s);return}
+ M.donor=null;M.reading=true;Kit.sheet('donorsheet').close();render();Kit.toast('The picture comes first, then its views');setTimeout(()=>{if(M.reading)$('meta').innerHTML='<span>Mac asleep</span>'},1400)}
+
+document.addEventListener('DOMContentLoaded',()=>{
+ go=document.getElementById('go');
+ document.querySelectorAll('.rail .door').forEach(d=>{const k=d.getAttribute('href').split('.')[0];d.dataset.u={altar:'u34',crossroads:'u35',cauldron:'u36'}[k]||''});{const bk=document.querySelector('.head .back');if(bk)bk.dataset.u={'feed-sight':'u28',vessel:'u29',canopy:'u30',reliquary:'u31',pact:'u32','publish-kit':'u33',crossroads:'u37'}[FROM]||''}
+ outList();chList();render();
+ /* the styles sheet: each style as its own drawn layout */
+ const drawStyles=()=>{$('styles').innerHTML=STYLES.map(s=>{const keep=M.style;M.style=s.k;const h=lay(0);M.style=keep;return `<button class="sty${s.k===M.style?' on':''}" data-k="${s.k}"><span class="frame">${h}</span><span>${s.n}, ${s.p}</span></button>`}).join('')};drawStyles();
+ if(ST==='empty'||Kit.param('pick'))Kit.sheet('donorsheet').open();
+ if(Kit.param('simpler'))simpler();
+ if(ST==='style')Kit.sheet('stylesheet').open();
+ if(ST==='idea'||ST==='free-try'&&false)Kit.sheet('ideasheet').open();
+ if(ST==='subject'||ST==='no-photo')Kit.sheet('subjsheet').open();
+ $('theirs').addEventListener('click',e=>{if(e.target.closest('.box,.ctl'))return;Kit.sheet('donorsheet').open()});
+ $('ours').addEventListener('click',()=>{if(matchMedia('(max-width:760px)').matches)$('bend').classList.toggle('swap')});
+ /* phone: tap the small picture to swap which one is big; swipe the big one to change version */
+ $('theirs').addEventListener('click',e=>{if(matchMedia('(max-width:760px)').matches&&!$('bend').classList.contains('swap')){e.stopImmediatePropagation();$('bend').classList.add('swap')}},true);
+ let sx=null;$('ours').addEventListener('pointerdown',e=>sx=e.clientX);$('ours').addEventListener('pointerup',e=>{if(sx!=null&&Math.abs(e.clientX-sx)>40){M.v=(M.v+(e.clientX<sx?1:2))%3;renderOurs();renderVers();renderDeck()}sx=null});
+ $('vers').addEventListener('click',e=>{const v=e.target.closest('.ver');if(!v)return;M.v=+v.dataset.v;renderOurs();renderVers();renderDeck();Kit.press(v)});
+ $('outlist').addEventListener('click',e=>{const r=e.target.closest('[data-n]');if(r)setDonor(byN[r.dataset.n])});
+ $('chlist').addEventListener('click',e=>{const r=e.target.closest('[data-ch]');if(!r)return;chFilter=r.dataset.ch;outList();document.querySelector('#donorsheet .tab').click()});
+ $('pastebtn').onclick=async()=>{let v=$('link').value;if(!v){try{v=await navigator.clipboard.readText();$('link').value=v}catch(e){}}pasteLink(v)};
+ $('link').addEventListener('keydown',e=>{if(e.key==='Enter')pasteLink(e.target.value)});
+ $('link').addEventListener('paste',e=>setTimeout(()=>pasteLink(e.target.value),0));
+ const readFile=f=>{if(!f||!/^image\//.test(f.type)||f.size>20e6){Kit.toast('This file cannot be read',{state:'stop'});return}const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{M.study={src:r.result,small:Math.max(i.width,i.height)<640};M.donor=null;M.reading=false;Kit.sheet('donorsheet').close();render();Kit.toast('Study only. No views claimed.')};i.src=r.result};r.readAsDataURL(f)};
+ $('file').onchange=e=>readFile(e.target.files[0]);
+ const T=$('theirs');T.addEventListener('dragover',e=>{e.preventDefault();T.classList.add('drop')});T.addEventListener('dragleave',()=>T.classList.remove('drop'));
+ T.addEventListener('drop',e=>{e.preventDefault();T.classList.remove('drop');const f=e.dataTransfer.files[0];if(f){readFile(f);return}const u=e.dataTransfer.getData('text');if(u)pasteLink(u)});T.dataset.u2='u6';
+ /* idea sheet */
+ const ii=$('idea-in'),wi=$('words-in'),wc=$('wcount');
+ document.querySelector('[data-open=ideasheet]').addEventListener('click',()=>{ii.value=M.idea;wi.value=M.words;wc.textContent=(M.words.split(/\s+/).filter(Boolean).length)+'/3';setTimeout(()=>ii.focus(),60)});
+ wi.addEventListener('input',()=>{const n=wi.value.split(/\s+/).filter(Boolean).length;wc.textContent=n+'/3';wc.style.color=n>3?'var(--stop-hi)':''});
+ $('bendit').onclick=()=>{const n=wi.value.split(/\s+/).filter(Boolean);if(n.length>3){Kit.toast('Three words at most',{state:'stop'});return}
+  const changed=ii.value!==M.idea||wi.value!==M.words;M.idea=ii.value.trim();M.words=n.join(' ');
+  if(changed)M.slots=M.slots.map(x=>x.s==='painted'?{s:'old'}:x);Kit.sheet('ideasheet').close();render();Kit.toast('Bent this way')};
+ /* style sheet */
+ $('styles').addEventListener('click',e=>{const s=e.target.closest('.sty');if(!s)return;M.style=s.dataset.k;drawStyles();render();Kit.press(s)});
+ $('wordsrule').addEventListener('click',e=>{const x=e.target.closest('[data-w]');if(!x)return;M.wrule=x.dataset.w;$('wordsrule').querySelectorAll('[data-w]').forEach(y=>y.setAttribute('aria-pressed',y===x));render();drawStyles()});
+ let undo=null;$('keepch').onclick=()=>{const k=$('keepch');if(undo){Object.assign(M,undo);undo=null;k.textContent='Keep for this channel';drawStyles();render();Kit.toast('The earlier start is back');return}
+  undo={style:'woodcut',wrule:'theirs'};k.textContent='Kept. Undo';k.dataset.u='u14';Kit.toast('The start for every next film',{art:Art.seal({state:'pressed',emblem:'vessel'})})};
+ /* subject sheet */
+ $('subjrows').addEventListener('click',e=>{const r=e.target.closest('[data-s]');if(!r||r.disabled)return;const s=r.dataset.s;$('personbox').hidden=s!=='person';$('relicbox').hidden=s!=='relic';
+  if(s==='juju'){M.subject='juju';render();Kit.sheet('subjsheet').close()}if(s==='person')setTimeout(()=>$('person-in').focus(),50)});
+ $('person-in').addEventListener('keydown',e=>{if(e.key!=='Enter')return;Kit.toast('Looking in the archives');setTimeout(()=>{Kit.toast('No photo of that person we may use. Juju picks.',{state:'need'});M.subject='juju';document.querySelector('[data-s=juju]').click()},reduce()?0:900)});
+ if(ST==='film-drawn'){const fr=$('framerow');fr.disabled=false;fr.classList.remove('off');fr.querySelector('.val').remove();Kit.sheet('subjsheet').open();$('moments').hidden=false;$('moments').innerHTML=['Cold Open','The Waking and the Court','The King of the Dead','Heaven Ends','The Last Lot','The River and the Waking'].map((a,k)=>`<button class="sty${k?'':' on'}" data-m="${k}"><span class="frame"><span class="plate"><span data-art="plate" data-state="empty"></span></span></span><span data-d>${a}</span></button>`).join('');fillArt($('moments'));$('moments').onclick=e=>{const m=e.target.closest('.sty');if(m){$('moments').querySelectorAll('.sty').forEach(x=>x.classList.toggle('on',x===m));Kit.press(m)}}}
+ if(ST==='no-photo'){$('personbox').hidden=false;$('person-in').value='@Er of Pamphylia'}
+ /* the phone back key closes a sheet first (the kit's Escape does it at the desk) */
+});
+/* proof aid: ?do=<css>;<css>~<text> taps (or types into) those controls in order, so a still can show the state after a tap. Not part of the room. */
+document.addEventListener('DOMContentLoaded',()=>{(Kit.param('do')||'').split(';').filter(Boolean).forEach((q,i)=>setTimeout(()=>{const [c,v]=q.split('~'),e=document.querySelector(c);if(!e){console.error('do: nothing at '+c);return}if(v!=null){e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));return}e.click()},40+i*130))});
+})();
+</script>
+</body>
+</html>

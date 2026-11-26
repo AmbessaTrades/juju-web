@@ -1,0 +1,259 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Juju · The Sound Shelf</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script>
+<style>
+/* sound room layout. Parts the kit lacks, kept here: .field (a text box), .picker (a lit choice among a few buttons), .verdict (state word plus what the ears heard), .scenecard (the scene that sent you). */
+body{--focus-x:34%;--focus-y:40%}
+.field{width:100%;min-height:52px;padding:0 16px;border:0;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line);color:var(--bone);font:400 16px/1.3 "Lato",sans-serif}
+.field::placeholder{color:var(--smoke)} .field:focus{outline:none;box-shadow:inset 0 0 0 2px var(--act)}
+.picker{display:flex;gap:6px;flex-wrap:wrap}
+.picker .btn[aria-pressed=true]{color:var(--on-act);background:linear-gradient(180deg,var(--act-hi) -60%,var(--act) 60%,var(--act-lo))} .picker .btn[aria-pressed=true]::after{box-shadow:none}
+.sd{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:34px;align-items:start}
+.left{display:grid;gap:18px;align-content:start}
+.big{display:grid;gap:14px}
+.big .top{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:28px}
+.stage{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px}
+.stage .art.sound{width:100%;height:auto;cursor:pointer;touch-action:none}
+.stage .play{width:64px;height:64px} .stage .play .glyph{width:26px;height:26px}
+.big .h2{overflow-wrap:anywhere}
+.verdict{display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-height:44px;border:0;background:none;padding:0;cursor:pointer;color:var(--ash);font:400 16px/1.3 "Lato",sans-serif;text-align:left}
+.verdict .heard{color:var(--bone)}
+.acts,.ask{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.acts .grow{margin-left:auto}
+.asker{display:grid;gap:6px;padding:0 4px}
+.side{display:grid;gap:16px;align-content:start}
+.group{display:grid;gap:8px}
+.group>.lab{display:flex;justify-content:space-between} .lab .num{font-size:12.5px}
+.row{grid-template-columns:56px minmax(0,1fr)}
+.row .tile .art.pip{width:24px;height:24px}
+.row .len{display:block;font-size:14px;color:var(--ash);margin-top:3px}
+.parts{display:grid;gap:12px;margin-top:14px}
+.part{display:grid;grid-template-columns:minmax(0,1fr) 48px;gap:8px;align-items:center}
+.part .found{grid-column:1/-1;font-size:14px;color:var(--ash);margin-top:-4px} .part .found.ok{color:var(--work)}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 18px;margin-top:14px;font-size:15px}
+.kv dt{color:var(--smoke)} .kv dd{margin:0}
+.scenecard{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:center}
+.scenecard .plate{min-height:0}
+.scenecard .quote{font:italic 400 17px/1.4 "Spectral",serif;color:var(--bone)}
+@media (max-width:760px){
+ .sd{grid-template-columns:1fr;gap:22px}
+ .stage{grid-template-columns:minmax(0,1fr) 56px} .stage .play{width:56px;height:56px}
+ .scenecard{grid-template-columns:110px minmax(0,1fr);gap:12px}
+ .row{grid-template-columns:48px minmax(0,1fr)} #takes{flex-wrap:nowrap;gap:8px} #takes .btn:not(.icon){padding:0 12px 3px;flex:1 1 0} .scenecard .lab{line-height:1.4}
+}
+</style></head>
+<body data-skin="nocturne" data-room="sound" data-door="altar" data-title="The Sound Shelf" data-channel="Library of Tehuti" data-chan-state="need" data-back="vessel.html" data-back-label="Vessel" data-tank="asleep" data-who="A">
+<script>/* the door decides the way back before the shell is built */
+(()=>{const q=new URLSearchParams(location.search.replace(/\.html$/,'')),st=q.get('state')||'',f=q.get('from')||(st==='from-a-scene'?'spell-strip':st==='from-the-receipt'?'pact':'');const b=document.body.dataset;
+ if(f==='spell-strip'){b.back='spell-strip.html';b.backLabel='Back to the scene'}else if(f==='pact'){b.back='pact.html';b.backLabel='Back to the receipt'}})();</script>
+<main>
+ <div class="sd">
+ <div class="left">
+  <section class="panel focus big" data-frame="crest" id="big" aria-label="The sound in your hand">
+   <div class="top"><span class="lab" id="where"></span><span id="tag"></span></div>
+   <div class="scenecard" id="scenecard" hidden data-u="u7">
+    <span class="plate empty"><span data-art="plate" data-state="empty"></span></span>
+    <span><span class="lab" data-d>Act II · The Meadow and the Mouth</span><br><span class="quote" data-d>“A thousand years on foot, dust in the mouth.”</span></span>
+   </div>
+   <div class="stage"><span id="bigart" data-u="u2"></span><button class="btn icon play" id="play" aria-label="Play" data-u="u1"><span data-art="glyph" data-name="play"></span></button></div>
+   <button class="verdict" id="verdict" data-open="heard" data-u="u17" aria-label="What the check heard"></button>
+   <h2 class="h2" id="sname" data-d hidden></h2>
+   <div class="acts" id="takes" hidden>
+    <button class="btn" data-take="Softer" data-u="u12">Softer</button><button class="btn" data-take="Darker" data-u="u12">Darker</button><button class="btn" data-take="Longer" data-u="u12">Longer</button>
+    <button class="btn icon grow" id="throw" data-u="u9" aria-label="Throw out"><span data-art="glyph" data-name="close"></span></button>
+   </div>
+   <div class="acts" id="closer" hidden data-u="u13"><span class="lab">Closer?</span><button class="btn" data-pickt="0">First</button><button class="btn" data-pickt="1">Second</button></div>
+   <div class="acts" id="checks" hidden><button class="btn" id="checkagain" data-u="u6">Check again</button><button class="btn" id="checknow" data-u="u6">Check now</button></div>
+   <div class="acts" id="putback" hidden><button class="btn" id="undo" data-u="u9">Put it back</button></div>
+   <div class="acts" id="setnav" hidden data-u="u20"><button class="btn icon" id="setthrow" aria-label="Throw out"><span data-art="glyph" data-name="back"></span></button><span class="num" id="setcount" data-d></span><button class="btn icon" id="setkeep" aria-label="Keep"><span data-art="glyph" data-name="go"></span></button></div>
+   <div id="ears" hidden><div class="acts only-phone"><button class="btn need" data-open="earsheet" data-u="u28">Get the ears</button><span class="num" data-d>420 MB</span></div></div>
+  </section>
+  <div class="asker">
+   <div class="ask only-desk"><input class="field" id="askfield" style="flex:1 1 220px" placeholder="Ask for a sound: rain on a tin roof" aria-label="Ask for a sound" data-u="u10"><button class="btn" id="make" data-u="u11">Make</button></div>
+   <div class="ask"><button class="btn bare" data-open="partsheet" data-u="u14">Build from parts</button><button class="btn bare" data-open="device" data-kind="sound" data-u="u19">Your file</button></div>
+  </div>
+ </div>
+  <section class="side" aria-label="The shelf">
+   <div class="tabs" data-tabs data-scroll><button class="tab" aria-selected="true" data-panel="p-sounds" data-u="u22">Sounds <span class="n" id="nk" data-d>0</span></button><button class="tab" data-panel="p-music" data-u="u22">Music</button></div>
+   <input class="field" id="find" type="search" placeholder="Find on this shelf" aria-label="Find on this shelf" data-u="u21">
+   <div id="p-sounds" class="group"><div id="shelf" class="group"></div></div>
+   <div id="p-music" class="group" hidden>
+    <div class="rows" id="beds"></div>
+    <div class="ask"><button class="btn" id="findbed" data-u="u30" aria-label="Find a free bed">Free bed</button><button class="btn" data-open="device" data-kind="music" data-u="u23" aria-label="Add music I own">My music</button></div>
+   </div>
+  </section>
+ </div>
+</main>
+<footer class="deck"><div class="aside"></div><button class="primary" id="go" data-u="u4">Ask for a sound</button></footer>
+
+<section class="sheet" id="asksheet" hidden><h3>Ask for a sound</h3><input class="field" id="askfield2" style="margin-top:14px" placeholder="rain on a tin roof" aria-label="Ask for a sound"><div class="acts" style="margin-top:16px"><button class="btn need" id="make2">Make</button><button class="btn bare" data-close>Not now</button></div></section>
+
+<section class="sheet" id="heard" hidden><h3>What the check heard</h3><b class="name" id="heardname" data-d></b>
+ <dl class="kv" id="heardkv"></dl>
+ <p class="lab" style="margin-top:18px">Loudness</p>
+ <div class="picker" id="loud" data-u="u18" style="margin-top:8px"><button class="btn">Quiet</button><button class="btn" aria-pressed="true">Normal</button><button class="btn">Loud</button></div></section>
+
+<section class="sheet" id="partsheet" hidden><h3>Build from parts</h3><div class="parts" id="parts"></div>
+ <div class="acts" style="margin-top:16px"><button class="btn" id="addpart">Add a part</button><button class="btn need" id="build" data-u="u16">Build it</button></div></section>
+
+<section class="sheet" id="device" hidden><h3 id="devh">From this device</h3><div class="acts" style="margin-top:14px"><button class="btn" id="pickfile">Pick a file</button><span class="small" id="filename" data-d></span></div>
+ <p class="lab" style="margin-top:18px">Whose</p>
+ <div class="picker" id="whose" style="margin-top:8px"><button class="btn" data-w="mine">Mine</button><button class="btn" data-w="other">Someone else's</button></div>
+ <div id="licence" hidden style="display:grid;gap:10px;margin-top:12px"><input class="field" placeholder="Whose is it" aria-label="Whose is it"><input class="field" placeholder="The licence, as printed" aria-label="The licence, as printed"></div>
+ <div class="acts" style="margin-top:16px"><button class="btn need" id="devkeep" disabled>Shelve it</button><button class="btn bare" data-close>Not now</button></div></section>
+
+<section class="sheet" id="earsheet" hidden><h3>Get the ears</h3><span class="num" data-d>about 420 MB</span><div class="acts" style="margin-top:16px"><button class="btn need" id="getears">Get them on Wi-Fi</button><button class="btn bare" data-close>Later</button></div></section>
+
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const ST=Kit.state,FROM=Kit.param('from')||(ST==='from-a-scene'?'spell-strip':ST==='from-the-receipt'?'pact':''),phone=()=>matchMedia('(max-width:760px)').matches;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,say=(t,o)=>Kit.toast(t,Object.assign({ms:2600},o||{}));
+let seedN=20,shelf=[],cur=null,thrown=null,setMode=null,beds=[],bedOn='none',sample=false,tab='sounds';
+const S=(name,st,o={})=>Object.assign({id:'s'+(++seedN),name,st,seed:seedN,takes:[]},o);
+const net=ST!=='no-network';
+/* the one real sample: a learned page turn measured on this Mac, z 2.8 against the candidate mark 3.0 */
+const page=S('a page turned','close',{heard:'a page turn',z:'2.8 / 3.0',from:'Learned',real:true});
+const presets={
+ making:()=>{shelf=[S('rain on a tin roof','making')]},
+ checking:()=>{shelf=[S('a coin dropped on wood','checking',{from:'Learned'})]},
+ passed:()=>{shelf=[S('water poured into a cup','passed',{heard:'pouring water',second:'Agrees',from:'Learned'})]},
+ close:()=>{shelf=[page]},
+ failed:()=>{shelf=[S('a stone door closing','failed',{heard:'an explosion',second:'Objects',from:'Invented'})]},
+ kept:()=>{shelf=[Object.assign(page,{st:'kept'}),S('wind over dry grass','passed',{heard:'wind',second:'Agrees',from:'Learned'})]},
+ 'set-to-hear':()=>{shelf=[['a page turned','a page turn'],['a candle flame','a small fire'],['wind over dry grass','wind'],['a wooden pile settling','wood creaking'],['a heavy door','a door closing'],['a bell far off','a distant bell'],['bare feet on stone','footsteps'],['a slow river','running water'],['a crowd murmuring','a crowd']].map(([n,h])=>S(n,'passed',{heard:h,second:'Agrees',from:'Learned'}));setMode={i:0,n:shelf.length,kept:0}},
+ 'from-a-scene':()=>{shelf=[S('bare feet on dry earth','passed',{heard:'footsteps on dirt',second:'Agrees',from:'Learned'})]},
+ 'waiting-for-a-render':()=>{shelf=[S('a candle flame','unheard',{waiting:true,from:'Learned'})]},
+ 'phone-ears-not-here':()=>{shelf=[S('a bell far off','unheard',{noears:true,from:'Learned'})]},
+ 'from-the-receipt':()=>{presets['set-to-hear']();setMode=null},
+};
+if(presets[ST]){presets[ST]();sample=ST!=='close'}
+cur=shelf.find(s=>s.st!=='kept')||shelf[0]||null;
+if(ST==='kept')cur=shelf[0];
+if(ST==='from-the-receipt')cur=null;
+/* ---------- drawing ---------- */
+const bigArt=$('#bigart');let prog=0,playing=false;
+function drawBig(){const s=cur,st=!s?'empty':s.st==='kept'?'kept':playing?'playing':s.st==='making'?'empty':'made';bigArt.innerHTML=Art.sound({state:st,seed:s?s.seed:1,progress:prog})}
+/* the verdict: one state word, then what the ears heard (data) */
+function verdict(s){
+ if(!s)return shelf.length&&FROM==='pact'?['need','Hear the set',String(shelf.length)]:['dim','Empty',''];
+ if(s.st==='passed')return ['work','Passed',s.heard];
+ if(s.st==='close')return ['need','Close',s.heard+(s.z?' · '+s.z:'')];
+ if(s.st==='failed')return ['stop','Refused',s.heard];
+ if(s.st==='kept')return ['work','Kept',''];
+ if(s.st==='making')return ['work','Making',''];
+ if(s.waiting)return ['dim','Waiting',''];
+ if(s.noears)return ['dim','Not checked',''];
+ if(s.checkfail)return ['stop','Check failed',''];
+ return ['work','Checking','']}
+function render(){const s=cur;drawBig();
+ $('#sname').textContent=s?s.name:'';$('#sname').hidden=!s;
+ const [c,w,h]=verdict(s);$('#verdict').innerHTML=`<span class="pill ${c}">${w}</span>${h?`<span class="heard" data-d>${h}</span>`:''}`;$('#verdict').hidden=!s&&!(FROM==='pact'&&shelf.length);
+ $('#play').hidden=!s||s.st==='making';
+ $('#takes').hidden=!s||s.st==='making'||s.st==='unheard'||!!setMode;
+ $('#closer').hidden=!(s&&s.takes.length);
+ $('#checks').hidden=!(s&&(s.waiting||s.checkfail));$('#checknow').hidden=!(s&&s.waiting);$('#checkagain').hidden=!(s&&s.checkfail);
+ $('#ears').hidden=!(s&&s.noears);
+ $('#setnav').hidden=!setMode||setMode.done;if(setMode)$('#setcount').textContent=(setMode.i+1)+' / '+setMode.n;
+ $('#tag').innerHTML='';
+ $('#scenecard').hidden=FROM!=='spell-strip';
+ $('#where').textContent=setMode?'Hear the set':'';
+ $('.big .top').hidden=!$('#where').textContent;$('#find').hidden=tab==='music'||shelf.length<4;
+ drawShelf();primary()}
+function rowOf(s){const pip=s.st==='kept'?'done':s.st==='failed'?'failed':s.st==='making'||s.st==='checking'?'now':'next';
+ return `<button class="row${s===cur?' on':''}${s.st==='failed'?' stop':''}" data-id="${s.id}" data-u="u3"><span class="tile">${Art.pip({state:pip})}</span><span><b class="name" data-d>${s.name}</b></span></button>`}
+function drawShelf(){const q=$('#find').value.trim().toLowerCase(),f=s=>!q||s.name.includes(q);
+ const wait=shelf.filter(s=>s.st!=='kept'&&s.st!=='thrown'&&s.st!=='failed'&&f(s)),bad=shelf.filter(s=>s.st==='failed'&&f(s)),kept=shelf.filter(s=>s.st==='kept'&&f(s));
+ $('#nk').textContent=shelf.filter(s=>s.st!=='thrown').length;
+ const grp=(l,a)=>`<div class="group"><span class="lab"><span>${l}</span><span class="num" data-d>${a.length}</span></span>${a.length?`<div class="rows">${a.map(rowOf).join('')}</div>`:''}</div>`;
+ let h='';if(wait.length)h+=grp('Waiting',wait);if(bad.length)h+=grp('Refused',bad);h+=grp('Kept',kept);$('#shelf').innerHTML=h}
+const go=$('#go');
+function primary(){const s=cur;let label='Ask for a sound',dis=false,need=false,u='u4';
+ if(tab==='music'){label=FROM==='spell-strip'?'Use for this film':'Use as channel music';u=FROM==='spell-strip'?'u8':'u24';dis=bedOn==='none'&&!beds.length}
+ else if(setMode){label=setMode.done?'Done, the set is yours':'Keep this sound';u=setMode.done?'u25':'u20';need=!!setMode.done}
+ else if(FROM==='pact'&&!s&&shelf.length){label='Hear the set';u='u20'}
+ else if(!s||s.st==='kept'&&FROM!=='spell-strip'){label='Ask for a sound';u='u4'}
+ else if(s.st==='failed'){label='Make it again';u='u5'}
+ else if(s.st==='making'){label='Keep this sound';dis=true}
+ else if(FROM==='spell-strip'){label='Use in this scene';u='u7'}
+ else label='Keep this sound';
+ go.textContent=label;go.dataset.u=u;go.disabled=dis;go.classList.toggle('need',need)}
+/* ---------- play and scrub ---------- */
+let raf=0;function stop(){playing=false;cancelAnimationFrame(raf);$('#play').innerHTML=Art.glyph('play');$('#play').setAttribute('aria-label','Play');drawBig()}
+$('#play').onclick=()=>{if(!cur)return;if(playing)return stop();playing=true;$('#play').innerHTML=Art.glyph('pause');$('#play').setAttribute('aria-label','Stop');
+ if(reduce){prog=1;drawBig();return}const t0=performance.now()-prog*2600;const step=t=>{prog=Math.min(1,(t-t0)/2600);drawBig();if(prog<1&&playing)raf=requestAnimationFrame(step);else{prog=0;stop()}};raf=requestAnimationFrame(step)};
+bigArt.addEventListener('pointerdown',e=>{if(!cur||cur.st==='making')return;const r=bigArt.querySelector('svg').getBoundingClientRect();const at=x=>{prog=Math.max(0,Math.min(1,((x-r.left)/r.width*560-150)/400));const p=playing;playing=true;drawBig();playing=p};
+ at(e.clientX);bigArt.setPointerCapture(e.pointerId);const mv=ev=>at(ev.clientX),up=()=>{bigArt.removeEventListener('pointermove',mv);bigArt.removeEventListener('pointerup',up)};bigArt.addEventListener('pointermove',mv);bigArt.addEventListener('pointerup',up)});
+/* ---------- the shelf ---------- */
+$('#shelf').addEventListener('click',e=>{const r=e.target.closest('.row');if(!r)return;stop();cur=shelf.find(s=>s.id===r.dataset.id);prog=0;render();Kit.press($(`.row[data-id="${cur.id}"]`));if(cur.st==='close')say('Close. Your ear decides.',{state:'need'})});
+$('#find').addEventListener('input',drawShelf);
+/* ---------- ask, make, check ---------- */
+const CHIP=/\b(8[- ]?bit|retro|chiptune)\b/i;
+function make(words,from){words=(words||'').trim();if(!words||CHIP.test(words)){say('Name a real thing: a bell, a coin on wood.',{state:words?'stop':'need'});return false}
+ const s=S(words,'making',{from:from||'Learned'});shelf.unshift(s);cur=s;prog=0;render();say('Making. Ask for the next one meanwhile.');
+ setTimeout(()=>{s.st='checking';render()},reduce?0:1300);
+ setTimeout(()=>{if(!net){s.checkfail=true}else{s.st='passed';s.heard=words;s.second='Agrees'}render()},reduce?0:3200);return true}
+$('#make').onclick=()=>{if(make($('#askfield').value))$('#askfield').value=''};
+$('#askfield').addEventListener('keydown',e=>{if(e.key==='Enter')$('#make').click()});
+$('#make2').onclick=()=>{if(make($('#askfield2').value)){$('#askfield2').value='';Kit.sheet('asksheet').close()}};
+$('#checkagain').onclick=()=>{cur.checkfail=false;cur.st='checking';render();setTimeout(()=>{cur.st='passed';cur.heard=cur.name;cur.second='Agrees';render()},reduce?0:1500)};
+$('#checknow').onclick=()=>{say('The render paused at its last finished act.');cur.waiting=false;cur.st='checking';render();setTimeout(()=>{cur.st='passed';cur.heard=cur.name;cur.second='Agrees';render();say('Checked. The render goes on.')},reduce?0:1500)};
+$$('[data-take]').forEach(b=>b.onclick=()=>{if(!cur)return;const t=S(cur.name+', '+b.dataset.take.toLowerCase(),'checking',{from:'New take'});cur.takes=[cur.id,t.id];t.takes=[cur.id,t.id];shelf.splice(shelf.indexOf(cur)+1,0,t);const a=cur;cur=t;render();say('A new take beside the old one. Hear both.');
+ setTimeout(()=>{t.st='passed';t.heard=a.heard||a.name;t.second='Agrees';render()},reduce?0:1500)});
+$('#closer').addEventListener('click',e=>{const b=e.target.closest('[data-pickt]');if(!b||!cur)return;const [a,c]=cur.takes.map(id=>shelf.find(s=>s.id===id));const keep=b.dataset.pickt==='0'?a:c,drop=keep===a?c:a;
+ shelf=shelf.filter(s=>s!==drop);keep.takes=[];cur=keep;render();say('Kept the closer one')});
+$('#throw').onclick=()=>{if(!cur)return;stop();clearTimeout(thrown&&thrown.t);thrown={s:cur,i:shelf.indexOf(cur)};shelf=shelf.filter(s=>s!==cur);cur=shelf.find(s=>s.st!=='kept')||null;render();$('#putback').hidden=false;say('Thrown out. A sound already in a film stays there.');
+ thrown.t=setTimeout(()=>{$('#putback').hidden=true;thrown=null},7000)};
+$('#undo').onclick=()=>{if(!thrown)return;clearTimeout(thrown.t);shelf.splice(thrown.i,0,thrown.s);cur=thrown.s;$('#putback').hidden=true;thrown=null;render()};
+let sx=null;$('#big').addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});$('#big').addEventListener('touchend',e=>{if(sx==null)return;const dx=e.changedTouches[0].clientX-sx;sx=null;if(setMode&&!setMode.done){if(dx>60)setStep(true);if(dx<-60)setStep(false)}else if(dx<-80)$('#throw').click()});
+/* ---------- hear the set ---------- */
+function setStep(keep){if(!setMode||setMode.done)return;const s=shelf[setMode.i];if(keep){s.st='kept';setMode.kept++}else s.st='thrown';
+ if(setMode.i<setMode.n-1){setMode.i++;cur=shelf[setMode.i];prog=0;render();Kit.press($('#big'))}else{setMode.done=true;cur=null;render();say(setMode.kept+' kept. The set may now enter this channel\'s films.',{art:Art.seal({state:'live'})})}}
+$('#setkeep').onclick=()=>setStep(true);$('#setthrow').onclick=()=>setStep(false);
+document.addEventListener('keydown',e=>{if(!setMode||document.querySelector('.sheet:not([hidden])'))return;if(e.key==='ArrowRight')setStep(true);if(e.key==='ArrowLeft')setStep(false)});
+/* ---------- the primary ---------- */
+go.onclick=()=>{const s=cur,u=go.dataset.u;if(go.disabled)return;
+ if(u==='u4'&&(!s||s.st==='kept')){if(phone())Kit.sheet('asksheet').open();else $('#askfield').focus();return}
+ if(u==='u20'&&!setMode){presets['set-to-hear']();cur=shelf[0];render();say('Right keeps, left throws out.');return}
+ if(u==='u20'){setStep(true);return}
+ if(u==='u25'){Kit.finish(go,'The set is yours');setTimeout(()=>location.href=FROM==='pact'?'pact.html':'vessel.html',900);return}
+ if(u==='u5'){const w=s.name;shelf=shelf.filter(x=>x!==s);make(w,'Learned');return}
+ if(u==='u7'){Kit.finish(go,'In the scene, on its phrase');setTimeout(()=>location.href='spell-strip.html',900);return}
+ if(u==='u8'){Kit.finish(go,'The film\'s music is swapped');setTimeout(()=>location.href='spell-strip.html',900);return}
+ if(u==='u24'){Kit.finish(go,'This channel\'s music, from the next film');return}
+ if(u==='u4'&&s){stop();s.st='kept';s.takes=[];Kit.finish(go,'Sealed on this shelf');cur=shelf.find(x=>x.st!=='kept'&&x.st!=='thrown'&&x.st!=='failed')||s;prog=0;render()}};
+/* ---------- tabs: sounds and music ---------- */
+$('.tabs').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;tab=b.dataset.panel==='p-music'?'music':'sounds';render()});
+function drawBeds(){const all=[{id:'none',name:'No music'}].concat(beds);
+ $('#beds').innerHTML=all.map(b=>`<button class="row${b.id===bedOn?' on':''}" data-bed="${b.id}"><span class="tile">${Art.emblem('sound')}</span><span><b class="name"${b.id==='none'?'':' data-d'}>${b.name}</b></span></button>`).join('');primary()}
+$('#beds').addEventListener('click',e=>{const r=e.target.closest('.row');if(!r)return;bedOn=r.dataset.bed;drawBeds();Kit.press($(`[data-bed="${bedOn}"]`))});
+$('#findbed').onclick=()=>{if(!net){say('No network. Find a free bed needs one.',{state:'stop'});return}const b=$('#findbed');b.disabled=true;b.textContent='Looking';
+ setTimeout(()=>{b.disabled=false;b.textContent='Free bed';say('No bed we may use was found. Add music you own.',{state:'need'})},reduce?0:1600)};
+/* ---------- sheets: heard, parts, device ---------- */
+document.addEventListener('click',e=>{if(e.target.closest('[data-open="heard"]')){const s=cur;$('#heardname').textContent=s?s.name:'';
+  $('#heardkv').innerHTML=s?`<dt>Asked for</dt><dd data-d>${s.name}</dd><dt>First ear</dt><dd>${['checking','unheard','making'].includes(s.st)?'Not yet':s.real?s.heard+' · '+s.z:(s.heard||s.name)}</dd><dt>Second ear</dt><dd>${s.second||'Not yet'}</dd><dt>Made from</dt><dd>${s.from||'Not made'}</dd>`:''}});
+$('#loud').addEventListener('click',e=>{const b=e.target.closest('.btn');if(!b)return;$$('#loud .btn').forEach(x=>x.setAttribute('aria-pressed',x===b));say(b.textContent+' in every film of this channel')});
+let parts=['a soft thump on wood','paper crumpling, quiet, short'];
+function drawParts(){$('#parts').innerHTML=parts.map((p,i)=>`<div class="part" data-u="u15"><input class="field" value="${p}" data-i="${i}" aria-label="Part ${i+1}"><button class="btn icon" data-rm="${i}" aria-label="Take this part out"${parts.length<=2?' disabled':''}>${Art.glyph('close')}</button><span class="found${i%2?'':' ok'}">${i%2?'Nothing yet':'Found'}</span></div>`).join('');$('#addpart').disabled=parts.length>=5}
+drawParts();
+$('#parts').addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(b&&!b.disabled){parts.splice(+b.dataset.rm,1);drawParts()}});
+$('#parts').addEventListener('input',e=>{const i=e.target.dataset.i;if(i!=null)parts[+i]=e.target.value});
+$('#addpart').onclick=()=>{if(parts.length<5){parts.push('');drawParts();$$('#parts .field').pop().focus()}};
+$('#build').onclick=()=>{Kit.sheet('partsheet').close();make(parts.filter(Boolean).join(', then '),'Built')};
+let devKind='sound',whose=null;document.addEventListener('click',e=>{const o=e.target.closest('[data-open="device"]');if(o){devKind=o.dataset.kind;$('#devh').textContent=devKind==='music'?'Add music I own':'From this device';whose=null;$$('#whose .btn').forEach(x=>x.setAttribute('aria-pressed','false'));$('#licence').hidden=true;$('#devkeep').disabled=true;$('#filename').textContent=''}});
+$('#pickfile').onclick=()=>{$('#filename').textContent='recording.wav';$('#devkeep').disabled=!whose};
+$('#whose').addEventListener('click',e=>{const b=e.target.closest('.btn');if(!b)return;whose=b.dataset.w;$$('#whose .btn').forEach(x=>x.setAttribute('aria-pressed',x===b));$('#licence').hidden=whose!=='other';$('#devkeep').disabled=!$('#filename').textContent});
+$('#devkeep').onclick=()=>{Kit.sheet('device').close();if(devKind==='music'){beds.push({id:'b'+beds.length,name:'Your bed'});bedOn='b'+(beds.length-1);drawBeds();say('Cut into a clean loop, levelled under a voice.')}else{const s=S('your recording','checking',{from:'Yours'});shelf.unshift(s);cur=s;render();say('Listening to your recording.')}};
+$('#getears').onclick=()=>{Kit.sheet('earsheet').close();say('The ears come down on Wi-Fi.')};
+/* ---------- start: each state says its one sentence once ---------- */
+const NOTE={close:['Close. Your ear decides.','need'],checking:['Checking'],failed:['Heard as an explosion','stop'],
+ 'waiting-for-a-render':['The check waits'],'phone-ears-not-here':['Waiting for the Mac','need'],'no-network':['No network','need'],
+ 'set-to-hear':['Right keeps, left throws out','need'],'from-the-receipt':['Hear the set first','need'],'music-empty':['No music yet'],
+ empty:['Ask for the first sound']};
+if(ST==='music-empty'||(FROM==='spell-strip'&&Kit.param('tab')==='music')){$('.tab[data-panel="p-music"]').click();tab='music'}
+drawBeds();render();
+const n=NOTE[ST];if(n)say(n[0],{state:n[1]||'',ms:4200});
+});
+/* proof aid: ?do=<css>;<css> taps those controls in order so a still can show the result; a missing or dead control is a console error. Not part of the room. */
+document.addEventListener('DOMContentLoaded',()=>{(Kit.param('do')||'').split(';').filter(Boolean).forEach((q,i)=>setTimeout(()=>{const e=document.querySelector(q);const b=e&&e.getBoundingClientRect();if(!e)console.error('no control '+q);else if(e.disabled)console.error('control is off '+q);else if(e.closest('[hidden]')||!b.width||!b.height)console.error('control is hidden '+q);else e.click()},40+i*45))});
+</script>
+</body></html>

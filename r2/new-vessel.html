@@ -1,0 +1,145 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Juju · New Vessel</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script><script>(function(){if(!('serviceWorker' in navigator))return;if(navigator.serviceWorker.controller)return;document.documentElement.style.visibility='hidden';navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(function(){return navigator.serviceWorker.ready}).then(function(){location.reload()})})()</script><script src="phone.js"></script><script src="api.js"></script><script src="flow.js"></script>
+<style>
+/* New Vessel (APP-FLOW-3 unit 1, Ambi 26 Nov: "I don't want to log in and see pre-selected shit"). Three doors: Ready-made, Absorb, Describe.
+   Nothing is chosen until the person chooses. Juju's receipt on the right fills from what was chosen and from what Juju read; a line with no
+   program behind it says "Not built yet". Layout only; every colour is a kit token. Server: /api/tap/looks, /api/tap/channels. */
+body{--focus-x:38%;--focus-y:46%}
+.nv{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(300px,.8fr);gap:30px;align-items:start;padding-bottom:110px}
+.nv>*{min-width:0}
+.pane{display:grid;gap:16px;margin-top:20px}
+.field{width:100%;min-height:52px;padding:12px 16px;border:0;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line);color:var(--bone);font:400 17px/1.4 "Lato",sans-serif}
+.field::placeholder{color:var(--smoke)} .field:focus{outline:none;box-shadow:inset 0 0 0 2px var(--act)}
+.inrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap} .inrow .field{flex:1 1 240px}
+.hint{color:var(--ash);font:400 15px/1.4 "Lato",sans-serif}
+.looks{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.look{display:grid;gap:10px;padding:10px;border:2px solid var(--line);background:var(--lift);color:var(--bone);text-align:left;cursor:pointer;font:inherit}
+.look.on{border-color:var(--act)} .look:disabled{opacity:.45;cursor:not-allowed}
+.look .ex{display:grid;grid-template-columns:1fr 1fr;gap:4px} .look .ex img,.look .ex .nopic{width:100%;aspect-ratio:16/9;object-fit:cover;background:#000;display:block}
+.look b{font:600 17px/1.2 "Spectral SC",serif} .look small{color:var(--ash);font:400 12px/1.3 "Josefin Sans",sans-serif;letter-spacing:.04em}
+.vp{padding:24px 22px 22px;display:grid;gap:12px}
+.vp .jar{display:grid;place-items:center;height:170px} .vp .jar .art.jar{height:160px;width:auto}
+.rc{display:grid;gap:8px}
+.rc .row{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px;align-items:center;min-height:48px;padding:8px 12px;border:2px solid var(--line);background:var(--lift);color:var(--bone);text-align:left;font:400 15px/1.35 "Lato",sans-serif;-webkit-mask:none;mask:none}
+.rc .row>span:first-child{color:var(--ash);font:600 12px/1.2 "Josefin Sans",sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.rc .row.tap{cursor:pointer} .rc .row.tap:hover{border-color:var(--line-hi)}
+.rc .row .nb{color:var(--smoke);font-style:italic}
+.rc .row input{width:100%;min-height:36px;padding:0 8px;background:var(--a-well);border:2px solid var(--line-hi);color:var(--bone);font:600 17px/1 "Spectral SC",serif}
+.rc .chips{display:flex;gap:6px;flex-wrap:wrap} .rc .chips .btn{min-height:36px;padding:0 10px;font-size:13px} .rc .chips .btn.on{color:var(--act);box-shadow:inset 0 0 0 2px var(--act)}
+.rc .thumbs{display:flex;gap:4px} .rc .thumbs img{width:64px;aspect-ratio:16/9;object-fit:cover}
+.rc .titles{display:grid;gap:2px;font-size:13.5px}
+.reading{display:flex;align-items:center;gap:12px;color:var(--ash)} .bar{width:120px;height:4px;background:var(--line);overflow:hidden} .bar i{display:block;height:100%;width:30%;background:var(--work);animation:go 1.4s linear infinite}
+@keyframes go{from{transform:translateX(-100%)}to{transform:translateX(340%)}} @media (prefers-reduced-motion: reduce){.bar i{animation:none;width:100%}}
+.sw{display:flex;gap:6px;flex-wrap:wrap} .sw button{width:34px;height:34px;border:2px solid var(--line-hi);cursor:pointer;padding:0}
+.sw button.changed{outline:2px solid var(--act);outline-offset:2px}
+#colpick .inks{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px} #colpick .inks button{width:44px;height:44px;border:2px solid var(--line-hi);cursor:pointer}
+#colpick .any{display:flex;align-items:center;gap:12px} #colpick input[type=color]{width:64px;height:44px;border:0;background:none;padding:0}
+.refs{display:grid;gap:8px} .ref{display:grid;grid-template-columns:120px minmax(0,1fr);gap:10px;align-items:center} .ref img{width:120px;aspect-ratio:16/9;object-fit:cover}
+.ref b{font:600 14px/1.25 "Lato",sans-serif} .ref small{color:var(--ash);font-size:12px}
+.got{display:flex;align-items:center;gap:14px} .got img{width:56px;height:56px;border-radius:50%} .got b{font:600 18px/1.2 "Spectral SC",serif}
+@media (max-width:760px){.tab{padding:3px 11px 0;letter-spacing:.03em;font-size:12.5px} .nv{grid-template-columns:minmax(0,1fr);gap:18px} .looks{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .look b{font-size:15px}
+ .vp .jar{height:110px} .vp .jar .art.jar{height:104px} .rc .row{grid-template-columns:92px minmax(0,1fr)}}
+</style></head>
+<body data-skin="nocturne" data-room="new-vessel" data-mark="altar" data-door="altar" data-title="New Vessel" data-back="altar.html" data-back-label="Altar">
+<main>
+ <div class="nv">
+  <section>
+   <div class="tabs" data-tabs>
+    <button class="tab" data-panel="d-ready" aria-selected="false">Ready-made</button>
+    <button class="tab" data-panel="d-absorb" aria-selected="false">Absorb</button>
+    <button class="tab" data-panel="d-describe" aria-selected="false">Describe</button>
+   </div>
+   <div class="pane" id="d-none"><p class="hint">Pick a look, paste a YouTube channel, or say it in one line.</p></div>
+   <div class="pane" id="d-ready" hidden><div class="looks" id="looks" role="radiogroup" aria-label="Looks"></div></div>
+   <div class="pane" id="d-absorb" hidden>
+    <form class="inrow" id="absorb" novalidate><input class="field" id="url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste a YouTube channel link" aria-label="Channel link"><button class="btn" id="read">Read it</button></form>
+    <div class="reading" id="reading" hidden><div class="bar"><i></i></div><span>Reading the channel</span></div>
+    <div class="got" id="got" hidden></div>
+   </div>
+   <div class="pane" id="d-describe" hidden>
+    <form class="inrow" id="describe" novalidate><input class="field" id="line" maxlength="300" autocomplete="off" placeholder="One line: what is this channel?" aria-label="The channel in one line"><button class="btn" id="say">Keep</button></form>
+   </div>
+   <div class="pane" id="learn" hidden>
+    <form class="inrow" id="refform" novalidate><input class="field" id="ref" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Learn from a film: paste a YouTube video link" aria-label="A film to learn from"><button class="btn" id="refgo">Add</button></form>
+    <div class="refs" id="refs"></div>
+   </div>
+  </section>
+  <aside class="panel focus vp" data-frame="crest" aria-label="Your vessel">
+   <div class="jar" id="jar"></div>
+   <div class="rc" id="rc"></div>
+  </aside>
+ </div>
+</main>
+<footer class="deck"><div class="aside"></div><button class="primary" id="go" disabled>Open the vessel</button></footer>
+<section class="sheet" id="colpick" hidden aria-labelledby="cpT"><h3 id="cpT">Colour</h3><p class="hint" id="cprole"></p><div class="inks" id="inks"></div>
+ <div class="any"><input type="color" id="anycol" aria-label="Any colour"><button class="btn" id="anyset">Use this colour</button><button class="btn bare" id="cpreset">As the look has it</button></div></section>
+<section class="sheet" id="lookpick" hidden aria-labelledby="lpT"><h3 id="lpT">Look</h3><div class="looks" id="looks2" role="radiogroup" aria-label="Looks"></div></section>
+<script>
+(()=>{
+const $=id=>document.getElementById(id),esc=JUJU.esc;
+let looks=[],V=null,slug=JUJU.param('v')||'',poll=null;
+const NB='<span class="nb">Not built yet</span>';
+const lookName=id=>(looks.find(l=>l.id===id)||{}).name||'';
+const lookCard=l=>`<button class="look${V&&V.look_from===l.id?' on':''}" role="radio" aria-checked="${!!(V&&V.look_from===l.id)}" data-look="${esc(l.id)}"${l.locked?' disabled aria-disabled="true"':''}>
+  <span class="ex">${(l.examples.length?l.examples:[{},{}]).slice(0,2).map(x=>x.thumb?`<img src="${esc(x.thumb)}" alt="" loading="lazy">`:'<span class="nopic"></span>').join('')}</span>
+  <b data-d>${esc(l.name)}</b><small>${l.locked?'Opens in High Juju':l.examples.length?'Examples of this look':'No example yet'}</small></button>`;
+function drawLooks(){$('looks').innerHTML=looks.map(lookCard).join('');$('looks2').innerHTML=looks.map(lookCard).join('')}
+/* the receipt: what was chosen, what Juju read, and plain "Not built yet" where no program stands behind a line */
+function receipt(I){const v=V;if(!v){$('rc').innerHTML='';$('jar').innerHTML=Art.jar({state:'new'});$('go').disabled=true;return}
+ const L=looks.find(l=>l.id===v.look_from),m=v.minutes||2,w=v.films_week||0;
+ const rt=v.route||{},niche=v.niche_line?esc(v.niche_line):v.describe?esc(v.describe)+(rt.say?`<br><span class="nb">${esc(rt.say)}</span>`:rt.locked?'<br><span class="nb">Opens in High Juju</span>':''):I&&I.niche?esc(I.niche):I&&I.running?'<span class="nb">Juju is reading the channel</span>':v.door==='absorb'?'<span class="nb">Juju reads it next</span>':NB;
+ const titles=I&&I.titles&&I.titles.length?`<span class="titles">${I.titles.slice(0,3).map(t=>`<span data-d>${esc(t)}</span>`).join('')}</span>`:I&&I.running?'<span class="nb">Reading its titles</span>':NB;
+ const thumbs=L&&L.examples.some(x=>x.thumb)?`<span><span class="thumbs">${L.examples.filter(x=>x.thumb).slice(0,3).map(x=>`<img src="${esc(x.thumb)}" alt="">`).join('')}</span><span class="nb">Examples of this look</span></span>`:NB;
+ $('rc').innerHTML=`<div class="row"><span>Name</span><input id="name" maxlength="60" placeholder="Name it" value="${esc(v.name||'')}" aria-label="Name"></div>
+  <div class="row"><span>Niche</span><span data-d>${niche}</span></div>
+  <button class="row tap" data-open="lookpick"><span>Look</span><span data-d>${L?esc(L.name):'<span class="nb">Pick a look</span>'}</span></button>
+  <div class="row" id="colrow"><span>Colours</span>${v.swatches&&v.swatches.length?`<span class="sw">${v.swatches.map(x=>{const h=(v.palette||{})[x.role]||x.hex;return `<button type="button" data-role="${x.role}" title="${esc(x.name)}" aria-label="${esc(x.name)}" style="background:${esc(h)}"${(v.palette||{})[x.role]?' class="changed"':''}></button>`}).join('')}</span>`:'<span class="nb">Pick a look</span>'}</div>
+  <div class="row"><span>Titles like</span>${titles}</div>
+  <div class="row"><span>Learn from</span>${v.refs&&v.refs.length?`<span data-d>${v.refs.length} film${v.refs.length>1?'s':''}; used when Bend is built</span>`:'<span class="nb">Paste a film on the left</span>'}</div>
+  <div class="row"><span>Thumbnails</span>${thumbs}</div>
+  <div class="row"><span>Sound</span>${NB}</div>
+  <div class="row"><span>Length</span><span class="chips" id="lens">${[2,10,20,28].map(x=>`<button class="btn${x===m?' on':''}" data-m="${x}" aria-pressed="${x===m}">${x} min</button>`).join('')}</span></div>
+  <div class="row"><span>A week</span><span class="chips" id="pace">${[1,3,5,7].map(x=>`<button class="btn${x===w?' on':''}" data-w="${x}" aria-pressed="${x===w}">${x} film${x>1?'s':''}</button>`).join('')}</span></div>`;
+ $('jar').innerHTML=Art.jar({state:v.name&&v.kinds.length?'needs':'new',label:(v.name||'').slice(0,2).toUpperCase()||undefined});
+ $('go').disabled=!(v.name&&v.kinds.length);
+ JUJU.say($('go'),!v.kinds.length?'Pick a look':!v.name?'Name it':'', 'need');if(v.name&&v.kinds.length)JUJU.unsay($('go'))}
+async function load(){if(!slug){receipt();return}
+ V=await JUJU.get('/api/tap/channels/'+slug);let I=null;try{I=await JUJU.get('/api/tap/channels/'+slug+'/ideas')}catch(e){}
+ receipt(I);drawLooks();drawRefs();if(I&&I.running)watch()}
+function drawRefs(){$('learn').hidden=!slug;const l=(V&&V.refs)||[];$('refs').innerHTML=l.map(r=>`<div class="ref"><img src="${esc(r.thumb)}" alt=""><span><b data-d>${esc(r.title||'')}</b><br><small data-d>${esc(r.channel||'')}${r.views?' · '+JUJU.count(r.views)+' views':''}</small></span></div>`).join('')}
+$('refform').addEventListener('submit',e=>{e.preventDefault();const link=$('ref').value.trim();if(!link){JUJU.say($('refgo'),'Paste a video link');return}
+ JUJU.once($('refgo'),async()=>{await JUJU.long('/api/tap/channels/'+slug+'/refs',{link},70000);$('ref').value='';await load()})});
+/* colours: a swatch opens the look's own inks first, then any colour; the vessel keeps the change */
+let role='';
+$('rc').addEventListener('click',e=>{const b=e.target.closest('.sw button');if(!b||!V)return;e.stopPropagation();role=b.dataset.role;const L=looks.find(l=>l.id===V.look_from)||{},sw=(V.swatches||[]).find(x=>x.role===role)||{};
+ $('cprole').textContent=sw.name||'';$('inks').innerHTML=(L.inks||[]).map(h=>`<button type="button" data-hex="${esc(h)}" style="background:${esc(h)}" aria-label="${esc(h)}"></button>`).join('');$('anycol').value=(V.palette||{})[role]||sw.hex||'#888888';Kit.sheet('colpick').open()});
+const setCol=h=>JUJU.patch('/api/tap/channels/'+slug,{palette:{[role]:h}}).then(()=>{Kit.sheet('colpick').close();return load()}).catch(x=>JUJU.say($('anyset'),x.say));
+$('inks').addEventListener('click',e=>{const b=e.target.closest('[data-hex]');if(b)setCol(b.dataset.hex)});
+$('anyset').addEventListener('click',()=>setCol($('anycol').value));$('cpreset').addEventListener('click',()=>setCol(null));
+function watch(){if(poll)poll.stop();let n=0;poll=JUJU.poll('/api/tap/channels/'+slug+'/ideas',I=>{receipt(I);if(!I.running)JUJU.get('/api/tap/channels/'+slug).then(v=>{V=v;receipt(I)}).catch(()=>{});return I.running||(!V.niche_line&&++n<6)},{every:4000,fail:()=>{}})}
+const setSlug=s=>{slug=s;history.replaceState(null,'','new-vessel.html?v='+s)};
+/* a look: the vessel is made with it, or takes it */
+async function pickLook(id){if(slug)await JUJU.patch('/api/tap/channels/'+slug,{look:id});else setSlug((await JUJU.post('/api/tap/channels',{look:id})).slug);await load()}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-look]');if(!b||b.disabled)return;Kit.press(b);JUJU.once(b,async()=>{await pickLook(b.dataset.look);Kit.sheet('lookpick').close()})});
+/* absorb: a channel read from YouTube; then Juju reads its titles and its niche by itself (ju ideas, about a tenth of a cent) */
+$('absorb').addEventListener('submit',e=>{e.preventDefault();const link=$('url').value.trim();if(!link){JUJU.say($('read'),'Paste a channel link');return}
+ JUJU.once($('read'),async()=>{$('reading').hidden=false;$('got').hidden=true;
+  try{const r=await JUJU.long('/api/tap/channels',slug?{link,slug}:{link},90000);setSlug(r.slug);
+   $('got').innerHTML=`${r.avatar?`<img src="${esc(r.avatar)}" alt="">`:''}<span><b data-d>${esc(r.handle)}</b><br><span class="hint" data-d>${esc(r.name||'')}</span></span>`;$('got').hidden=false;
+   JUJU.post('/api/tap/channels/'+r.slug+'/ideas').catch(()=>{});await load();watch()}
+  finally{$('reading').hidden=true}})});
+/* describe: one line in the person's words */
+$('describe').addEventListener('submit',e=>{e.preventDefault();const d=$('line').value.trim();if(!d){JUJU.say($('say'),'One line, please');return}
+ JUJU.once($('say'),async()=>{if(slug)await JUJU.patch('/api/tap/channels/'+slug,{describe:d});else setSlug((await JUJU.post('/api/tap/channels',{describe:d})).slug);await load();Kit.toast('Kept')})});
+$('rc').addEventListener('click',e=>{const m=e.target.closest('[data-m]'),w=e.target.closest('[data-w]');if(!(m||w)||!slug)return;const b=m||w;
+ JUJU.once(b,async()=>{await JUJU.patch('/api/tap/channels/'+slug,m?{minutes:+m.dataset.m}:{films_week:+w.dataset.w});await load()})});
+$('rc').addEventListener('change',e=>{if(e.target.id!=='name'||!slug)return;const n=e.target.value.trim();if(!n)return;
+ JUJU.patch('/api/tap/channels/'+slug,{name:n}).then(load).catch(x=>JUJU.say(e.target,x.say))});
+$('rc').addEventListener('keydown',e=>{if(e.target.id==='name'&&e.key==='Enter'){e.preventDefault();e.target.blur()}});
+document.querySelector('.tabs').addEventListener('click',()=>{$('d-none').hidden=true});
+$('go').addEventListener('click',()=>{if(slug)JUJU.go('crossroads.html?ch='+slug)});
+JUJU.ready(async()=>{try{looks=(await JUJU.get('/api/tap/looks')).looks;drawLooks();await load()}catch(e){JUJU.say($('go'),e.say)}
+ if(V){const t=document.querySelector(`.tab[data-panel="d-${V.door==='ready-made'?'ready':V.door||'ready'}"]`);if(t)t.click()}});
+})();
+</script>
+</body></html>

@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Juju · Pact</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script><script>(function(){if(!('serviceWorker' in navigator))return;if(navigator.serviceWorker.controller)return;document.documentElement.style.visibility='hidden';navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(function(){return navigator.serviceWorker.ready}).then(function(){location.reload()})})()</script><script src="phone.js"></script><script src="api.js"></script>
+<style>
+/* The Pact: one film, its length, the most it may cost and its wait. Contract: runs/app/API.md.
+   Layout only; every colour is a kit token. Every number comes from GET /api/pacts/{id} and /api/make. */
+body{--focus-x:68%;--focus-y:36%}
+.cat{animation:none} .chip.tank{white-space:nowrap}
+.pact{flex:1;display:grid;grid-template-columns:minmax(0,720px);justify-content:center;gap:40px;align-items:start;align-content:center;padding-top:16px}
+.pact .scroll{max-width:none;margin:0 30px 72px}
+.pact .scroll .paper{padding:32px 32px 48px}
+.paper h4{padding-right:0!important;margin-bottom:16px!important;font-size:24px!important;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.scroll .ln{min-height:48px;align-items:center;padding:0}
+.scroll .ln .fill{transform:none}
+.scroll button.ln{width:100%;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer;line-height:1.35}
+.scroll button.ln:disabled{cursor:default}
+.scroll .ln .v{display:inline-flex;align-items:center;gap:8px;font-weight:700}
+.scroll .ln .v .glyph{width:16px;height:16px;opacity:.7} .scroll button.ln:disabled .glyph{display:none}
+.paper .rule{color:color-mix(in oklab,var(--paper-ink) 40%,var(--paper));margin:8px 0}
+.price{display:grid;gap:16px}
+.price .fig{font-size:56px}
+.price .top{display:grid;gap:16px}
+.price .three{display:grid;gap:0}
+.price .p{display:flex;align-items:center;justify-content:space-between;min-height:48px;gap:16px;border-top:2px solid var(--line)}
+.price .p b{font:600 18px/1.15 "Spectral SC",serif}
+.empty .paper>*,.empty .price{visibility:hidden} .empty .paper{min-height:320px}
+.sheet .rows{margin-top:16px}
+.sheet .row{min-height:64px} .sheet div.row{cursor:default} .sheet div.row:hover{transform:none}
+.lens{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;margin-top:16px}
+.lens button{min-height:64px;border:0;cursor:pointer;color:var(--ash);background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line);font:600 22px/1 "Spectral SC",serif;font-variant-numeric:lining-nums tabular-nums}
+.lens button[aria-checked=true]{color:var(--on-act);background:linear-gradient(180deg,var(--act-hi) -60%,var(--act) 60%,var(--act-lo));box-shadow:none}
+@media (max-width:760px){
+  .main{min-height:calc(100dvh - 74px - env(safe-area-inset-bottom))}
+  .pact{grid-template-columns:minmax(0,1fr);gap:8px;padding-top:8px;align-content:start}
+  .pact .scroll{margin:0 22px 32px}
+  .pact .scroll .paper{padding:16px 16px 24px}
+  .paper h4{font-size:20px!important;margin-bottom:8px!important;-webkit-line-clamp:3}
+  .scroll .ln{min-height:32px} .scroll button.ln{min-height:44px}
+  .paper .rule{margin:0}
+  .pact .scroll .wax{width:72px;height:72px;bottom:-48px}
+  .price{gap:8px} .price .fig{font-size:32px}
+  .price .top{display:flex;align-items:baseline;justify-content:space-between;gap:16px}
+  .price .p{min-height:40px}
+}
+</style>
+</head>
+<body data-skin="nocturne" data-room="pact" data-title="Pact" data-channel="Library of Tehuti" data-back="altar.html" data-back-label="Altar" data-tank="ok" data-who="A" class="empty">
+<main>
+ <div class="pact">
+  <div class="scroll" id="receipt"><div class="rod"></div><div class="paper">
+   <h4 id="r-title" data-d></h4>
+   <button class="ln" id="r-length" data-open="sh-length"><span class="k">Length</span><span class="fill"></span><span class="v"><span id="v-length" data-d></span><span data-art="glyph" data-name="go"></span></span></button>
+   <div class="rule"><i></i></div>
+   <button class="ln" id="r-sound" data-open="sh-sound" hidden><span class="k">Sound</span><span class="fill"></span><span class="v"><span id="v-sound" data-d></span><span data-art="glyph" data-name="go"></span></span></button>
+   <div class="ln"><span class="k">At most</span><span class="fill"></span><span class="v num" id="v-most" data-d></span></div>
+   <div class="ln"><span class="k">Wait</span><span class="fill"></span><span class="v num" id="v-wall" data-d></span></div>
+   <span class="wax" id="wax"></span>
+  </div><div class="rod"></div></div>
+
+ </div>
+</main>
+<footer class="deck"><div class="aside" id="aside"></div><button class="primary" id="incant" disabled>Make a silent film</button></footer>
+<section class="sheet" id="sh-length" hidden><h3>Length</h3>
+ <div class="lens" role="radiogroup" aria-label="Length"></div></section>
+<section class="sheet" id="sh-sound" hidden><h3>Sound</h3>
+ <div class="lens" id="snd" role="radiogroup" aria-label="Sound"><button role="radio" data-sound="silent">Silent</button><button role="radio" data-sound="voice">Voice</button></div></section>
+<script>
+(()=>{
+const $=s=>document.querySelector(s),go=$('#incant'),id=JUJU.param('pact'),esc=JUJU.esc,at='/api/pacts/'+encodeURIComponent(id);
+const from=JUJU.param('from')||(/crossroads\.html/.test(document.referrer)?'crossroads':/cauldron\.html/.test(document.referrer)?'cauldron':'');
+if(from==='crossroads'||from==='cauldron'){const b=document.body.dataset;b.door=from;b.back=from+'.html';b.backLabel=from==='cauldron'?'Cauldron':'Crossroads'}
+let P=null,M=null,sound='silent',cut=false,gone=false,other=null;
+const usd=v=>'$'+v.toFixed(2),clock=s=>{s=Math.round(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+
+function draw(){
+ document.body.classList.toggle('empty',!P||!M);
+ if(P&&M){const L=M.lengths,x=L.find(l=>l.minutes===P.minutes);if(!M.voice)sound='silent';
+  $('#r-title').textContent=P.title;$('#v-length').textContent=P.minutes+' min';
+  $('#v-most').textContent=x?usd(sound==='voice'?x.voice_usd:x.silent_usd):'';$('#v-wall').textContent=x?x.wait_min+' min':'';$('#r-sound').hidden=!M.voice;$('#v-sound').textContent=sound==='voice'?'Voice':'Silent';
+  const h=L.map(l=>`<button role="radio" data-min="${l.minutes}"><span data-d>${l.minutes} min</span></button>`).join('');if($('.lens').dataset.is!==h){$('.lens').dataset.is=h;$('.lens').innerHTML=h}
+  document.querySelectorAll('[data-sound]').forEach(b=>b.setAttribute('aria-checked',b.dataset.sound===sound));
+  document.querySelectorAll('[data-min]').forEach(b=>b.setAttribute('aria-checked',+b.dataset.min===P.minutes));
+  $('#r-length').disabled=!!P.sealed;
+  if($('#wax').dataset.is!==String(!!P.sealed)){$('#wax').dataset.is=!!P.sealed;$('#wax').innerHTML=Art.seal({state:P.sealed?'live':'blank',emblem:P.sealed?'pact':undefined})}}
+ go.textContent=!id||gone?'Open Altar':P&&P.run||other?'Open Conjuring':!P&&cut?'Try again':sound==='voice'?'Make a voiced film':'Make a silent film';
+ go.disabled=!!id&&!cut&&(!P||!M||!P.run&&!other&&!M.lengths.some(l=>l.minutes===P.minutes))}
+
+async function load(){
+ try{[P,M]=await Promise.all([JUJU.get(at),JUJU.get('/api/make')]);cut=gone=false;other=null;JUJU.unsay(go)}
+ catch(e){if(P)return;cut=true;gone=e.status===404;if(go.dataset.sending)throw e;JUJU.say(go,e.say)}
+ finally{draw()}}
+
+$('.lens').addEventListener('click',e=>{const b=e.target.closest('[data-min]');if(!b||!P)return;Kit.press(b);
+ if(+b.dataset.min===P.minutes){Kit.sheet('sh-length').close();return}
+ JUJU.once(b,async()=>{P=await JUJU.patch(at,{minutes:+b.dataset.min});draw();Kit.sheet('sh-length').close()},
+  {at:$('.lens'),done:x=>{if(x.error==='sealed'){load().then(()=>Kit.sheet('sh-length').close());return true}}})});
+
+$('#snd').addEventListener('click',e=>{const b=e.target.closest('[data-sound]');if(!b)return;sound=b.dataset.sound;Kit.press(b);draw();Kit.sheet('sh-sound').close()});
+go.addEventListener('click',()=>{
+ if(!id||gone){JUJU.go('altar.html');return}
+ if(other||P&&P.run){JUJU.go(JUJU.to.run(P&&P.run||other));return}
+ JUJU.once(go,async()=>{
+  if(!P)return load();
+  const d=await JUJU.post('/api/runs',{pact:id,sound});
+  Kit.seal($('#wax'),'live',{emblem:'pact'});await new Promise(r=>setTimeout(r,420));JUJU.go(JUJU.to.run(d.run))},
+ {done:e=>{if(e.error==='busy'&&e.run){other=e.run;draw();JUJU.say(go,e.say,'need');return true}}})});
+addEventListener('online',load);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&P)load()});
+draw();if(id)load();
+})();
+</script>
+</body></html>

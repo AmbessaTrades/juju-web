@@ -1,0 +1,88 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Juju · The Altar</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script><script>(function(){if(!('serviceWorker' in navigator))return;if(navigator.serviceWorker.controller)return;document.documentElement.style.visibility='hidden';navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(function(){return navigator.serviceWorker.ready}).then(function(){location.reload()})})()</script><script src="phone.js"></script><script src="api.js"></script><script src="flow.js"></script>
+<style>
+/* The Altar: every channel, each with its picture, its @handle, how many films are ready and its brand in one line. A pick opens its ideas.
+   Layout only; every colour is a kit token. Server: /api/tap/channels. */
+body{--focus-x:36%;--focus-y:36%}
+.ribbon{align-self:start;margin:4px 0 20px;padding:8px 28px 6px 16px;background:color-mix(in oklab,var(--act) 14%,var(--card));color:var(--bone);font:600 15px/1 "Spectral SC",serif;letter-spacing:.08em;clip-path:polygon(0 0,100% 0,calc(100% - 12px) 50%,100% 100%,0 100%);box-shadow:inset 0 0 0 1px var(--act-lo)}
+.chans{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;padding-bottom:24px}
+.chans.wait{visibility:hidden}
+.ch{position:relative;display:grid;grid-template-rows:auto auto auto;gap:0;min-width:0;padding:0;border:2px solid var(--line);background:var(--a-well);color:var(--bone);text-align:left;cursor:pointer;font:inherit;text-decoration:none;transition:border-color .15s,transform .2s cubic-bezier(.2,.9,.3,1.1)}
+.ch:hover,.ch:focus-visible{border-color:var(--act);outline:none;transform:translateY(-3px)}
+.ch .pic{position:relative;aspect-ratio:16/9;background:#000;overflow:hidden}
+.ch .pic img,.ch .pic video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.ch .pic .face{object-fit:contain;padding:18% 0;background:radial-gradient(circle at 50% 50%,var(--lift),#000 75%)}
+.ch .pic .nopic,.ch .pic .cat{position:absolute;inset:0;display:grid;place-items:center;color:var(--smoke)} .ch .pic .nopic svg,.ch .pic .cat svg{width:30%;height:auto}
+.ch .who{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 16px 4px}
+.ch .av{width:48px;height:48px;border-radius:50%;overflow:hidden;background:var(--lift);display:grid;place-items:center;box-shadow:0 0 0 2px var(--line-hi)}
+.ch .av img{width:100%;height:100%;object-fit:cover} .ch .av svg{width:60%;height:auto;color:var(--smoke)}
+.ch .h{font:600 18px/1.2 "Spectral SC",serif;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.ch .pic .pill{position:absolute;right:10px;bottom:10px;z-index:1;background:rgba(8,10,14,.86)}
+.ch .brief{display:flex;align-items:flex-start;gap:8px;padding:2px 16px 16px 76px;color:var(--ash);font:400 14px/1.35 "Lato",sans-serif;min-height:22px}
+.ch .brief>span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.ch .brief .lock{margin-top:2px}
+.ch .brief .lock{width:14px;height:14px;flex:none;color:var(--smoke)}
+.ch .ready{position:relative;z-index:1}
+.ch.locked .pic{filter:saturate(.35) brightness(.7)}
+.link{min-height:36px;padding:0 12px 2px;font-size:13px}
+/* the new channel sheet */
+#add h2{margin:0 0 16px}
+.paste{display:flex;gap:8px}
+.paste input{flex:1;min-width:0;min-height:52px;padding:0 14px;background:var(--a-well);color:var(--bone);border:2px solid var(--line-hi);font:400 18px/1 "Lato",sans-serif}
+.paste input:focus{outline:none;border-color:var(--act)}
+.got{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:16px;align-items:center;min-height:84px}
+.got[hidden],.paste[hidden],.reading[hidden]{display:none}
+.got .av{width:72px;height:72px;border-radius:50%;overflow:hidden;background:var(--lift);box-shadow:0 0 0 2px var(--act)}
+.got .av img{width:100%;height:100%;object-fit:cover}
+.got .h{font:600 22px/1.2 "Spectral SC",serif;overflow:hidden;text-overflow:ellipsis}
+.got .n{color:var(--ash);font:400 15px/1.3 "Lato",sans-serif}
+.got input{width:100%;min-height:44px;padding:0 10px;background:var(--a-well);color:var(--bone);border:2px solid var(--act);font:600 18px/1 "Spectral SC",serif}
+.reading{display:grid;gap:12px;justify-items:center;padding:12px 0;color:var(--ash)}
+.bar{width:60%;height:4px;background:var(--line);overflow:hidden} .bar i{display:block;height:100%;width:30%;background:var(--work);animation:go 1.4s linear infinite}
+@keyframes go{from{transform:translateX(-100%)}to{transform:translateX(340%)}}
+@media (prefers-reduced-motion: reduce){.bar i{animation:none;width:100%}}
+.ch.first .pic{display:grid;place-items:center;background:var(--a-well)} .ch.first .pic .art.jar{height:76%;width:auto}
+.sheetfoot{display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:20px;flex-wrap:wrap}
+@media (max-width:760px){
+ .chans{grid-template-columns:minmax(0,1fr);gap:16px}
+ .ribbon{margin:0 0 14px}
+ .ch .who{grid-template-columns:40px minmax(0,1fr) auto;padding:12px 12px 2px} .ch .av{width:40px;height:40px} .ch .h{font-size:17px}
+ .ch .brief{padding:0 12px 12px 64px;font-size:13px}
+ .got{grid-template-columns:56px minmax(0,1fr) auto} .got .av{width:56px;height:56px}
+}
+</style></head>
+<body data-skin="nocturne" data-room="altar" data-title="The Altar">
+<main>
+ <span class="ribbon">Your channels</span>
+ <div class="chans wait" id="chans" role="list" aria-label="Channels"></div>
+</main>
+<footer class="deck"><div class="aside"><button class="switch" id="mine" role="switch" aria-checked="false" hidden><span>Mine · Both</span></button></div><button class="primary" id="new">New vessel</button></footer>
+
+<script>
+(()=>{
+const $=id=>document.getElementById(id),esc=JUJU.esc;
+let chans=[];
+const CAT=()=>`<span class="cat">${window.JujuCat||''}</span>`;
+function face(c){return c.thumb?`<img src="${esc(c.thumb)}" alt="">`:c.avatar?`<img class="face" src="${esc(c.avatar)}" alt="">`:c.still?`<video data-src="${esc(c.still)}#t=25" muted playsinline preload="none" tabindex="-1" aria-hidden="true"></video>`:CAT()}
+function card(c){let brief=[c.describe||c.niche,c.look,c.minutes?c.minutes+' min':''].filter(Boolean);if(!c.kinds.length&&!c.locked)brief=[c.describe||(c.handle?c.name:''),'Pick a look'].filter(Boolean);if(!c.name&&!c.handle)brief.unshift('Not named yet');
+ return `<a class="ch${c.locked?' locked':''}" role="listitem" href="crossroads.html?ch=${esc(c.slug)}" data-ch="${esc(c.slug)}">
+  <span class="pic">${face(c)}<span class="pill${c.ready?' need':' dim'}" data-shelf="${esc(c.slug)}" data-d>${c.ready} ${c.ready===1?'film':'films'}</span></span>
+  <span class="who"><span class="av">${c.avatar?`<img src="${esc(c.avatar)}" alt="">`:Art.emblem('altar')}</span><span class="h" data-d>${esc(c.handle||c.name||'New vessel')}</span>${c.handle?'':`<span class="btn link" role="button" data-link="${esc(c.slug)}">${c.name?'Link':'Finish'}</span>`}</span>
+  <span class="brief">${c.locked?Flow.lock:''}<span data-d>${esc(brief.join(' · '))}</span></span></a>`}
+/* the first time, the Altar is empty: one jar marked +, and nothing chosen for anyone (Ambi, 26 Nov) */
+const FIRST=()=>`<a class="ch first" role="listitem" href="new-vessel.html"><span class="pic">${Art.jar({state:'new'})}</span><span class="who"><span class="h">New vessel</span></span><span class="brief"><span>Pick a look, paste a channel, or say it in one line</span></span></a>`;
+async function load(){const a=await JUJU.get('/api/tap/channels'+(mine?'?mine=1':''));chans=a.channels;
+ const both=a.channels.some(c=>c.owner&&c.owner!==a.me);$('mine').hidden=!both&&!mine;$('mine').setAttribute('aria-checked',String(mine));$('mine').querySelector('span').textContent=mine?'Mine':'Both';
+ $('chans').innerHTML=chans.length?chans.map(card).join(''):FIRST();$('new').textContent=chans.length?'New vessel':'Open your first vessel';
+ $('chans').classList.remove('wait');Flow.lazy($('chans'))}
+$('chans').addEventListener('click',e=>{
+ const s=e.target.closest('[data-shelf]');if(s){e.preventDefault();JUJU.go('shelf.html?ch='+s.dataset.shelf);return}
+ const l=e.target.closest('[data-link]');if(l){e.preventDefault();JUJU.go('new-vessel.html?v='+l.dataset.link)}});
+$('new').addEventListener('click',()=>JUJU.go('new-vessel.html'));
+/* Mine · Both: her channels and his, or only the ones this person opened */
+let mine=false;try{mine=localStorage.getItem('juju.mine')==='1'}catch(e){}
+$('mine').addEventListener('click',()=>{mine=!mine;try{localStorage.setItem('juju.mine',mine?'1':'0')}catch(e){}load()});
+JUJU.ready(()=>{load().catch(e=>{$('chans').classList.remove('wait');JUJU.say($('new'),e.say)});JUJU.money&&JUJU.money()});
+})();
+</script>
+</body></html>

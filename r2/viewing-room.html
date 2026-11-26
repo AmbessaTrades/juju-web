@@ -1,0 +1,69 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Juju · The Film</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script><script>(function(){if(!('serviceWorker' in navigator))return;if(navigator.serviceWorker.controller)return;document.documentElement.style.visibility='hidden';navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(function(){return navigator.serviceWorker.ready}).then(function(){location.reload()})})()</script><script src="phone.js"></script><script src="api.js"></script>
+<style>
+/* The Viewing Room: one finished film, watched and taken away. Layout only; every colour is a kit token. Contract: runs/app/API.md. */
+body{--focus-x:40%;--focus-y:40%}
+.view{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px 32px;align-items:center;align-content:center;padding-bottom:24px}
+.view.wait{visibility:hidden}
+.screen{position:relative;aspect-ratio:16/9;background:#000;border:2px solid var(--line-hi);overflow:hidden;width:100%;max-height:calc(100dvh - 248px)}
+.screen video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+.screen video:fullscreen{object-fit:contain}
+.side{display:grid;gap:16px;min-width:0;align-content:start}
+.name{display:grid;gap:8px} .name .h2{overflow-wrap:anywhere} .name .num{color:var(--ash);font-size:16px}
+.pic{border:2px solid var(--line-hi);aspect-ratio:16/9;width:100%;display:block;object-fit:cover}
+.thumb{display:grid;gap:12px}
+.worst{border-left:4px solid var(--need);padding:4px 0 4px 16px;font:400 20px/1.4 "Spectral",serif;color:var(--bone);overflow-wrap:anywhere}
+.more{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px} .more .btn{padding:0 8px 3px} #chaps{margin-top:16px}
+.text{font:400 17px/1.5 "Spectral",serif;color:var(--bone);white-space:pre-wrap;overflow-wrap:anywhere;margin:16px 0 0}
+.text a{color:var(--act)}
+.chap{display:flex;align-items:center;gap:16px;width:100%;min-height:52px;padding:0;border:0;border-top:2px solid var(--line);background:none;color:var(--bone);cursor:pointer;text-align:left;font:600 18px/1.2 "Spectral SC",serif} .chap:last-child{border-bottom:2px solid var(--line)}
+.chap .num{color:var(--ash);min-width:56px;font-size:16px} .chap:hover,.chap:focus-visible{color:var(--act);outline:none} .chap[aria-current=true]{color:var(--work)} .chap[aria-current=true] .num{color:var(--work)}
+@media (max-width:760px){
+  .view{grid-template-columns:minmax(0,1fr);gap:16px;align-content:start;flex:none}
+  .screen{max-height:none;margin:0 -16px;width:auto;border-width:2px 0}
+  .name .h2{font-size:22px} .thumb{grid-template-columns:144px minmax(0,1fr);gap:16px;align-items:center}
+  .worst{font-size:18px}
+}
+</style></head>
+<body data-skin="nocturne" data-room="viewing-room" data-mark="spell-strip" data-door="altar" data-title="The Film" data-channel="Library of Tehuti" data-back="altar.html" data-back-label="Altar">
+<main>
+ <div class="view wait" id="view">
+  <div class="screen"><video id="v" controls playsinline preload="metadata"></video></div>
+  <div class="side">
+   <div class="name"><h2 class="h2" id="title" data-d></h2><span class="num" id="len" data-d></span></div>
+   <p class="worst" id="worst" data-d hidden></p>
+   <div class="thumb"><img class="pic" id="pic" alt="Thumbnail"><a class="btn" id="savepic" download>Save thumbnail</a></div>
+   <div class="more"><button class="btn" id="openchap" data-open="sh-chap" hidden>Chapters</button><button class="btn" data-open="sh-desc">Description</button></div>
+  </div>
+ </div>
+</main>
+<footer class="deck"><div class="aside"><a class="btn" id="kit">Open publish kit</a></div><a class="primary" id="save" download>Save film</a></footer>
+<section class="sheet" id="sh-chap" hidden><h3>Chapters</h3><div id="chaps"></div></section>
+<section class="sheet" id="sh-desc" hidden><h3>Description</h3><p class="text" id="desc" data-d></p></section>
+<script>
+(()=>{
+const $=s=>document.getElementById(s),esc=JUJU.esc,id=JUJU.param('film')||'',at='/api/films/'+encodeURIComponent(id),v=$('v');
+let again=null,chaps=[];
+const clock=s=>{s=Math.floor(s);const h=Math.floor(s/3600);return (h?h+':'+String(Math.floor(s/60)%60).padStart(2,'0'):Math.floor(s/60))+':'+String(s%60).padStart(2,'0')},
+ secs=t=>String(t).split(':').reduce((a,x)=>a*60+(+x||0),0);
+function here(){const t=v.currentTime+.05;let k=-1;chaps.forEach((c,i)=>{if(secs(c.at)<=t)k=i});document.querySelectorAll('.chap').forEach((b,i)=>b.setAttribute('aria-current',i===k&&(v.currentTime>0||!v.paused)))}
+async function load(){
+ try{const[f,k]=await Promise.all([JUJU.get(at),JUJU.get(at+'/kit')]);JUJU.unsay($('save'));
+  $('title').textContent=f.title;$('len').textContent=clock(f.seconds);document.title='Juju · '+f.title;
+  if(f.still&&$('pic').getAttribute('src')!==f.still){$('pic').src=f.still;v.poster=f.still}
+  if(v.getAttribute('src')!==f.video)v.src=f.video;
+  const w=f.watched&&f.watched.worst;$('worst').hidden=!w;$('worst').textContent=w||'';
+  chaps=k.chapters;$('openchap').hidden=!chaps.length;$('chaps').innerHTML=chaps.map(c=>`<button class="chap" data-at="${secs(c.at)}"><span class="num" data-d>${esc(c.at)}</span><span data-d>${esc(c.name)}</span></button>`).join('');
+  $('desc').textContent=k.description.trim();here();
+  $('kit').href=JUJU.to.kit(id);$('savepic').href=at+'/kit/thumbnail.jpg';$('save').href=at+'/film.mp4';
+  $('view').classList.remove('wait');JUJU.chan('Library of Tehuti','need')}
+ catch(e){if(e.status===409&&e.run)return JUJU.go(JUJU.to.run(e.run));if(e.status===404)return JUJU.go('altar.html');JUJU.say($('save'),e.say);clearTimeout(again);again=setTimeout(load,4000)}}
+v.addEventListener('error',()=>{if(v.getAttribute('src'))JUJU.say($('save'),'The film does not play')});
+v.addEventListener('timeupdate',here);v.addEventListener('seeked',here);
+$('chaps').addEventListener('click',e=>{const b=e.target.closest('.chap');if(!b)return;v.currentTime=+b.dataset.at;v.play().catch(()=>{});Kit.sheet('sh-chap').close()});
+/* the review may come after the film */
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!$('view').classList.contains('wait'))load()});
+JUJU.ready(()=>{for(const x of ['save','savepic','kit'])$(x).addEventListener('click',e=>{if(!$(x).href)e.preventDefault()});load()});
+})();
+</script>
+</body></html>

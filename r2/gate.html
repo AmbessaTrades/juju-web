@@ -1,0 +1,139 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Juju · The Gate</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script><script>(function(){if(!('serviceWorker' in navigator))return;if(navigator.serviceWorker.controller)return;document.documentElement.style.visibility='hidden';navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(function(){return navigator.serviceWorker.ready}).then(function(){location.reload()})})()</script><script src="phone.js"></script><script src="api.js"></script>
+<style>
+/* Room layout only; every colour is a kit token. The PIN row is four circles in the page itself: no code adds one. */
+body[data-room="gate"] .rail .door,body[data-room="gate"] .rail .who,body[data-room="gate"] .chip.tank{display:none}
+.floor{display:grid;grid-template-columns:minmax(0,472px) minmax(0,400px);grid-template-rows:auto auto;justify-content:center;align-content:center;gap:32px 88px}
+.crown{grid-column:1;justify-self:center;color:var(--bone)}
+.lock{grid-column:1;grid-row:2;display:grid;gap:16px;align-content:start}
+.people{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.people .row{grid-template-columns:48px 1fr;min-height:64px;padding:8px;-webkit-mask:none;mask:none}
+.people .row:hover{transform:none}
+.people .row .tile{width:48px;height:48px;font:600 20px/1 "Spectral SC",serif;color:var(--bone)}
+.people .row.on .tile{color:var(--act)}
+.set{display:grid;gap:16px;justify-items:center;padding:8px 0}
+.set .lab{min-height:16px}
+.pin{display:flex;gap:24px;justify-content:center}
+.pin i{width:32px;height:32px;border-radius:50%;border:3px solid var(--smoke);background:var(--a-well);transition:background .12s,border-color .12s,box-shadow .12s}
+.pin i.full{background:var(--bone);border-color:var(--bone)}
+.pin.good i{background:var(--act);border-color:var(--act);box-shadow:0 0 16px var(--act-glow)}
+.pin.bad i{background:var(--stop);border-color:var(--stop)}
+.pin.bad{animation:shake .42s cubic-bezier(.36,.07,.19,.97)}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.line{display:flex;align-items:center;justify-content:center;gap:8px;min-height:24px;margin:0}
+.keys{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.keys .btn{min-height:56px;font:600 24px/1 "Spectral SC",serif;letter-spacing:0;padding:0 0 3px}
+.keys .btn.word{font:600 14px/1 "Josefin Sans",sans-serif;letter-spacing:.1em}
+.keys .btn[disabled]{opacity:.45}
+.arch{grid-column:2;grid-row:2;display:grid;grid-template-rows:1fr auto;justify-items:center}
+.arch .niche{width:100%;--arch:200px;--cw:248px}
+.arch .ledge{width:calc(100% + 32px)}
+/* the cat stands: its lowest line is 34 of its 1008 units above its own box, so the box sinks by that much into the ledge */
+.arch .cat{width:var(--cw);margin-bottom:calc(var(--cw)*-.031);position:relative;z-index:1}
+.arch .niche::after{content:"";position:absolute;left:20%;right:20%;bottom:-1px;height:12px;background:radial-gradient(50% 100% at 50% 100%,rgba(0,0,0,.8),transparent)}
+@media (max-width:760px){
+  body[data-room="gate"] .rail{display:none}
+  body[data-room="gate"] .room{padding-bottom:env(safe-area-inset-bottom)}
+  body[data-room="gate"] .main{min-height:100vh;min-height:100dvh}
+  body[data-room="gate"] .deck{bottom:0}
+  .floor{grid-template-columns:minmax(0,1fr);grid-template-rows:none;gap:32px;align-content:start}
+  .crown{display:none}
+  .arch,.lock{grid-column:1;grid-row:auto}
+  .arch{order:-1}
+  .arch .niche{width:144px;height:104px;--arch:72px;--cw:80px}
+  .arch .ledge{width:176px;height:16px}
+  .lock.panel{padding:24px 16px 16px}
+}
+</style></head>
+<body data-skin="nocturne" data-room="gate" data-mark="gate" data-title="The Gate">
+<main>
+ <h2 class="crown" aria-label="Juju">JUJU</h2>
+ <section class="lock panel focus" data-frame="crest">
+  <div class="people" role="group" aria-label="Who is here">
+   <button class="row on" data-who="ambi" aria-pressed="true"><span class="tile">A</span><b class="name">Ambi</b></button>
+   <button class="row" data-who="mumu" aria-pressed="false"><span class="tile">M</span><b class="name">Mumu</b></button>
+  </div>
+  <div class="set"><span class="lab" id="lab"></span>
+   <div class="pin" id="pin" role="img" aria-label="PIN, 0 of 4"><i></i><i></i><i></i><i></i></div></div>
+  <div class="line" id="say" role="status"></div>
+  <div class="keys" id="keys" role="group" aria-label="Keypad"></div>
+ </section>
+ <section class="arch" aria-hidden="true"><div class="niche" id="door"><span class="cat"></span></div><i class="ledge"></i></section>
+</main>
+<footer class="deck"><div class="aside"></div><button class="primary" id="enter" disabled>Enter</button></footer>
+
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const CORE=['make','shelf','altar','crossroads','cauldron','pact','conjuring','spell-strip','publish-kit'];
+/* sess: the server's answer or null. first: the new PIN while it is typed again. bad: the refusal's words. */
+let sess=null,dead=null,who='ambi',typed='',first='',busy=false,bad='',until={},clock=null;
+/* where to after the Gate: only a core room of this app */
+const next=()=>{try{const u=new URL(JUJU.param('next')||'',location.href),m=u.pathname.match(/^\/r2\/([a-z-]+)\.html$/);if(u.origin===location.origin&&m&&CORE.includes(m[1]))return u.pathname+u.search}catch(e){}return 'altar.html'};
+const me=()=>sess&&(sess.people||[]).find(p=>p.id===who);
+const left=()=>Math.max(0,Math.ceil(((until[who]||0)-Date.now())/1000));
+/* off | mac | set | again | wait | enter */
+const mode=()=>{const p=me();if(!p)return 'off';if(p.pin==='none')return sess.here==='mac'?(first?'again':'set'):'mac';return left()?'wait':'enter'};
+const open=()=>['set','again','enter'].includes(mode())&&!busy;
+
+function draw(){
+ const m=mode(),pin=$('pin'),say=$('say'),enter=$('enter');
+ [...pin.children].forEach((c,i)=>c.classList.toggle('full',i<typed.length));
+ pin.setAttribute('aria-label','PIN, '+typed.length+' of 4');
+ $('lab').textContent=m==='set'?'New PIN':m==='again'?'Again':'';
+ document.querySelectorAll('.people .row').forEach(r=>{const on=r.dataset.who===who;r.classList.toggle('on',on);r.setAttribute('aria-pressed',on)});
+ document.querySelectorAll('#keys .btn').forEach(b=>b.disabled=!open());
+ if(m==='wait')say.innerHTML=`<span class="say need">Wait</span> <b class="say need num" data-d>${left()}</b>`;
+ else if(m==='mac')say.innerHTML='<span class="say need">Mac only</span>';
+ else{say.innerHTML=dead||bad?'<span class="say stop"></span>':'';if(say.firstChild)say.firstChild.textContent=dead||bad}
+ const retry=m==='off'&&dead;
+ enter.textContent=retry?'Try again':'Enter';
+ /* while the digits are on their way Enter stays lit: the kit's busy light, and api.js takes no second press */
+ enter.disabled=!(retry||typed.length===4&&(m==='enter'||m==='again')&&!pin.classList.contains('bad'));
+}
+/* the waits count down by themselves, whoever is picked; at nothing the keys come back */
+function tick(){clearInterval(clock);clock=setInterval(()=>{if(Object.values(until).every(t=>t<=Date.now()))clearInterval(clock);draw()},250)}
+
+async function load(){
+ try{const s=await JUJU.get('/api/session');
+  if(s.who){JUJU.go(next());return}
+  sess=s;dead=null;(s.people||[]).forEach(p=>{until[p.id]=p.wait_s?Date.now()+p.wait_s*1000:0});
+  if(Object.values(until).some(Boolean))tick()}
+ catch(e){sess=null;dead=e.say||'Failed'}
+ draw()}
+
+function digit(d){if(!open()||typed.length>=4)return;bad='';typed+=d;draw();if(typed.length===4)send()}
+function back(){if(!open()||!typed)return;typed=typed.slice(0,-1);draw()}
+function clear(){if(!open())return;typed='';bad='';draw()}
+/* the fourth digit comes here, and so does Enter: whichever is second finds busy on */
+function send(){
+ if(busy||typed.length!==4)return;
+ const m=mode();
+ if(m==='set'){busy=true;draw();setTimeout(()=>{first=typed;typed='';busy=false;draw()},240);return}
+ if(m!=='again'&&m!=='enter')return;
+ busy=true;draw();
+ JUJU.once($('enter'),()=>m==='again'?JUJU.post('/api/session/pin',{who,pin:first,again:typed}):JUJU.post('/api/session',{who,pin:typed}),{done:e=>{refused(e);return true}})
+  .then(a=>{if(a&&a.who)welcome()})}
+function welcome(){$('pin').classList.add('good');$('door').classList.add('work');setTimeout(()=>JUJU.go(next()),360)}
+function refused(e){
+ /* no answer: the four digits stay and Enter sends them again */
+ if(e.error==='offline'||e.error==='slow'){busy=false;bad=e.say;draw();return}
+ const pin=$('pin');pin.classList.add('bad');bad=e.say;draw();
+ setTimeout(async()=>{
+  pin.classList.remove('bad');typed='';first='';busy=false;
+  if(e.error==='wait'){until[who]=Date.now()+(e.wait_s||60)*1000;bad='';tick()}
+  if(['no_pin','already_set','mac_only'].includes(e.error)){const b=bad;await load();bad=b}
+  draw()},480)}
+
+JUJU.ready(()=>{
+ $('keys').innerHTML=[1,2,3,4,5,6,7,8,9].map(n=>`<button class="btn" data-k="${n}">${n}</button>`).join('')+
+  `<button class="btn word" data-k="clear">Clear</button><button class="btn" data-k="0">0</button><button class="btn word" data-k="del" aria-label="Delete one">${Art.glyph('back')}</button>`;
+ $('keys').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;const k=b.dataset.k;k==='del'?back():k==='clear'?clear():digit(k)});
+ document.querySelectorAll('.people .row').forEach(r=>r.addEventListener('click',()=>{if(busy)return;who=r.dataset.who;typed='';first='';bad='';Kit.press(r);draw()}));
+ document.addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey||e.repeat)return;if(/^[0-9]$/.test(e.key))digit(e.key);else if(e.key==='Backspace')back();else if(e.key==='Enter'&&!e.target.closest('button'))send()});
+ $('enter').addEventListener('click',()=>{if(!sess)JUJU.once($('enter'),load);else send()});
+ draw();load();
+});
+})();
+</script>
+</body></html>

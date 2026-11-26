@@ -1,0 +1,268 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Juju · The Tank</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script>
+<style>
+/* Room layout only. Every colour is a kit token. Parts the kit lacks, named in the report:
+   hold-to-confirm fill (rows and the primary), a wallet rack that swipes on the phone, a key field, a lock readout in the deck. */
+body{--focus-x:40%;--focus-y:46%}
+.floor{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,380px);gap:20px 30px;align-items:start;align-content:center;padding-bottom:8px}
+.toprow{grid-column:1/-1;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.notes{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.spent{display:flex;align-items:flex-end;gap:16px;border:0;background:none;color:inherit;cursor:pointer;padding:0;font:inherit;justify-self:start;text-align:left}
+.spent .fig{font-size:46px}
+.spent .lab{margin-bottom:8px}
+.spent:hover .lab{color:var(--bone)}
+.rackwrap{padding:34px 26px 22px;min-width:0}
+.floor>*{min-width:0}
+.rack .wal .objname{font-size:17px}
+.rack .wal{padding-bottom:12px}
+.rack .wal .art.wallet{max-width:150px}
+.detail{display:grid;gap:18px;align-content:start}
+.detail .top{display:flex;align-items:center;gap:16px}
+.detail .medal{width:76px;height:76px;flex:none}
+.detail .left2{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.detail .left2 .fig{font-size:30px}
+.detail .acts2{display:flex;gap:8px;flex-wrap:wrap}
+.plan{margin-top:14px;display:flex;gap:10px;align-items:baseline;color:var(--ash);font-size:14px}
+.back2{grid-column:1/-1;justify-self:start}
+.lockread{display:flex;align-items:center;gap:12px}
+.lockread .art.lock{width:40px;height:52px}
+.lockread .art.lock.thud{animation:thud .38s cubic-bezier(.2,.9,.3,1.2)}
+.lockread b{font:600 18px/1 "Spectral SC",serif}
+.lockread.on b{color:var(--stop-hi)}
+.hold .fill,.holdbtn .fill{position:absolute;left:0;bottom:0;height:5px;width:0;background:var(--need);box-shadow:0 0 12px var(--need);z-index:2;pointer-events:none}
+.hold.holding .fill,.holdbtn.holding .fill{width:100%;transition:width var(--hold,1s) linear}
+.holdbtn{position:relative;overflow:hidden}
+.chip .art.knob{width:30px;height:30px}
+.chip .art.pip{width:18px;height:18px}
+.detail>.pill{justify-self:start}
+.spent{min-height:48px}
+.chip .emblem{width:22px;height:22px}
+.sheet .rows{margin-top:14px}
+.sheet .row{min-height:64px;text-decoration:none}
+.sheet .row .val{color:var(--ash)}
+.keybox{display:flex;gap:10px;align-items:center;margin-top:16px}
+.keybox input{flex:1;min-width:0;min-height:52px;padding:0 16px;border:0;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line-hi);color:var(--bone);font:500 16px/1 "JetBrains Mono",monospace;letter-spacing:.2em}
+.keybox input:focus{outline:none;box-shadow:inset 0 0 0 2px var(--act)}
+.vend{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
+.vend .num{color:var(--ash)}
+.where{display:grid;gap:4px;margin-top:16px}
+.where .status{min-height:32px}
+.steps .row .val .art{width:22px;height:22px}
+.testlist{display:grid;gap:6px;margin-top:12px}
+.testlist .status{min-height:28px}
+.ledger .row{grid-template-columns:56px minmax(0,1fr) auto}
+.ledger .num{font-size:15px}
+.fuse{display:flex;align-items:center;gap:18px;margin-top:12px}
+.fuse .art.knob{width:110px;height:110px}
+.amount{display:flex;gap:10px;margin-top:14px}
+.amount input{width:160px;min-height:52px;padding:0 14px;border:0;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line-hi);color:var(--bone);font:600 22px/1 "Spectral SC",serif}
+.ask{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.still .art *{animation:none!important}
+@media (max-width:760px){
+  .floor{grid-template-columns:1fr;gap:12px;padding-bottom:6px;align-content:start}
+  .detail{gap:12px} .detail .h2{display:none} .lockread.on b{display:none}
+  .spent .fig{font-size:36px}
+  .rackwrap{padding:22px 0 12px}
+  .rack{display:flex;overflow-x:auto;gap:4px;padding:0 10px;scroll-snap-type:x mandatory;scrollbar-width:none}
+  .rack::-webkit-scrollbar{display:none}
+  .rack .wal{flex:0 0 31%;scroll-snap-align:start}
+  .rack .wal .objname{font-size:15px}
+  .detail .medal{width:58px;height:58px}
+  .lockread b{font-size:16px}
+  .lockread .art.lock{width:30px;height:40px}
+}
+</style></head>
+<body data-skin="nocturne" data-room="tank" data-title="The Tank" data-tank="asleep" data-who="A" data-back="altar.html" data-back-label="Back">
+<main>
+ <div class="toprow"><button class="spent" data-open="ledger" aria-label="Spent today"><span class="fig num" id="spent" data-d>$0.00</span><span class="lab">Spent today</span></button><div class="notes" id="notes"></div></div>
+ <div class="panel sunk rackwrap" data-frame><div class="rack" id="rack" data-scroll role="list" aria-label="Wallets"></div></div>
+ <section class="panel focus detail" data-frame="crest" id="detailP"><div class="detail" id="detail" aria-live="polite"></div></section>
+ <a class="btn need back2" id="backFilm" hidden></a>
+</main>
+<div data-tools>
+ <button class="chip" data-open="practice" id="modeChip"><span data-art="pip" data-state="done"></span><span id="modeWord">Practice</span></button>
+ <button class="chip only-desk" data-open="fuse" id="fuseChip" aria-label="Test fuse"><span id="fuseKnob"></span><span class="num" data-d id="fuseWord">$0.00</span></button>
+ <button class="chip only-desk" data-open="free"><span class="lbl">Free</span></button>
+</div>
+<footer class="deck"><div class="aside"><span class="lockread" id="lockread"><span id="lockArt"></span><b id="lockWord">Open</b></span></div><button class="primary" id="go" style="--hold:1s">Lock spending</button></footer>
+
+<section class="sheet" id="keys" hidden><h3 id="kTitle">Wake the Tongue</h3>
+ <div class="vend"><b class="name" id="kVendor" data-d>Inworld</b><button class="btn" id="kOpen"><span data-art="glyph" data-name="go"></span>Open its page</button><span class="lab">Check on screen</span></div>
+ <div class="keybox"><input type="password" id="kInput" placeholder="Paste the key" aria-label="Key" autocomplete="off"><button class="btn need" id="kSave">Keep it</button></div>
+ <div class="where"><span class="status" id="kPhone"><span data-art="pip" data-state="none"></span><span>This phone: not here</span></span><span class="status" id="kMac"><span data-art="pip" data-state="none"></span><span>The Mac: not here</span></span></div>
+ <p class="plan" id="kPlan"></p>
+ <div class="acts" id="kWrong" hidden><button class="btn need" id="kAsk">Connect on the Mac</button></div>
+ <div class="acts" id="kMore" hidden><button class="btn bare" id="kRead"><span data-art="glyph" data-name="retry"></span>Read again</button><button class="btn stop holdbtn" id="kOff" style="--hold:1s">Take the key off<i class="fill"></i></button></div>
+</section>
+
+<section class="sheet" id="money" hidden><h3>I added money</h3>
+ <div class="amount"><input type="number" inputmode="decimal" min="0" step="0.01" id="mInput" placeholder="0.00" aria-label="US dollars"><span class="lab" style="align-self:center">USD</span><button class="btn need" id="mSave">Add</button></div>
+ <div class="acts"><button class="btn bare" data-swapm="correct">Correct it</button></div>
+</section>
+
+<section class="sheet" id="correct" hidden><h3>Correct it</h3>
+ <div class="amount"><input type="number" inputmode="decimal" min="0" step="0.01" id="cInput" placeholder="0.00" aria-label="US dollars seen on its page"><span class="lab" style="align-self:center">USD</span><button class="btn need" id="cSave">Use it</button></div>
+</section>
+
+<section class="sheet" id="ledger" hidden><h3>Spent today</h3><div class="rows ledger" id="ledgerRows"></div><p class="plan"><span class="lab">Film cap</span><span class="lab">in the pact</span></p></section>
+
+<section class="sheet" id="fuse" hidden><h3>Test fuse</h3>
+ <div class="fuse"><span id="fuseBig"></span><span><b class="fig num" data-d id="fuseBigWord">$0.00</b><span class="lab" style="display:block;margin-top:8px">of $0.75</span></span></div>
+ <div class="rows ledger" id="fuseRows"></div>
+ <div class="acts" id="burnt" hidden><span class="say stop">Burnt out</span><button class="btn need" id="burntGo">Spend for real</button></div>
+</section>
+
+<section class="sheet" id="practice" hidden><h3 id="pTitle">Practice</h3>
+ <p class="status" id="pNow"><span data-art="pip" data-state="done"></span><span>Nothing can be billed</span></p>
+ <div class="rows steps">
+  <button class="row" id="runTest"><span class="tile"><span data-art="pip" data-state="next"></span></span><b class="name">Run the free test</b><span class="val" id="runVal"></span></button>
+  <div class="testlist" id="testlist" hidden></div>
+  <button class="row holdbtn" id="allowTest" style="--hold:1s"><span class="tile"><span data-art="pip" data-state="none"></span></span><b class="name" id="allowName">Allow tests that cost</b><span class="val pill dim">hold</span><i class="fill"></i></button>
+  <button class="row holdbtn" id="spendReal" style="--hold:2s"><span class="tile"><span data-art="pip" data-state="none"></span></span><b class="name" id="realName">Spend for real</b><span class="val pill dim" id="realWhy">test first</span><i class="fill"></i></button>
+  <button class="row only-phone" data-swap="fuse"><span class="tile"><span data-art="emblem" data-name="tank"></span></span><b class="name">Test fuse</b><span class="val num" data-d id="fuseRowWord">$0.00</span></button>
+  <button class="row only-phone" data-swap="free"><span class="tile"><span data-art="emblem" data-name="gate"></span></span><b class="name">Free</b><span class="val"></span></button>
+ </div>
+</section>
+
+<section class="sheet" id="free" hidden><h3>Free</h3>
+ <div class="rows">
+  <button class="row" id="ytRow"><span class="tile"><span data-art="emblem" data-name="publish-kit"></span></span><b class="name">YouTube</b><span class="val pill dim" id="ytVal">connect</span></button>
+  <button class="row"><span class="tile"><span data-art="emblem" data-name="reliquary"></span></span><b class="name">Free stock</b><span class="val pill dim">connect</span></button>
+  <button class="row"><span class="tile"><span data-art="emblem" data-name="gate"></span></span><b class="name">Sync</b><span class="val pill dim">connect</span></button>
+  <div class="row off"><span class="tile"><span data-art="emblem" data-name="offering"></span></span><b class="name">Shop</b><span class="val pill dim">not needed yet</span></div>
+  <div class="row off"><span class="tile"><span data-art="emblem" data-name="offering"></span></span><b class="name">Checkout</b><span class="val pill dim">not needed yet</span></div>
+  <div class="row off"><span class="tile"><span data-art="emblem" data-name="publish-kit"></span></span><b class="name">Order email</b><span class="val pill dim">not needed yet</span></div>
+ </div>
+ <div class="acts"><button class="switch" aria-checked="false">Free picture help</button></div>
+</section>
+
+<script>
+(()=>{
+const S=Kit.state||'first',WHO=(Kit.param('who')||'ambi').toLowerCase()==='mumu'?'mumu':'ambi';
+/* six minds, named in NAMES.md. The vendor shows on the key sheet only. Plan = ADR 0008 (135 CAD; a candidate
+   until metered). Which vendor stands behind which mind is the maker's reading of brief 16.1 and 17.2, not said anywhere. Griot and
+   Scribe share "daily scripts and checks"; the 9 CAD for outlines belongs to no mind yet. usd = plan at the brief's own rate
+   (22 CAD is about 15.70 US). No address of any service is known here, so none is shown. */
+const MINDS=[
+ {k:'tongue',name:'Tongue',vendor:'Inworld',plan:'55',usd:39.3},
+ {k:'pigment',name:'Pigment',vendor:'WaveSpeed',plan:'14',usd:10},
+ {k:'elder',name:'Elder',vendor:'Google AI Studio',plan:'21',usd:15},
+ {k:'griot',name:'Griot',vendor:'OpenRouter',plan:'22',usd:15.7,shared:1},
+ {k:'scribe',name:'Scribe',vendor:'DeepSeek',plan:'22',usd:15.7,shared:1},
+ {k:'watcher',name:'Watcher',vendor:'TypeSafe',plan:'14',usd:10}];
+/* each wallet: state asleep|ok|low|locked, level 0..1 of its plan, left, films, key: where it lives. Today: all asleep. */
+const W={};MINDS.forEach(m=>W[m.k]={st:'asleep',level:0,left:null,films:null,phone:false,mac:false,known:false});
+/* where you came from: the back label and the line that lights when the missing piece is fixed */
+const FROM={altar:['altar.html','Back'],crossroads:['crossroads.html','Back to the cards'],conjuring:['conjuring.html','Back to the making'],'spell-strip':['spell-strip.html','Back to the scene'],
+ 'mirror-bend':['mirror-bend.html','Back to the thumbnail'],voice:['voice.html','Back to the voice'],reliquary:['reliquary.html','Back to the pictures'],offering:['offering.html','Back to the product'],
+ pact:['pact.html','Back to the film'],cauldron:['cauldron.html','Back to the pot'],arcana:['arcana.html','Back to the looks'],vessel:['vessel.html?tab=publishing','Back to the channel']};
+const from=Kit.param('from')||'altar',fr=FROM[from]||FROM.altar;
+document.body.dataset.back=fr[0];document.body.dataset.backLabel=fr[1];
+let mode='practice',locked=false,lockedBy='',testPassed=false,fuse=0,lit=Kit.param('mind')||(from==='voice'?'tongue':from==='mirror-bend'?'pigment':from==='reliquary'?'watcher':'elder');
+let ledger=[],asked=false;
+/* states: pictures of what will be. Numbers in them are made up for the picture, never shown by default. */
+const sample=()=>{Object.assign(W.elder,{st:'ok',level:.62,left:'$9.80',films:'15 films',mac:true,known:true});Object.assign(W.pigment,{st:'ok',level:.48,left:'$5.10',films:'23 films',mac:true,known:true})};
+if(['ready','low','locked','refused','offline','done','real-by-ambi'].includes(S)){sample();mode='real';testPassed=true;ledger=[{film:'The ENTIRE Journey After Death in 52 Minutes',mind:'elder',t:'09:12',v:'$0.21'},{film:'The ENTIRE Journey After Death in 52 Minutes',mind:'pigment',t:'09:40',v:'$0.05',held:true}]}
+if(S==='low')Object.assign(W.pigment,{st:'low',level:.07,left:'$0.40',films:'2 days'});
+if(S==='locked'){locked=true}
+if(S==='unknown'||S==='working')Object.assign(W.elder,{st:'ok',level:0,left:null,mac:true,known:false});
+if(S==='wrong-device')Object.assign(W.elder,{phone:true,mac:false});
+if(S==='fuse-burnt'){mode='test';fuse=.75}
+if(S==='asked'||S==='mumu')asked=S==='asked';
+document.addEventListener('DOMContentLoaded',()=>{
+ const $=id=>document.getElementById(id),rack=$('rack'),detail=$('detail'),go=$('go');
+ const mind=k=>MINDS.find(m=>m.k===k);
+ const wstate=k=>locked&&W[k].st!=='asleep'?'locked':W[k].st;
+ const drawRack=()=>{rack.innerHTML=MINDS.map(m=>{const w=W[m.k],s=wstate(m.k);return `<button class="wal ${s==='asleep'?'asleep':s} ${m.k===lit?'on':''}" data-k="${m.k}" role="listitem" aria-label="${m.name}">${Art.wallet({mind:m.k,state:s,level:w.level})}<span class="medal">${Art.medal(m.k,{state:s==='asleep'?'off':s==='low'?'need':s==='locked'?'stop':'on'})}</span><b class="objname ${m.k===lit?'on':''}">${m.name}</b></button>`}).join('')};
+ const drawDetail=()=>{const m=mind(lit),w=W[lit],s=wstate(lit);let h=`<div class="top"><span class="medal">${Art.medal(lit,{state:s==='asleep'?'off':s==='low'?'need':s==='locked'?'stop':'on'})}</span><div><h2 class="h2">${m.name}</h2></div></div>`;
+  if(s==='asleep'){h+=`<span class="pill dim">asleep</span><div class="acts2"><button class="btn need" data-open="keys">${Art.glyph('retry')}Wake it</button></div>`}
+  else{const word='';
+   h+=`<div class="left2">${w.left?`<b class="fig num" data-d>${w.left}</b>`:`<span class="lab">left unknown</span>`}</div>`+(w.films?`<span class="small">${w.films.replace(/(\d+)/,'<span data-d>$1</span>')}</span>`:'')+(s==='low'?'<span class="lab warn">Under one film</span>':'')+word;
+   if(S==='refused'&&lit==='elder')h+=`<p class="status"><span data-art="pip" data-state="failed"></span><span>Key expired</span></p><button class="btn need" data-open="keys">Paste it again</button>`;
+   h+=`<div class="acts2">${w.left?`<button class="btn" data-open="money">${Art.glyph('plus')}Added money</button>`:`<button class="btn need" data-open="money">${Art.glyph('plus')}I added money</button>`}<button class="btn bare" data-open="keys">Key</button></div>`}
+  detail.innerHTML=h;detail.querySelectorAll('[data-art]').forEach(e=>Art.fill(e));
+  /* the key sheet follows the lit wallet */
+  $('kTitle').textContent=(W[lit].st==='asleep'?'Wake the ':'')+m.name;$('kVendor').textContent=m.vendor;$('kPlan').innerHTML=`<span class="lab">Plan</span><span class="num" data-d>${m.plan} CAD</span>${m.shared?'<span class="lab">shared</span>':''}`;
+  const where=(el,on,label)=>{el.innerHTML=Art.pip({state:on?'done':'none'})+`<span>${label}: ${on?'here':S==='offline'&&label==='The Mac'?'not known':'not here'}</span>${label==='The Mac'&&from!=='altar'?'<span class="pill need">next film</span>':''}`};
+  $('kWrong').hidden=!(w.phone&&!w.mac);$('kAsk').textContent=WHO==='mumu'?'Ask Ambi':'Connect on the Mac';
+  where($('kPhone'),w.phone,'This phone');where($('kMac'),w.mac,'The Mac');$('kMore').hidden=W[lit].st==='asleep'};
+ const drawLock=()=>{const la=$('lockArt');la.innerHTML=Art.lock({locked});$('lockWord').textContent=locked?(lockedBy?'Locked by '+lockedBy:'Locked'):'Open';$('lockread').classList.toggle('on',locked);
+  go.textContent=locked?'Let it spend':'Lock spending';go.classList.toggle('breach',locked);go.setAttribute('aria-label',locked?'Hold one second to let it spend':'Lock spending');
+  document.querySelector('.room')?.classList.toggle('still',locked)};
+ const drawMode=()=>{$('modeWord').textContent=mode==='practice'?'Practice':mode==='test'?'Test':'Real';
+  $('pTitle').textContent=$('modeWord').textContent;
+  $('pNow').innerHTML=Art.pip({state:mode==='practice'?'done':'now'})+`<span>${mode==='practice'?'Nothing can be billed':mode==='test'?(fuse>=.75?'Burnt out':'Tests may cost'):(WHO==='mumu'||S==='real-by-ambi'?'Opened by Ambi':'Real')}</span>`;
+  $('allowName').textContent=mode==='test'?'Back to Practice':'Allow tests that cost';
+  const why=!testPassed?'test first':!['elder','griot'].some(k=>W[k].st!=='asleep')?'wake a writer':'';
+  const sr=$('spendReal');sr.classList.toggle('off',!!why&&mode!=='real');$('realWhy').textContent=WHO==='mumu'?'ask Ambi':mode==='real'?'open':why||'hold 2 s';$('realName').textContent=WHO==='mumu'?'Ask Ambi':mode==='real'?'Back to Practice':'Spend for real';
+  $('runVal').innerHTML=testPassed?`<span class="pill work">passed</span>`:'';
+  $('runTest').querySelector('.tile').innerHTML=Art.pip({state:testPassed?'done':'next'});
+  $('spendReal').querySelector('.tile').innerHTML=Art.pip({state:mode==='real'?'done':!why?'next':'none'});
+  $('allowTest').querySelector('.tile').innerHTML=Art.pip({state:mode==='test'?'now':'none'});
+  $('fuseKnob').innerHTML=Art.knob({value:fuse/.75,state:fuse>=.75?'held':'set'});$('fuseWord').textContent='$'+fuse.toFixed(2)+' / 0.75';$('fuseRowWord').textContent='$'+fuse.toFixed(2);
+  $('fuseBig').innerHTML=Art.knob({value:fuse/.75,state:fuse>=.75?'held':'set'});$('fuseBigWord').textContent='$'+fuse.toFixed(2);
+  $('fuseRows').innerHTML=fuse?`<div class="row"><span class="tile">${Art.emblem('tongue')}</span><b class="name">Voice hearing</b><span class="val num" data-d>$0.75</span></div>`:'';
+  document.body.dataset.tank=Object.values(W).some(w=>w.st==='low')?'low':Object.values(W).some(w=>w.st!=='asleep')?'ok':'asleep';
+  const chip=document.querySelector('.chip.tank');if(chip)chip.className='chip tank '+document.body.dataset.tank};
+ const drawLedger=()=>{$('spent').textContent='$'+ledger.reduce((a,l)=>a+parseFloat(l.v.slice(1)),0).toFixed(2);
+  $('ledgerRows').innerHTML=ledger.length?ledger.map(l=>`<a class="row" href="conjuring.html"><span class="tile">${Art.emblem(l.mind)}</span><span><b class="name">${mind(l.mind).name}</b></span><span class="val"><span class="num" data-d>${l.t} ${l.v}</span>${l.held?' <span class="pill work">held</span>':''}</span></a>`).join(''):`<p class="status"><span data-art="pip" data-state="none"></span><span>Nothing spent</span></p>`;
+  $('ledgerRows').querySelectorAll('[data-art]').forEach(e=>Art.fill(e))};
+ const all=()=>{drawRack();drawDetail();drawLock();drawMode();drawLedger()};all();
+ rack.addEventListener('click',e=>{const b=e.target.closest('.wal');if(!b)return;lit=b.dataset.k;drawRack();drawDetail();Kit.press(rack.querySelector(`[data-k="${lit}"] .art.wallet`))});
+ /* hold: a press held for its time, with a fill along the bottom */
+ const hold=(el,ms,fn,box)=>{box=box||el;let t=null;const on=e=>{if(e.button>0||el.classList.contains('off'))return;box.classList.add('holding');t=setTimeout(()=>{box.classList.remove('holding');fn()},ms)},off=()=>{clearTimeout(t);box.classList.remove('holding')};
+  el.addEventListener('pointerdown',on);['pointerup','pointerleave','pointercancel'].forEach(k=>el.addEventListener(k,off));el.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!e.repeat){e.preventDefault();on(e)}});el.addEventListener('keyup',off)};
+ /* the one action: lock with one tap; letting it spend again is a one second hold */
+ const holdBox=go.closest('.hold');holdBox.insertAdjacentHTML('beforeend','<i class="fill"></i>');holdBox.style.setProperty('--hold','1s');
+ const doLock=()=>{locked=true;lockedBy='';drawLock();drawRack();drawDetail();const a=$('lockArt').firstElementChild;a&&a.classList.add('thud');Kit.finish(go,'Locked. Nothing can spend.');drawLockNote()};
+ const drawLockNote=()=>{document.getElementById('locknote')?.remove();if(!locked)return;const run=ledger.filter(l=>l.held).length;
+  $('notes').insertAdjacentHTML('beforeend',`<span id="locknote" class="notes"><span class="status">${Art.pip({state:'none'})}<span>Mac waiting</span></span>${run?`<span class="status">${Art.pip({state:'now'})}<span>${run} call finishing</span></span>`:''}</span>`)};
+ const doOpen=()=>{if(WHO==='mumu'&&lockedBy==='Ambi'){Kit.toast('Only Ambi opens his lock',{state:'need'});return}locked=false;drawLock();drawLockNote();drawRack();drawDetail();Kit.toast('Spending is open',{art:Art.lock({locked:false})})};
+ let held=0;go.addEventListener('click',()=>{if(Date.now()-held<400)return;if(!locked)doLock()});
+ hold(go,1000,()=>{if(locked){held=Date.now();doOpen()}},holdBox);
+ /* the key: pasted, kept on this device only, one check call that costs $0.00 */
+ $('kSave').addEventListener('click',()=>{const v=$('kInput').value.trim();const s=$('kSave');if(!v){$('kInput').focus();return}
+  s.textContent='Checking';s.classList.add('busy');$('kInput').value='';setTimeout(()=>{s.textContent='Keep it';s.classList.remove('busy');
+   if(v.length<8){Kit.toast('Refused. Paste it again',{state:'stop'});return}
+   Object.assign(W[lit],{st:'ok',level:0,left:null,known:false,mac:true});all();Kit.wake(rack.querySelector(`[data-k="${lit}"] .art.wallet`));Kit.sheet('keys').close();Kit.toast(mind(lit).name+' is awake',{art:Art.medal(lit)})},900)});
+ hold($('kOff'),1000,()=>{Object.assign(W[lit],{st:'asleep',level:0,left:null,films:null,mac:false,phone:false});all();Kit.sheet('keys').close();Kit.toast('Key taken off this device')});
+ $('kRead').addEventListener('click',()=>{const r=$('kRead');r.classList.add('busy');setTimeout(()=>{r.classList.remove('busy');Kit.toast('Read '+new Date().toTimeString().slice(0,5))},700)});
+ /* money added by hand, in US dollars, dated today: the level rises */
+ $('mSave').addEventListener('click',()=>{const n=parseFloat($('mInput').value);if(!(n>0)){$('mInput').focus();return}const w=W[lit];const had=w.left?parseFloat(w.left.slice(1)):0;
+  w.left='$'+(had+n).toFixed(2);w.level=Math.min(1,(had+n)/mind(lit).usd);w.known=true;w.st='ok';$('mInput').value='';Kit.sheet('money').close();all();Kit.wake(rack.querySelector(`[data-k="${lit}"] .art.wallet`));Kit.toast('Added $'+n.toFixed(2))});
+ $('cSave').addEventListener('click',()=>{const n=parseFloat($('cInput').value);if(!(n>=0))return;const w=W[lit];w.left='$'+n.toFixed(2);w.level=Math.min(1,n/mind(lit).usd);$('cInput').value='';Kit.sheet('correct').close();all();Kit.toast('Corrected. The old number is kept')});
+ /* practice, test, real */
+ $('runTest').addEventListener('click',()=>{const L=['Lock','Stand-in script','Script checks','Reading clock','Stand-in scenes','Drawing','Picture checks','Join','Export refused'],box=$('testlist');box.hidden=false;
+  box.innerHTML=L.map(l=>`<span class="status">${Art.pip({state:'none'})}<span>${l}</span></span>`).join('');let i=0;$('runVal').innerHTML='<span class="pill work">running</span>';
+  const step=()=>{const r=box.children[i];if(!r){testPassed=true;drawMode();Kit.toast('The free test passed',{art:Art.seal({state:'live'})});return}r.firstElementChild.outerHTML=Art.pip({state:'now'});setTimeout(()=>{r.firstElementChild.outerHTML=Art.pip({state:'done'});i++;step()},170)};step()});
+ hold($('allowTest'),1000,()=>{mode=mode==='test'?'practice':'test';drawMode();Kit.toast(mode==='test'?'Tests may cost, up to $0.75':'Back to Practice')});
+ hold($('spendReal'),2000,()=>{if(WHO==='mumu'){asked=true;Kit.toast('Asked Ambi');drawAsk();return}mode=mode==='real'?'practice':'real';drawMode();Kit.toast(mode==='real'?'Real. Films may spend':'Back to Practice',{art:Art.seal({state:mode==='real'?'live':'blank'})})});
+ $('spendReal').addEventListener('click',()=>{if(WHO==='mumu'){asked=true;Kit.toast('Asked Ambi');drawAsk()}});
+ $('ytRow').addEventListener('click',()=>{$('ytVal').textContent='opening';setTimeout(()=>$('ytVal').textContent='connect',1200)});
+ /* asks between the two people */
+ const drawAsk=()=>{const a=document.getElementById('askline');if(a)a.remove();if(WHO==='mumu'&&asked){$('notes').insertAdjacentHTML('beforeend',`<p class="ask" id="askline"><span class="status"><span>${Art.pip({state:'next'})}</span><span>Asked <span data-d>14:10</span></span></span><button class="btn bare" id="takeBack">Take it back</button></p>`);$('takeBack').onclick=()=>{asked=false;drawAsk();Kit.toast('Ask taken back')}}};
+ document.querySelector('[data-swapm]').addEventListener('click',()=>{Kit.sheet('money').close();setTimeout(()=>Kit.sheet('correct').open(),220)});
+ if(WHO==='mumu'){document.body.dataset.who='M';const w=document.querySelector('.rail .who');if(w)w.textContent='M';drawMode();drawAsk()}
+ if(S==='mumu-asks'){$('notes').insertAdjacentHTML('beforeend',`<p class="ask"><a class="btn need" data-open="practice" href="#" onclick="return false">${Art.glyph('go')}Mumu asks</a></p>`)}
+ /* came from a film: the way back lights once the missing piece is fixed */
+ if(S==='done'||(from!=='altar'&&W[lit].st!=='asleep')){const b=$('backFilm');b.hidden=false;b.href=fr[0];b.innerHTML=Art.glyph('back')+fr[1]}
+ if(S==='working'){const s=$('kSave');Kit.sheet('keys').open();$('kInput').value='xxxxxxxxxxxx';s.textContent='Checking';s.classList.add('busy')}
+ if(S==='refused'){W.elder.st='ok';drawDetail()}
+ if(S==='offline'){document.querySelector('.room').classList.add('still');$('notes').insertAdjacentHTML('beforeend',`<p class="status"><span>${Art.pip({state:'none'})}</span><span>No network <span data-d>14:05</span></span></p>`)}
+ if(S==='locked-by-ambi'){locked=true;lockedBy='Ambi';drawLock();drawLockNote()}
+ if(S==='locked')drawLockNote();
+ if(S==='ask-unsent'){$('notes').insertAdjacentHTML('beforeend',`<p class="ask"><span class="status">${Art.pip({state:'failed'})}<span>Not sent yet</span></span><button class="btn" id="askAgain">Ask Ambi again</button></p>`);$('askAgain').onclick=()=>Kit.toast('No network. It waits')}
+ if(S==='free-test-failed'){Kit.sheet('practice').open();const box=$('testlist');box.hidden=false;box.innerHTML=[['Lock','done'],['Stand-in script','done'],['Script checks','failed'],['Reading clock','none']].map(([l,k])=>`<span class="status">${Art.pip({state:k})}<span>${l}</span></span>`).join('');$('runVal').innerHTML='<span class="pill stop">stopped</span>'}
+ $('kOpen').addEventListener('click',()=>Kit.toast('Its page opens outside Juju'));
+ $('kAsk').addEventListener('click',()=>{if(WHO==='mumu'){asked=true;drawAsk();Kit.sheet('keys').close();Kit.toast('Asked Ambi')}else $('kInput').focus()});
+ $('burntGo').textContent=WHO==='mumu'?'Ask Ambi':'Spend for real';$('burntGo').addEventListener('click',()=>{Kit.sheet('fuse').close();if(WHO==='mumu'){asked=true;drawAsk();Kit.toast('Asked Ambi')}else setTimeout(()=>Kit.sheet('practice').open(),220)});
+ $('burnt').hidden=fuse<.75;
+ if(S==='fuse-burnt'){Kit.sheet('fuse').open()}
+ if(S==='practice'||S==='free-test-not-run')Kit.sheet('practice').open();
+ if(S==='wrong-device')Kit.sheet('keys').open();
+ /* phone: the fuse and the free services open from the practice sheet, so the head keeps one chip */
+ document.querySelectorAll('[data-swap]').forEach(b=>b.addEventListener('click',()=>{Kit.sheet('practice').close();setTimeout(()=>Kit.sheet(b.dataset.swap).open(),220)}));
+});
+})();
+</script>
+</body></html>

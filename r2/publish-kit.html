@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Juju · Publish Kit</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script><script>(function(){if(!('serviceWorker' in navigator))return;if(navigator.serviceWorker.controller)return;document.documentElement.style.visibility='hidden';navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(function(){return navigator.serviceWorker.ready}).then(function(){location.reload()})})()</script><script src="phone.js"></script><script src="api.js"></script>
+<style>
+/* Publish Kit: room layout only, on 8 px steps. Every colour is a kit token. */
+body{--focus-x:50%;--focus-y:40%}
+/* no film to show: the jar on its ledge, and how long is left */
+.idle{flex:1;display:grid;grid-template-columns:400px minmax(0,1fr);gap:72px;align-items:center;align-content:center}
+.idle .pot{display:grid;justify-items:center}
+.idle .niche{width:336px;height:408px;--arch:168px} .idle .niche .art.jar{height:352px;width:auto;margin-bottom:-2px} .idle .ledge{width:400px}
+.idle .what{display:grid;gap:24px;justify-items:start;min-width:0} .idle .fig{font-size:64px} .idle .what>:empty{display:none}
+.deck .aside a[hidden]{display:none}
+.papers{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) minmax(0,.9fr);gap:24px;align-items:start;padding-top:8px}
+.papers.two{grid-template-columns:minmax(0,1fr) minmax(0,1.6fr)}
+.papers.two .col.c{display:none}
+.col{display:grid;gap:24px;min-width:0}
+.papers .scroll{margin:0 30px 32px;max-width:none}
+.papers .scroll .paper{padding:16px 24px 32px}
+.papers .scroll h4{display:flex;align-items:center;gap:8px;min-height:48px;margin:0 0 8px;padding:0}
+.papers .scroll h4 span{margin-right:auto}
+.papers .scroll h4 .btn{color:var(--paper-ink);background:none;margin-right:-8px} .papers .scroll h4 .btn:last-child{margin-right:-14px}
+.papers .scroll h4 .btn::after{display:none}
+.txt{font:400 15px/24px "Lato",sans-serif;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--paper-ink)}
+.txt.long{max-height:max(240px,round(down,calc(100dvh - 440px),24px));overflow-y:auto;overscroll-behavior:contain;margin-right:-8px;padding-right:8px}
+.txt.long::-webkit-scrollbar{width:8px} .txt.long::-webkit-scrollbar-track{background:color-mix(in oklab,var(--paper-ink) 12%,transparent)} .txt.long::-webkit-scrollbar-thumb{background:color-mix(in oklab,var(--paper-ink) 55%,transparent)}
+.txt.more{-webkit-mask:linear-gradient(#000 calc(100% - 32px),transparent);mask:linear-gradient(#000 calc(100% - 32px),transparent)}
+.txt.title{font:600 24px/32px "Spectral",serif}
+.papers .scroll .wax{width:72px;height:72px;right:0;bottom:-50px}
+.shot{display:grid;gap:8px}
+.shot .named{display:flex;align-items:center;gap:8px;min-height:48px}
+.shot .named .btn{margin-left:auto}
+.thumb{position:relative;display:block;width:100%;aspect-ratio:16/9;padding:0;border:2px solid var(--line-hi);background:var(--a-well);cursor:pointer;overflow:hidden}
+.thumb:hover{border-color:var(--need)}
+.thumb img{display:block;width:100%;height:100%;object-fit:cover}
+.thumb .wax{position:absolute;right:8px;bottom:8px;width:56px;height:56px}
+.thumb .wax .art{width:100%;height:100%}
+.sheet{width:min(720px,100%)}
+.field{display:block;width:100%;padding:16px;margin-top:16px;border:0;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line);color:var(--bone);font:400 16px/24px "Lato",sans-serif;resize:vertical;min-height:88px}
+.field.long{min-height:288px}
+.stills{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:16px;max-height:48vh;overflow:auto;padding:4px}
+.still{display:grid;gap:8px;padding:0;border:0;background:none;color:inherit;text-align:left;cursor:pointer;font:400 14px/24px "Lato",sans-serif}
+.still img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--a-well);box-shadow:0 0 0 2px var(--line)}
+.still.on img{box-shadow:0 0 0 3px var(--need)}
+@media (max-width:760px){
+  .idle{grid-template-columns:minmax(0,1fr);gap:24px;justify-items:center} .idle .niche{width:208px;height:264px;--arch:104px} .idle .niche .art.jar{height:224px} .idle .ledge{width:248px} .idle .what{gap:16px;justify-items:center;text-align:center} .idle .fig{font-size:40px}
+  .main{min-height:calc(100dvh - 74px - env(safe-area-inset-bottom))}
+  .papers,.papers.two{grid-template-columns:minmax(0,1fr);gap:16px;padding-top:0} .papers .col{display:contents}
+  [data-part=title]{order:1} [data-part=description]{order:2} [data-part=chapters]{order:3} .shot{order:4} .two [data-part=chapters]{display:none}
+  .papers .scroll{margin:0;padding:0;filter:none} .papers .scroll .rod,.papers .scroll .wax{display:none}
+  .papers .scroll .paper{padding:0 16px 16px} .papers .scroll h4{margin:0}
+  .txt.title{font-size:20px;line-height:24px} .txt.long{max-height:120px} [data-part=chapters] .txt.long{max-height:72px}
+  .shot{grid-template-columns:160px minmax(0,1fr);gap:8px 16px;align-items:center} .shot .thumb{grid-row:1} .shot .thumb .wax{width:40px;height:40px}
+  .shot .named{flex-direction:column;align-items:flex-start;justify-content:center} .shot .named .btn{margin-left:0;min-height:44px;padding:0 16px 3px;font-size:14px} .shot .juju-say{grid-column:1/-1}
+  .stills{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style>
+</head>
+<body data-skin="nocturne" data-room="publish-kit" data-title="Publish Kit" data-channel="Library of Tehuti" data-chan-state="need" data-back="spell-strip.html" data-back-label="Film" data-door="altar" data-tank="asleep" data-who="A">
+<main>
+ <div class="idle" id="idle" hidden><div class="pot"><div class="niche"></div><i class="ledge"></i></div><div class="what"><b class="h2" data-d id="idlename"></b><span class="pill" id="idlepill"></span><b class="fig" data-d id="idleleft"></b></div></div>
+ <div class="papers" id="papers" hidden>
+  <div class="col">
+   <div class="scroll" data-part="title"><div class="rod"></div><div class="paper"><h4><span>Title</span><button class="btn icon" data-edit="title" aria-label="Change the title"></button><button class="btn icon" data-copy="title" aria-label="Copy the title"></button></h4><p class="txt title" data-d></p><span class="wax"></span></div><div class="rod"></div></div>
+   <section class="shot" data-part="thumbnail"><div class="named"><b class="name">Thumbnail</b><button class="btn" data-act="folder" hidden>Open folder</button></div><button class="thumb" id="thumb" aria-label="Choose the thumbnail"><span class="wax"></span></button></section>
+  </div>
+  <div class="col b"><div class="scroll" data-part="description"><div class="rod"></div><div class="paper"><h4><span>Description</span><button class="btn icon" data-edit="description" aria-label="Change the description"></button><button class="btn icon" data-copy="description" aria-label="Copy the description"></button></h4><p class="txt long" data-d tabindex="0" aria-label="Description"></p><span class="wax"></span></div><div class="rod"></div></div></div>
+  <div class="col c"><div class="scroll" data-part="chapters"><div class="rod"></div><div class="paper"><h4><span>Chapters</span><button class="btn icon" data-copy="chapters" aria-label="Copy the chapters"></button></h4><p class="txt long" data-d tabindex="0" aria-label="Chapters"></p><span class="wax"></span></div><div class="rod"></div></div></div>
+ </div>
+</main>
+<footer class="deck"><div class="aside"><a class="btn" id="savefilm" download hidden>Save film</a></div><button class="primary" id="go" disabled>Copy title</button></footer>
+
+<section class="sheet" id="sh-edit" hidden><h3 id="editname"></h3><textarea class="field" id="text"></textarea><div class="acts"><button class="btn need" data-act="keep">Save</button></div></section>
+<section class="sheet" id="sh-thumb" hidden><h3>Thumbnail</h3><div class="stills" id="stills"></div><div class="acts"><button class="btn need" data-act="save">Save</button></div></section>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const J=window.JUJU,enc=encodeURIComponent,NAME={title:'Title',description:'Description',chapters:'Chapters',thumbnail:'Thumbnail'},MAX={title:100,description:5000};
+let K=null,F=null,id=J.param('film')||'',mac=false,editing='',picked='',shown='',draft={},choosing=null,seen='';
+const path=()=>'/api/films/'+enc(id)+'/kit';
+const text=k=>k==='chapters'?K.chapters.map(c=>c.at+' '+c.name).join('\n'):K[k];
+const parts=()=>['title','description',...(K.chapters.length?['chapters']:[]),'thumbnail'];
+const at=k=>$(`[data-part="${k}"]`);
+
+/* ---------- what the server says ---------- */
+async function load(){
+ try{
+  if(!id){const l=((await J.get('/api/films?vessel='+enc(J.vessel))).films||[]).slice().sort((a,b)=>String(b.made).localeCompare(String(a.made)));
+   id=(l.find(f=>f.state==='approved')||l[0]||{}).id||'';if(!id)return none('Nothing yet','Make a film','altar.html')}
+  const b=$('.head .back');if(b)b.href=J.to.room(id);
+  const [k,s]=await Promise.all([J.get(path()),J.get('/api/session')]);mac=s.here==='mac';K=k;if(b&&K.practice)b.href=J.to.strip(id);draw()}
+ catch(e){
+  if(e.status===409)return waiting();
+  if(e.status===404)return none('Nothing yet','Make a film','altar.html');
+  if(!K)none(e.status?'Failed':'Offline');setTimeout(load,4000)}}
+/* no film to show: one jar, one word, how long is left, one way on */
+const JAR={Working:['working','work'],Waiting:['working','work'],Ready:['done','need'],Stopped:['stopped','stop'],Failed:['stopped','stop']};
+let R=null;
+function idle(word,label,href,r){const[jar,c]=JAR[word]||['asleep','dim'],n=$('.idle .niche');$('#idle').hidden=false;
+ if(n.dataset.jar!==jar){n.dataset.jar=jar;n.className='niche '+(c==='work'?'work':c==='need'?'need':'');n.innerHTML=Art.jar({state:jar,label:'LT'})}
+ $('#idlename').textContent=r?r.title:'';$('#idlepill').textContent=word;$('#idlepill').className='pill '+c;
+ $('#idleleft').textContent=word==='Working'&&r&&r.left_min!=null?J.minutes(r.left_min):'';
+ $('#papers').hidden=true;K=null;$('#savefilm').hidden=true;const g=$('#go');g.textContent=label||'Copy title';g.dataset.do=href||'';g.disabled=!href}
+const none=idle;
+/* a film still being drawn: follow its run, and open when it is there */
+function follow(run){const href=run?J.to.run(run):'conjuring.html';if(R)R.stop();if(!run)return idle('Working','Open Conjuring',href);
+ const W={working:'Working',waiting:'Waiting',stopped:'Stopped',failed:'Failed'};
+ R=J.poll('/api/runs/'+enc(run),r=>{if(r.state==='done'){load();return false}idle(W[r.state]||'Working','Open Conjuring',href,r)},{fail:e=>idle(e.status?'Failed':'Offline','Open Conjuring',href)})}
+/* not approved yet: the film is there to watch, or it is still being drawn */
+async function waiting(){try{const f=await J.get('/api/films/'+enc(id));idle('Ready','Watch the film',f.practice?J.to.strip(id):J.to.room(id),f)}
+ catch(e){if(e.status===409)follow(e.run);else{idle(e.status?'Failed':'Offline');setTimeout(load,4000)}}}
+
+/* ---------- drawing the room ---------- */
+function draw(){
+ $('#idle').hidden=true;$('#papers').hidden=false;$('#papers').classList.toggle('two',!K.chapters.length);
+ ['title','description','chapters'].forEach(k=>{const p=at(k);p.querySelector('.txt').textContent=text(k);p.querySelector('[data-copy]').innerHTML=Art.glyph(K.marks[k]?'check':'copy');seal(p.querySelector('.wax'),K.marks[k])});
+ $$('[data-edit]').forEach(b=>{if(!b.innerHTML)b.innerHTML=Art.glyph('edit')});
+ seal(at('thumbnail').querySelector('.wax'),K.marks.thumbnail);
+ $('[data-act=folder]').hidden=!mac;const sf=$('#savefilm');sf.hidden=false;sf.href='/api/films/'+enc(id)+'/film.mp4';
+ $('#thumb').setAttribute('aria-label',K.practice?'Choose the thumbnail':'Save the thumbnail');
+ $$('.txt.long').forEach(more);
+ const src=thumb();if(src!==shown){shown=src;paint(src)}
+ const g=$('#go'),n=parts().find(k=>!K.marks[k]);
+ g.textContent=!n?'Make a film':n==='thumbnail'?'Save thumbnail':'Copy '+n;g.dataset.do=n||'altar.html';g.disabled=false;
+ const d=$('.head .chan .dot');if(d)d.className='dot '+(n?'need':'work')}
+/* more words below: the last line fades until the end is reached */
+function more(t){t.classList.toggle('more',t.scrollHeight-t.scrollTop-t.clientHeight>4)}
+$$('.txt.long').forEach(t=>t.addEventListener('scroll',()=>more(t)));addEventListener('resize',()=>$$('.txt.long').forEach(more));
+/* a wax seal thuds down once, when its part is really copied or saved */
+function seal(w,on){const want=on?'pressed':'blank';if(w.dataset.st===want)return;const first=!w.dataset.st;w.dataset.st=want;if(on&&!first)Kit.seal(w,'pressed');else w.innerHTML=on||w.closest('.paper')?Art.seal({state:want}):''}
+const thumb=()=>K.thumbnail.url+(K.thumbnail.url.includes('?')?'&':'?')+'scene='+enc(K.thumbnail.scene);
+function paint(src){const t=$('#thumb'),old=t.querySelector('img'),i=new Image;i.alt='';if(old)old.remove();
+ i.onload=()=>{if(shown===src){J.unsay(at('thumbnail'));t.insertBefore(i,t.querySelector('.wax'))}};
+ i.onerror=()=>{if(shown!==src)return;J.say(at('thumbnail'),'Failed');setTimeout(()=>{if(shown===src){shown='';draw()}},4000)};i.src=src}
+
+/* ---------- copy: the clipboard first, the mark only when it is really there ---------- */
+function copy(k,b){
+ const words=text(k),did=J.copy(words);
+ return J.once(b,async()=>{if(!await did){getSelection().selectAllChildren(at(k).querySelector('.txt'));throw Object.assign(new Error,{error:'copy',say:'Copy refused'})}
+  await mark(k)},{at:b.id==='go'?b:at(k)})}
+async function mark(k){const r=await J.post(path()+'/marks',{part:k,on:true});K.marks={...K.marks,...r.marks};draw()}
+
+/* ---------- change the words ---------- */
+function edit(k){editing=k;$('#editname').textContent=NAME[k];const t=$('#text');t.className='field'+(k==='description'?' long':'');t.maxLength=MAX[k];t.value=draft[k]!=null?draft[k]:K[k];t.setAttribute('aria-label',NAME[k]);J.unsay($('#text'));ok();Kit.sheet('sh-edit').open()}
+const ok=()=>$('[data-act=keep]').disabled=editing==='title'&&!$('#text').value.trim();
+$('#text').addEventListener('input',()=>{if(editing==='title')$('#text').value=$('#text').value.replace(/\s*\n\s*/g,' ');draft[editing]=$('#text').value;ok()});
+async function keep(b){const k=editing,v=$('#text').value;if(v===K[k]){delete draft[k];return Kit.sheet('sh-edit').close()}
+ await J.once(b,async()=>{K=await J.patch(path(),{[k]:v});delete draft[k];draw();Kit.sheet('sh-edit').close()})}
+
+/* ---------- the thumbnail: a pick is drawn at full size, Save puts the file on this device ---------- */
+async function choose(){picked=K.thumbnail.scene;stills();Kit.sheet('sh-thumb').open();
+ if(!F)try{F=await J.get('/api/films/'+enc(id));stills()}catch(e){}}
+function stills(){const S=F?F.acts.flatMap(a=>a.scenes.map(s=>({...s,act:a.name}))):[];
+ $('#stills').innerHTML=K.choices.map(k=>{const s=S.find(x=>x.id===k);return `<button class="still${k===picked?' on':''}" data-still="${J.esc(k)}" aria-pressed="${k===picked}" aria-label="${J.esc(s?s.act:k)}"><img src="${J.esc(s?s.still:'/api/films/'+enc(id)+'/stills/'+enc(k)+'.jpg')}" alt=""><span data-d>${J.esc(s?s.act:'')}</span></button>`}).join('')}
+function pick(k,b){if(k===picked&&!choosing)return;picked=k;$$('#stills .still').forEach(x=>{const on=x.dataset.still===k;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});Kit.press(b);
+ const run=async()=>{if(picked!==k)return;K=await J.patch(path(),{thumbnail:k});draw()};
+ choosing=(choosing||Promise.resolve()).catch(()=>{}).then(run);const mine=choosing;
+ mine.then(()=>J.unsay($('#stills')),e=>J.say($('#stills'),e.say||'Failed')).finally(()=>{if(choosing===mine)choosing=null})}
+const save=b=>J.once(b,async()=>{if(choosing)await choosing;
+ const c=new AbortController(),t=setTimeout(()=>c.abort(),60000);let blob;
+ try{const r=await fetch(thumb(),{credentials:'same-origin',cache:'no-store',signal:c.signal});if(!r.ok)throw 0;blob=await r.blob();if(!/^image\/jpeg/.test(blob.type)||!blob.size)throw 0}
+ catch(e){throw Object.assign(new Error,{error:'save',say:'Not saved'})}finally{clearTimeout(t)}
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=K.title.replace(/[^\w ]+/g,'').trim().replace(/\s+/g,'-').toLowerCase()+'-thumbnail.jpg';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),60000);
+ await mark('thumbnail');if(b.id!=='go')Kit.sheet('sh-thumb').close()},{at:b});
+
+/* ---------- presses ---------- */
+document.addEventListener('click',e=>{if(!K)return;
+ const c=e.target.closest('[data-copy]');if(c)return copy(c.dataset.copy,c);
+ const d=e.target.closest('[data-edit]');if(d)return edit(d.dataset.edit);
+ const s=e.target.closest('[data-still]');if(s)return pick(s.dataset.still,s);
+ if(e.target.closest('#thumb'))return K.practice?choose():save($('#thumb'));
+ const b=e.target.closest('[data-act]');if(!b||b.disabled)return;
+ if(b.dataset.act==='keep')keep(b);
+ if(b.dataset.act==='save')save(b);
+ if(b.dataset.act==='folder')J.once(b,async()=>{await J.post(path()+'/folder');J.say(at('thumbnail'),'Opened','work');setTimeout(()=>J.unsay(at('thumbnail')),2400)},{at:at('thumbnail')})});
+$('#go').addEventListener('click',()=>{const g=$('#go'),a=g.dataset.do;if(g.disabled||!a)return;if(/\.html/.test(a))return J.go(a);if(a==='thumbnail')return save(g);copy(a,g)});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&K&&!document.querySelector('.sheet:not([hidden])'))load()});
+J.ready(load);
+})();
+</script>
+</body>
+</html>

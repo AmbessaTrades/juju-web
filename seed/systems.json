@@ -1,0 +1,95 @@
+[
+ {
+  "id": "kingdoms",
+  "name": "Kingdoms",
+  "kind": "kingdoms",
+  "locked": false,
+  "themes": [
+   "duppy-time-night",
+   "lapis-choir",
+   "salt-road",
+   "fever-ward",
+   "green-ledger",
+   "long-ice"
+  ]
+ },
+ {
+  "id": "wealth",
+  "name": "Wealth",
+  "kind": "wealth",
+  "locked": false,
+  "themes": [
+   "duppy-time-night",
+   "lapis-choir",
+   "salt-road",
+   "fever-ward",
+   "green-ledger",
+   "long-ice"
+  ]
+ },
+ {
+  "id": "states",
+  "name": "States",
+  "kind": "states",
+  "locked": false,
+  "themes": [
+   "duppy-time-night"
+  ]
+ },
+ {
+  "id": "duppy-night",
+  "name": "Duppy Night",
+  "kind": "night",
+  "locked": true,
+  "themes": []
+ },
+ {
+  "id": "duppy-day",
+  "name": "Duppy Day",
+  "kind": null,
+  "locked": true,
+  "themes": []
+ },
+ {
+  "id": "worlds",
+  "name": "Worlds",
+  "kind": "worlds",
+  "locked": true,
+  "themes": [
+   "duppy-time-night",
+   "lapis-choir",
+   "salt-road",
+   "fever-ward",
+   "green-ledger",
+   "long-ice"
+  ]
+ },
+ {
+  "id": "city-towers",
+  "name": "City Towers",
+  "kind": null,
+  "locked": true,
+  "themes": []
+ },
+ {
+  "id": "contagion-pulse",
+  "name": "Contagion Pulse",
+  "kind": null,
+  "locked": true,
+  "themes": []
+ },
+ {
+  "id": "crude-ledger",
+  "name": "Crude Ledger",
+  "kind": null,
+  "locked": true,
+  "themes": []
+ },
+ {
+  "id": "engraved-atlas",
+  "name": "Engraved Atlas",
+  "kind": null,
+  "locked": true,
+  "themes": []
+ }
+]

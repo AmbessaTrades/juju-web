@@ -1,0 +1,275 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Juju · The Vessel</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script>
+<style>
+/* vessel room layout. Parts the kit lacks, kept here: .field (text box), .picker (a lit choice among a few buttons), .holdbtn (hold to confirm),
+   .demo (an engine test frame from runs/stage-y with the layer laid over it in CSS), .chipx (a removable chip), .tiles (scene type tiles),
+   .setrow (a named row that opens a sheet), icon tabs on the phone (.tab .em). */
+body{--focus-x:62%;--focus-y:40%}
+.field{width:100%;min-height:52px;padding:12px 16px;border:0;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line);color:var(--bone);font:400 16px/1.4 "Lato",sans-serif}
+.field::placeholder{color:var(--smoke)} .field:focus{outline:none;box-shadow:inset 0 0 0 2px var(--act)}
+.picker{display:flex;gap:6px;flex-wrap:wrap}
+.picker .btn{min-height:44px;min-width:48px;padding:0 14px 3px}
+.picker .btn[aria-pressed=true]{color:var(--on-act);background:linear-gradient(180deg,var(--act-hi) -60%,var(--act) 60%,var(--act-lo))} .picker .btn[aria-pressed=true]::after{box-shadow:none}
+.picker .btn.refused{color:var(--smoke);text-decoration:line-through}
+.holdbtn{overflow:hidden} .holdbtn::before{content:"";position:absolute;left:0;top:0;bottom:0;width:calc(var(--p,0)*100%);background:color-mix(in oklab,var(--stop) 35%,transparent);pointer-events:none}
+.chanbtn{border:0;background:none;padding:0;cursor:pointer;min-height:44px;margin:-14px 0;text-align:left}
+.lay{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:30px;align-items:start}
+.lay{align-items:stretch}
+.cab{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:1fr;gap:8px;padding:14px}
+.cab .row{min-height:72px;grid-template-columns:28px minmax(0,1fr) auto;padding-right:30px}
+.cab .row .tile{width:28px;height:28px;background:none;box-shadow:none} .cab .row .tile .art{width:24px;height:24px}
+.cab .row .val{font-size:13px;color:var(--ash)}
+.layer{display:grid;gap:16px}
+.layer .top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.layer .top .h2{margin-right:auto}
+.demo{position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--a-deep);box-shadow:inset 0 0 0 2px var(--line)}
+.demo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.13);transform-origin:50% 0;transition:filter .3s}
+.demo img.b{opacity:0}
+.demo .words{position:absolute;left:6%;right:6%;bottom:9%;font:400 clamp(15px,2.1vw,24px)/1.25 "Spectral",serif;color:var(--bone-fixed);text-shadow:0 2px 8px var(--a-deep);transition:all .3s}
+.demo[data-o="Left"] .words{right:48%;bottom:auto;top:36%} .demo[data-o="Centred"] .words{text-align:center;bottom:42%}
+.demo .figs{position:absolute;right:5%;top:7%;display:grid;justify-items:end;gap:4px;font:600 clamp(14px,1.8vw,20px)/1 "JetBrains Mono",monospace;color:var(--bone-fixed);text-shadow:0 2px 6px var(--a-deep)}
+.demo .grain{position:absolute;inset:0;background:var(--l-grain) 0 0/128px;mix-blend-mode:overlay;opacity:.55;pointer-events:none}
+.demo .tagp{position:absolute;left:10px;top:10px}
+.demo.drift img.a{animation:drift 9s ease-in-out infinite alternate} @keyframes drift{to{transform:scale(1.24) translate(-3%,1%)}}
+.demo.one img.a{animation:none} .demo.one .mover{position:absolute;left:30%;top:30%;width:22%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,color-mix(in oklab,var(--bone-fixed) 24%,transparent),transparent 70%);animation:mv 3s ease-in-out infinite alternate}
+@keyframes mv{to{transform:translate(60%,10%)}}
+.demo.join img.b{animation:xf 3.2s infinite} .demo.join[data-o="Carry, black"]::after{content:"";position:absolute;inset:0;background:var(--a-deep);opacity:0;animation:blk 3.2s infinite}
+.demo.join[data-o="Hard cuts"] img.b{animation:cut 3.2s steps(1) infinite}
+@keyframes xf{0%,40%{opacity:0}55%,90%{opacity:1}100%{opacity:0}} @keyframes cut{0%{opacity:0}50%{opacity:1}} @keyframes blk{40%{opacity:0}47%{opacity:1}54%{opacity:0}}
+.opts{display:grid;gap:10px}
+.sw{display:flex;gap:18px;flex-wrap:wrap}
+.tab .em{display:none;width:22px;height:22px}
+.setrow{grid-template-columns:minmax(0,1fr) auto;min-height:60px;padding-left:18px} .setrow .val{font-size:14px;color:var(--ash);text-align:right;max-width:26ch}
+.rows.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.pane{display:grid;gap:18px;max-width:980px}
+.pane .lab{margin-bottom:-6px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chipx{min-height:44px;display:inline-flex;align-items:center;gap:8px;padding:0 6px 0 14px;border:0;background:var(--lift);color:var(--bone);box-shadow:inset 0 0 0 2px var(--line);cursor:pointer;font:600 14px/1 "Josefin Sans",sans-serif;letter-spacing:.04em}
+.chipx .glyph{width:18px;height:18px;color:var(--ash)}
+.inrow{display:flex;gap:10px;align-items:center}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.tilebtn{position:relative;display:grid;gap:6px;padding:0;border:0;background:none;color:var(--bone);cursor:pointer;text-align:left;font:600 14px/1.2 "Josefin Sans",sans-serif;letter-spacing:.04em}
+.tilebtn img{width:100%;aspect-ratio:16/9;object-fit:cover;object-position:50% 0;display:block;box-shadow:0 0 0 2px var(--line)}
+.tilebtn[aria-pressed=true] img{box-shadow:0 0 0 3px var(--act)} .tilebtn[aria-pressed=false]{color:var(--smoke)} .tilebtn[aria-pressed=false] img{filter:grayscale(1) brightness(.45)}
+.styles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px 12px;padding:6px 2px 10px}
+.styles .stl{display:grid;gap:8px;padding:0;border:0;background:none;color:var(--ash);cursor:pointer;text-align:left;font:600 14px/1.2 "Josefin Sans",sans-serif}
+.styles .stl .plate{min-height:0;box-shadow:0 0 0 2px transparent} .styles .stl[aria-pressed=true]{color:var(--bone)} .styles .stl[aria-pressed=true] .plate{box-shadow:0 0 0 3px var(--act)}
+.btn{white-space:nowrap}
+.inrow{flex-wrap:wrap} .inrow .field{flex:1 1 0;width:auto;min-width:0}
+.reading{display:flex;gap:14px;flex-wrap:wrap;align-items:center} .reading .art.path{width:min(100%,460px);height:auto}
+
+.resting .floor .pane,.resting .floor .lay{opacity:.45;pointer-events:none}
+.nums{display:flex;gap:18px;align-items:baseline;font-size:14px;color:var(--ash)} .nums b{font:600 18px/1 "Spectral SC",serif;color:var(--bone)}
+.stopbox{display:grid;gap:16px;justify-items:start;max-width:520px}
+@media (max-width:760px){
+ .tab .em{display:block} .tab .tx{display:none} .tab[aria-selected=true] .tx{display:inline;margin-left:8px} .tab{padding:3px 12px 0;display:inline-flex;align-items:center}
+ .cab .row .val{display:none}
+ .lay{grid-template-columns:1fr;gap:16px} .cab{grid-auto-rows:auto}
+ .cab{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:8px}
+ .cab .row{grid-template-columns:1fr;min-height:56px;padding:6px 4px;-webkit-mask:none;mask:none;justify-items:center;text-align:center;gap:2px}
+ .cab .row .tile{display:none} .cab .row .name{font-size:13px;letter-spacing:0} .cab .row .val{justify-self:center;font-size:12px}
+ .tiles{grid-template-columns:repeat(2,minmax(0,1fr))} .rows.two{grid-template-columns:1fr}
+ .styles{display:flex;overflow-x:auto} .styles .stl{flex:0 0 62%}
+}
+</style></head>
+<body data-skin="nocturne" data-room="vessel" data-door="altar" data-title="The Vessel" data-channel="Library of Tehuti" data-chan-state="need" data-back="altar.html" data-back-label="Altar" data-tank="asleep" data-who="A">
+<script>(()=>{const q=new URLSearchParams(location.search.replace(/\.html$/,''));const c=q.get('channel');if(c==='two'||q.get('state')==='no-numbers'||q.get('state')==='switching')document.body.dataset.channel='Vessel two'})();</script>
+<main>
+ <div id="ok">
+ <div class="tabs" data-tabs data-scroll id="tabs">
+  <button class="tab" aria-selected="true" data-panel="t-layers" data-u="u2" aria-label="Layers"><span data-art="emblem" data-name="arcana" class="em"></span><span class="tx">Layers</span></button><button class="tab" data-panel="t-voice" data-u="u2" aria-label="Voice"><span data-art="emblem" data-name="voice" class="em"></span><span class="tx">Voice</span></button><button class="tab" data-panel="t-thumbs" data-u="u2" aria-label="Thumbs"><span data-art="emblem" data-name="feed-sight" class="em"></span><span class="tx">Thumbs</span></button><button class="tab" data-panel="t-sources" data-u="u2" aria-label="Sources"><span data-art="emblem" data-name="reliquary" class="em"></span><span class="tx">Sources</span></button><button class="tab" data-panel="t-story" data-u="u2" aria-label="Story"><span data-art="emblem" data-name="spell-strip" class="em"></span><span class="tx">Story</span></button><button class="tab" data-panel="t-pub" data-u="u2" aria-label="Publishing"><span data-art="emblem" data-name="publish-kit" class="em"></span><span class="tx">Publishing</span></button>
+ </div>
+
+ <!-- Layers: eight drawers; one is lit; its demo is a test frame the engine drew -->
+ <section id="t-layers" style="margin-top:22px">
+  <div class="lay">
+   <div class="panel sunk cab" data-frame id="cab" data-u="u3"></div>
+   <div class="panel focus layer" data-frame="crest" id="layer">
+        <div class="demo" id="demo"><img class="a" alt=""><img class="b" alt=""><span class="mover" hidden></span><span class="words" id="dwords" data-d>So you lay ten lives of a hundred years end to end.</span><span class="figs" id="dfigs" data-d></span><span class="grain" id="dgrain"></span><span class="tagp"><span class="pill need" id="nextp" hidden>Next film</span></span></div>
+    <div class="opts"><div class="picker" id="opts" data-u="u4"></div><div class="sw" id="lsw"></div></div>
+    <div class="inrow" id="goback" hidden><button class="btn icon" id="back1" data-u="u5" aria-label="Go back to the version before"><span data-art="glyph" data-name="retry"></span></button></div>
+   </div>
+  </div>
+ </section>
+
+ <section id="t-voice" class="pane" hidden style="margin-top:22px">
+  <div class="picker" id="ways" data-u="u9"><button class="btn" aria-pressed="true">Elder brother</button><button class="btn">World log</button><button class="btn">Two sides</button><button class="btn">Dry guide</button><button class="btn">Atlas</button></div>
+  <div class="inrow"><button class="btn" data-open="finding" id="soundmode" data-u="u10"><span>Full voice</span></button><a class="btn" href="voice.html?from=vessel" data-u="u11">Hear it</a><button class="btn bare" data-open="langs" data-u="u12">English</button></div>
+ </section>
+
+ <section id="t-thumbs" class="pane" hidden style="margin-top:22px">
+  <div class="styles" data-scroll id="styles" data-u="u13"></div>
+  <span class="lab">Words</span>
+  <div class="picker" id="twords" data-u="u14"><button class="btn" aria-label="No words"><span data-d>0</span></button><button class="btn" aria-label="1 to 2 words"><span data-d>2</span></button><button class="btn" aria-pressed="true" aria-label="1 to 3 words"><span data-d>3</span></button></div>
+  <input class="field" placeholder="One line of direction for every film" aria-label="Direction for every thumbnail" data-u="u14">
+  <div><a class="btn" href="mirror-bend.html?from=vessel" data-u="u15" aria-label="Try it on an outlier">Try one</a></div>
+ </section>
+
+ <section id="t-sources" class="pane" hidden style="margin-top:22px">
+  <div class="sw" id="homes" data-u="u16"><button class="switch" aria-checked="true" aria-label="Museums and archives">Museums</button><button class="switch" aria-checked="true" aria-label="Free stock">Stock</button><button class="switch" aria-checked="true">Own files</button><button class="switch" aria-label="Open web">Web</button></div>
+  <div class="rows"><button class="row setrow" data-open="s-clips" data-u="u17"><b class="name">Real clips</b><span class="val num" data-d id="v-clips"></span></button><button class="row setrow" data-open="s-never" data-u="u18"><b class="name">Never use</b><span class="val num" data-d id="v-never"></span></button></div>
+  <div><a class="btn" href="reliquary.html?from=vessel" data-u="u19" aria-label="Open the reliquary">Reliquary</a></div>
+ </section>
+
+ <section id="t-story" class="pane" hidden style="margin-top:22px">
+  <div class="inrow"><div class="reading" id="reading" hidden></div><button class="btn need" id="againvis" hidden data-u="u26">Read again</button></div>
+  <div class="rows two"><button class="row setrow" data-open="pov" data-u="u20"><b class="name">View</b><span class="val num" data-d id="v-pov"></span></button><button class="row setrow" data-open="s-open" data-u="u21"><b class="name">Openings</b><span class="val num" data-d id="v-open">6</span></button><button class="row setrow" data-open="s-within" data-u="u22"><b class="name">Open within</b><span class="val num" data-d id="v-within">22 s</span></button><button class="row setrow" data-open="s-length" data-u="u23"><b class="name">Length</b><span class="val num" data-d id="v-length">50 min</span></button><button class="row setrow" data-open="s-scenes" data-u="u24"><b class="name">Scenes</b><span class="val num" data-d id="v-scenes">9</span></button><button class="row setrow" data-open="s-shapes" data-u="u42"><b class="name">Titles</b><span class="val num" data-d id="v-shapes">9 / 12</span></button><button class="row setrow" data-open="s-learn" data-u="u25"><b class="name">Learned from</b><span class="val num" data-d id="learnpill"></span></button></div>
+ </section>
+
+ <section id="t-pub" class="pane" hidden style="margin-top:22px">
+  <div class="rows two"><button class="row setrow" data-open="s-before" data-u="u44"><b class="name">Before the voice</b><span class="val num" data-d id="v-before"></span></button><button class="row setrow" data-open="s-how" data-u="u45"><b class="name">To YouTube</b><span class="val num" data-d id="v-how"></span></button><button class="row setrow" data-open="s-pin" data-u="u46"><b class="name">Pinned comment</b><span class="val num" data-d id="v-pin"></span></button></div>
+  <div id="connectyt" hidden><a class="btn need" href="tank.html?from=vessel" data-u="u49">Connect YouTube</a></div>
+  <div class="sw"><button class="switch" aria-checked="true" id="capfile" data-u="u47">Captions</button><button class="switch" disabled data-u="u48" aria-label="Product link, off until the product is live">Product</button><button class="switch" id="verified" data-u="u50" aria-label="Verified on YouTube">Verified</button><a class="btn bare" href="https://studio.youtube.com" target="_blank" rel="noopener" aria-label="Open YouTube Studio">Studio</a></div>
+ </section>
+ </div>
+
+ <section class="panel stop stopbox" data-frame id="cannot" hidden><h2 class="h2">Cannot open</h2></section>
+</main>
+<div data-tools><button class="chip" data-open="more" aria-label="More" data-u="u28"><span data-art="glyph" data-name="more"></span></button></div>
+<footer class="deck"><div class="aside"></div><button class="primary" id="go" data-u="u37">Make a film</button></footer>
+
+<section class="sheet" id="s-clips" hidden><h3>Real clips</h3><div class="picker" id="clips" style="margin-top:14px"><button class="btn">Never</button><button class="btn" aria-pressed="true">As proof</button><button class="btn">Often</button></div></section>
+<section class="sheet" id="s-never" hidden><h3>Never use</h3><div class="inrow" style="margin-top:14px"><input class="field" id="blockf" placeholder="A site or a YouTube channel" aria-label="Never use"><button class="btn" id="block">Block</button></div><div class="chips" id="blocked" style="margin-top:12px"></div></section>
+<section class="sheet" id="s-open" hidden><h3>Openings</h3><div class="picker" id="openings" data-multi="4" style="margin-top:14px"></div></section>
+<section class="sheet" id="s-within" hidden><h3>Open within</h3><div class="picker" id="within" style="margin-top:14px"><button class="btn">8 s</button><button class="btn">15 s</button><button class="btn" aria-pressed="true">22 s</button></div></section>
+<section class="sheet" id="s-length" hidden><h3>Length</h3><div class="picker" id="length" style="margin-top:14px"><button class="btn">8 to 18 min</button><button class="btn">20 to 35 min</button><button class="btn" aria-pressed="true">45 to 58 min</button></div></section>
+<section class="sheet" id="s-scenes" hidden><h3>Scenes it may use</h3><div class="tiles" id="scenes" style="margin-top:14px"></div></section>
+<section class="sheet" id="s-shapes" hidden><h3>Title shapes</h3><div class="picker" id="shapes" style="margin-top:14px"></div></section>
+<section class="sheet" id="s-learn" hidden><h3>Learned from</h3><span class="pill dim" id="learnsay">Not learned</span>
+ <div class="inrow" style="margin-top:14px"><input class="field" id="learnf" placeholder="Paste 1 to 3 YouTube links" aria-label="Learn from a link" data-u="u39"><button class="btn" id="learnpaste">Paste</button><button class="btn need" id="learn" data-u="u39">Read it</button></div>
+ <p class="lab" style="margin-top:18px">Channels it learns from</p><div class="chips" id="donors" data-u="u43" style="margin-top:8px"></div>
+ <div class="inrow" style="margin-top:16px"><button class="btn" id="readagain" data-u="u26" disabled>Read again</button><button class="btn bare holdbtn" id="forget" data-u="u27" disabled>Forget it</button></div></section>
+<section class="sheet" id="s-before" hidden><h3>Before the voice</h3><div class="picker" id="before" style="margin-top:14px"><button class="btn" aria-pressed="true">Carry on, mark unsure</button><button class="btn">Stop when unsure</button><button class="btn">Stop every time</button></div></section>
+<section class="sheet" id="s-how" hidden><h3>How it reaches YouTube</h3><div class="picker" id="how" style="margin-top:14px"><button class="btn" aria-pressed="true">I paste it</button><button class="btn">Juju uploads unlisted</button></div></section>
+<section class="sheet" id="s-pin" hidden><h3>Pinned comment</h3><div class="picker" id="pinned" style="margin-top:14px"><button class="btn" aria-pressed="true">One question</button><button class="btn">None</button></div></section>
+
+<section class="sheet" id="channels" hidden><h3>Channels</h3><input class="field" placeholder="Find a channel" aria-label="Find a channel" style="margin:10px 0 12px">
+ <div class="rows" id="chanlist"><button class="row" data-ch="lot"><span class="tile"><span data-art="emblem" data-name="vessel"></span></span><span><b class="name" data-d>Library of Tehuti</b></span></button><button class="row" data-ch="two"><span class="tile"><span data-art="emblem" data-name="vessel"></span></span><span><b class="name" data-d>Vessel two</b></span></button><button class="row" data-ch="three"><span class="tile"><span data-art="emblem" data-name="vessel"></span></span><span><b class="name" data-d>Vessel three</b></span></button></div></section>
+
+<section class="sheet" id="more" hidden><h3>More</h3>
+ <div class="nums" style="margin:8px 0 4px"><span><b data-d>277,000</b> subscribers</span><span><b data-d>3,700</b> median views</span></div>
+ <div style="display:grid;gap:10px;margin-top:12px">
+  <div class="inrow"><input class="field" id="rename" placeholder="Rename" aria-label="Rename" data-u="u29"><button class="btn" id="renameb">Rename</button></div>
+  <div class="inrow"><input class="field" id="ytlink" placeholder="Its YouTube channel link" aria-label="Its YouTube channel" data-u="u30"><button class="btn" id="ytsave">Save</button></div>
+  <div class="acts" style="display:flex;flex-wrap:wrap;gap:10px"><a class="btn" href="canopy.html?from=vessel" data-u="u31">See what works</a><a class="btn" href="sound.html" data-u="u32">Sound shelf</a><a class="btn" href="offering.html?from=vessel" data-u="u33">Companion product</a><a class="btn" href="new-vessel.html?state=copy" data-u="u34">Copy this vessel</a></div>
+  <button class="btn stop holdbtn" id="rest" data-u="u35" aria-label="Hold to put to rest">Put to rest</button>
+ </div></section>
+
+<section class="sheet" id="finding" hidden><h3>Sound: Full voice</h3><div style="margin-top:10px"><span class="pill dim">Not learned</span></div></section>
+<section class="sheet" id="langs" hidden><h3>Language</h3><div class="picker" style="margin-top:12px"><button class="btn" aria-pressed="true">English</button></div></section>
+<section class="sheet" id="pov" hidden><h3>Point of view</h3><textarea class="field" id="povt" rows="4" style="margin-top:12px" aria-label="Point of view">The dead in old books saw things the living still need. This channel reads them in their own words and never invents a day, a city or a name.</textarea>
+ <div class="small" id="povcheck" style="margin-top:8px"></div><div class="acts" style="display:flex;gap:10px;margin-top:14px"><button class="btn need" id="povsave" data-close>Keep it</button></div></section>
+
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const ST=Kit.state,reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,say=(t,o)=>Kit.toast(t,Object.assign({ms:3200},o||{}));
+const F=n=>'../../runs/stage-y/rounds/3/'+n;
+const silent=ST==='subtitles-only-channel';
+/* ---------- the eight layers: options from brief 6.1; every value is the channel's own data ---------- */
+const L=[
+ {k:'Pacing',img:'still-021.66.jpg',o:['Steady','Long hold','Speeding up']},
+ {k:'Motion',img:'still-000.60.jpg',o:['One mover','Drift','Still'],v:1},
+ {k:'Layout',img:'still-052.10.jpg',o:['Low','Left','Centred']},
+ {k:'Joins',img:'still-061.49.jpg',img2:'still-086.15.jpg',o:['Carry, black','Carry','Hard cuts']},
+ {k:'Numbers',img:'still-133.00.jpg',o:['Clock count share','Clock count','Count']},
+ {k:'Letters',img:'still-043.91.jpg',o:['Garamond','Grotesk','Cinzel']},
+ {k:'Colour',img:'still-042.11.jpg',o:['One','Two','Three','Other'],refuse:ST==='option-refused'?'Three':''},
+ {k:'Feeling',img:'still-021.66.jpg',o:['Level','Warm','Grave']}];
+L.forEach(l=>{l.ver=1;l.cur=l.o[l.v||0];l.prev=null});
+let on=0;const sample=/layer-changed|film-in-making|reading-again|read-failed|option-refused|subtitles-only|waits-for-the-mac|switching/.test(ST);
+function drawCab(){$('#cab').innerHTML=L.map((l,i)=>`<button class="row${i===on?' on':''}" data-i="${i}"><span class="tile">${Art.pip({state:l.ver>1?'next':'done'})}</span><span class="name">${l.k}</span><span class="val num" data-d>${l.ver>1?'':'v1'}</span></button>`).join('')}
+const FILTER={One:'none',Two:'sepia(.45) saturate(1.15)',Three:'hue-rotate(160deg) saturate(.7)',Other:'hue-rotate(40deg)',Level:'none',Warm:'sepia(.35) saturate(1.25) brightness(1.04)',Grave:'grayscale(.6) brightness(.78) contrast(1.1)'};
+let grain=true,caps=silent,words=!silent;
+function drawLayer(){const l=L[on],d=$('#demo'),a=d.querySelector('img.a'),b=d.querySelector('img.b');
+ $('#nextp').hidden=l.ver<2;$('#layer').setAttribute('aria-label',l.k);
+ a.src=F(l.img);b.src=F(l.img2||l.img);d.className='demo'+(l.k==='Motion'?(l.cur==='Drift'?' drift':l.cur==='One mover'?' one':''):'')+(l.k==='Joins'?' join':'');d.dataset.o=l.k==='Layout'||l.k==='Joins'?l.cur:'';
+ d.querySelector('.mover').hidden=!(l.k==='Motion'&&l.cur==='One mover');
+ const fw=$('#dwords');fw.hidden=!words&&!caps;fw.style.fontFamily=l.k==='Letters'?(l.cur==='Grotesk'?'"Josefin Sans",sans-serif':l.cur==='Cinzel'?'"Spectral SC",serif':'"Spectral",serif'):'';
+ const fg=$('#dfigs');fg.hidden=l.k!=='Numbers'&&l.k!=='Pacing';fg.innerHTML=l.k==='Pacing'?({Steady:'<span>12 / 22 s</span>','Long hold':'<span>866 s</span>'}[l.cur]||''):l.k==='Numbers'?(l.cur==='Count'?['1,000 years']:l.cur==='Clock count'?['Day 12','1,000 years']:['Day 12','1,000 years','tenfold']).map(x=>`<span>${x}</span>`).join(''):'';
+ const f=(L[6].cur&&FILTER[L[6].cur]||'none')+' '+(FILTER[L[7].cur]||'');a.style.filter=b.style.filter=(grain?'contrast(1.06) ':'')+(l.k==='Colour'||l.k==='Feeling'?f:'');
+ $('#dgrain').hidden=!grain;
+ $('#opts').innerHTML=l.o.map(o=>`<button class="btn${o===l.refuse?' refused':''}" aria-pressed="${o===l.cur}" data-o="${o}">${o}</button>`).join('');
+ let sw='';if(l.k==='Layout')sw=silent?`<button class="switch" aria-checked="true" disabled data-u="u6">Subtitles</button>`:`<button class="switch" aria-checked="${caps}" id="sw-caps" data-u="u6">Captions</button><button class="switch" aria-checked="${words}" id="sw-words" data-u="u7">Words</button>`;
+ if(l.k==='Colour')sw=`<button class="switch" aria-checked="${grain}" id="sw-grain" data-u="u8" aria-label="Grain and grade">Grain</button>`;
+ $('#lsw').innerHTML=sw;$$('#lsw .switch').forEach(s=>s.insertAdjacentHTML('afterbegin','<span class="slot"><span class="bolt"></span></span>'));
+ $('#goback').hidden=!l.prev}
+$('#cab').addEventListener('click',e=>{const r=e.target.closest('.row');if(!r)return;on=+r.dataset.i;drawCab();drawLayer();Kit.press($(`#cab .row[data-i="${on}"]`))});
+$('#opts').addEventListener('click',e=>{const b=e.target.closest('.btn');if(!b)return;const l=L[on],o=b.dataset.o;if(o===l.cur)return;
+ if(o===l.refuse){Kit.press(b);say('Too faint on a phone',{state:'stop'});return}
+ l.prev=l.cur;l.cur=o;l.ver++;drawCab();drawLayer();Kit.press($(`#opts [data-o="${o}"]`));const cat=document.querySelector('.rail .cat');if(cat){cat.classList.add('scan');setTimeout(()=>cat.classList.remove('scan'),1400)}say(ST==='film-in-making'?'That film keeps its own':'From the next film')});
+$('#lsw').addEventListener('click',e=>{const s=e.target.closest('.switch');if(!s||s.disabled)return;const v=s.getAttribute('aria-checked')!=='true';s.setAttribute('aria-checked',v);
+ if(s.id==='sw-caps')caps=v;if(s.id==='sw-words')words=v;if(s.id==='sw-grain'){grain=v;say(v?'Grain, grade and light leaks on.':'Grain, grade and light leaks off for this channel.')}drawLayer()});
+$('#back1').onclick=()=>{const l=L[on];if(!l.prev)return;l.cur=l.prev;l.prev=null;l.ver--;drawCab();drawLayer();say('Back to the version before.')};
+/* ---------- simple pickers and multi pickers ---------- */
+document.addEventListener('click',e=>{const b=e.target.closest('.picker .btn');if(!b||b.closest('#opts'))return;const p=b.parentElement;
+ if(p.dataset.multi){const min=+p.dataset.multi,max=+(p.dataset.max||99),onN=p.querySelectorAll('[aria-pressed=true]').length,is=b.getAttribute('aria-pressed')==='true';
+  if(is&&onN<=min){say('At least '+min+' stay on, so films do not repeat.',{state:'need'});return}if(!is&&onN>=max){say('Up to '+max+'.',{state:'need'});return}b.setAttribute('aria-pressed',!is);Kit.press(b);const c=p.querySelectorAll('[aria-pressed=true]').length;if(p.id==='openings')$('#v-open').textContent=c;if(p.id==='shapes')$('#v-shapes').textContent=c+' / 12';return}
+ p.querySelectorAll('.btn').forEach(x=>x.setAttribute('aria-pressed',x===b));Kit.press(b);const vv={clips:'v-clips',within:'v-within',length:'v-length',before:'v-before',how:'v-how',pinned:'v-pin'}[p.id];if(vv==='v-within'||vv==='v-length')$('#'+vv).textContent=b.textContent.replace(' to ',' / ');
+ if(p.id==='how')$('#connectyt').hidden=b.textContent.indexOf('Juju')<0;
+ if(p.id==='ways')say({'Elder brother':'Elder brother: speaks to you as one who walked the road first.','World log':'World log: a dated dispatch, fact by fact.','Two sides':'Two sides: rival speakers, two voices.','Dry guide':'Dry guide: a deadpan walk through a place.','Atlas':'Atlas: a calm voice over maps and instruments.'}[b.textContent])});
+/* ---------- thumbs: seven styles, no picture of ours yet ---------- */
+$('#styles').innerHTML=['Staged scene','Film frame','Real photo','News desk','Cutaway','Etching','Atlas'].map((n,i)=>`<button class="stl" aria-pressed="${i===0}"><span class="plate empty">${Art.plate({state:'empty'})}</span><span>${n}</span></button>`).join('');
+$('#styles').addEventListener('click',e=>{const b=e.target.closest('.stl');if(!b)return;$$('#styles .stl').forEach(x=>x.setAttribute('aria-pressed',x===b));Kit.press(b);if(b===$('#styles .stl:nth-child(2)'))say('This style just ran twice',{state:'need'})});
+/* ---------- sources ---------- */
+$('#homes').addEventListener('click',e=>{const s=e.target.closest('.switch');if(!s)return;if(s.getAttribute('aria-checked')==='true'&&$$('#homes .switch[aria-checked=true]').length===1){e.stopPropagation();say('At least one stays on.',{state:'need'})}},true);
+let blocked=['wikipedia.org'];const drawBlocked=()=>{$('#blocked').innerHTML=blocked.map(b=>`<button class="chipx" data-b="${b}" aria-label="Take ${b} off the list"><span data-d>${b}</span>${Art.glyph('close')}</button>`).join('')};drawBlocked();
+$('#block').onclick=()=>{const v=$('#blockf').value.trim();if(!v)return;blocked.push(v);$('#blockf').value='';drawBlocked();Kit.press($('#blocked .chipx:last-child'));$('#v-never').textContent=blocked.length};
+$('#blocked').addEventListener('click',e=>{const c=e.target.closest('.chipx');if(!c)return;blocked=blocked.filter(b=>b!==c.dataset.b);drawBlocked()});
+/* ---------- story ---------- */
+$('#openings').innerHTML=['False name','Dated report','Paradox','Live instrument','Two numbers','Primary text'].map(n=>`<button class="btn" aria-pressed="true">${n}</button>`).join('');
+const SHAPES=['Real time voyage','Era chasm','Dated simulation','Mental map','Titan rival','Moral mirror','Lineage clash','Cosmic whisper','Lost manuscript','Status archetype','Realm atlas','Group chat'];
+const sh=$('#shapes');sh.dataset.multi=4;sh.dataset.max=9;sh.innerHTML=SHAPES.map((n,i)=>`<button class="btn" aria-pressed="${i<9}">${n}</button>`).join('');
+const SC=[['Layered painting','still-000.60.jpg'],['Document page','still-052.10.jpg'],['Map theatre','still-074.12.jpg'],['Lineage tree','still-097.20.jpg'],['Group chat','still-115.63.jpg'],['Route chart','still-133.00.jpg'],['Scale flight','still-147.62.jpg'],['Instrument view','still-164.79.jpg'],['Archive footage','still-181.54.jpg']];
+$('#scenes').innerHTML=SC.map(([n,f])=>`<button class="tilebtn" aria-pressed="true"><img src="${F(f)}" alt="" loading="lazy"><span>${n}</span></button>`).join('');
+$('#scenes').addEventListener('click',e=>{const b=e.target.closest('.tilebtn');if(!b)return;const v=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',v);Kit.press(b);$('#v-scenes').textContent=$$('#scenes [aria-pressed=true]').length;if(!v)say('Off from the next film')});
+let donors=[];const drawDonors=()=>{$('#donors').innerHTML=donors.map(d=>`<button class="chipx" data-dn="${d}" aria-label="Take it out"><span data-d>${d}</span>${Art.glyph('close')}</button>`).join('');$('#readagain').disabled=!donors.length;$('#forget').disabled=!donors.length;$('#learnpill').textContent=donors.length||'';$('#learnsay').textContent=donors.length?'Kept':'Not learned'};drawDonors();
+$('#donors').addEventListener('click',e=>{const c=e.target.closest('.chipx');if(!c)return;donors=donors.filter(d=>d!==c.dataset.dn);drawDonors()});
+const PARTS=['Films','Frames','Sound','Cuts','What stays','What moves','Colours','Words','Guess'];
+function strip(i,fail){const r=$('#reading');r.hidden=false;r.innerHTML=Art.path(PARTS.map((p,j)=>j<i?'done':j===i?(fail?'failed':'now'):'none'),{gap:52})+(i<PARTS.length?`<span class="pill ${fail?'stop':'work'}">${PARTS[i]}</span>`:'');r.firstChild.setAttribute('aria-label',PARTS.join(', '))}
+function readRun(fail){let i=0;const draw=()=>strip(i,fail&&i===PARTS.length-1);draw();
+ if(ST==='reading-again')return;const t=setInterval(()=>{i++;draw();if(i>=PARTS.length-1){clearInterval(t);if(fail){draw();say('Nothing changed',{state:'stop',ms:5000})}else{i=PARTS.length;draw();say('Read')}}},reduce?0:380)}
+$('#learn').onclick=()=>{const v=$('#learnf').value.trim();if(!v){say('Paste a YouTube link first.',{state:'need'});return}if(ST==='reading-waits-for-the-mac'){donors.push(v);drawDonors();say('Kept. Waits for the Mac.',{state:'need'});return}
+ donors.push(v);$('#learnf').value='';drawDonors();say('Reading');readRun(false)};
+$('#againvis').onclick=()=>{$('#againvis').hidden=true;$('#readagain').click()};
+$('#readagain').onclick=()=>{say('Reading again');readRun(ST==='read-failed')};
+function hold(btn,ms,fn){let t0=0,raf=0;const tick=t=>{const p=Math.min(1,(t-t0)/ms);btn.style.setProperty('--p',p);if(p<1)raf=requestAnimationFrame(tick);else{btn.style.setProperty('--p',0);fn()}};
+ btn.addEventListener('pointerdown',()=>{if(btn.disabled)return;t0=performance.now();raf=requestAnimationFrame(tick)});['pointerup','pointerleave'].forEach(k=>btn.addEventListener(k,()=>{cancelAnimationFrame(raf);btn.style.setProperty('--p',0)}))}
+hold($('#forget'),1000,()=>{donors=[];drawDonors();say('Forgotten. The layers stay.')});
+/* point of view: the same word check scripts use */
+const BAN=/\b(unlock|elevate|seamless|effortless|delve|on a day in|in the city of)\b/i;
+$('#povt').addEventListener('input',()=>{const m=$('#povt').value.match(BAN);$('#povcheck').textContent=m?'Breaks a rule: '+m[0]:'';});
+$('#povsave').onclick=()=>{say('Kept. Every next film carries it.')};
+$('#learnpaste').onclick=async()=>{let t='';try{t=await navigator.clipboard.readText()}catch(e){}$('#learnf').value=/youtu/.test(t||'')?t:'https://www.youtube.com/@BygonePhilosophy'};
+/* ---------- more, channels, rest ---------- */
+const chan=$('.place .chan');if(chan){const b=document.createElement('button');b.className='chan chanbtn';b.innerHTML=chan.innerHTML;b.setAttribute('aria-label','Change channel');b.dataset.open='channels';b.dataset.u='u1';chan.replaceWith(b)}
+$('#chanlist').addEventListener('click',e=>{const r=e.target.closest('.row');if(!r)return;const t=$('#tabs [aria-selected=true]').dataset.panel;Kit.sheet('channels').close();location.href='vessel.html?channel='+r.dataset.ch+'&tab='+t.replace('t-','')});
+$('#renameb').onclick=()=>{const v=$('#rename').value.trim();if(!v)return;document.querySelector('.place .chan').lastChild.textContent=v;say('Renamed. Old films keep their titles.')};
+$('#ytsave').onclick=()=>{const v=$('#ytlink').value.trim();if(!/youtube\.com|youtu\.be/.test(v)){say('That link did not open a channel. Paste it again.',{state:'stop'});return}say('Saved. Juju reads its public numbers.')};
+let resting=ST==='resting';hold($('#rest'),1000,()=>{resting=true;Kit.sheet('more').close();applyRest();say('Put to rest')});
+const go=$('#go');
+function applyRest(){document.body.classList.toggle('resting',resting);if(ST==='cannot-open'){go.textContent='Back to the altar';go.dataset.u='u38';return}go.textContent=resting?'Wake':'Make a film';go.dataset.u=resting?'u36':'u37';go.classList.toggle('need',resting);document.querySelector('.place .chan .dot').className='dot '+(resting?'':'need')}
+go.onclick=()=>{if(resting){resting=false;applyRest();Kit.finish(go,'Awake. Back on the shelf.');return}if(ST==='cannot-open'){location.href='altar.html';return}Kit.finish(go,'Dealing the cards');setTimeout(()=>location.href='crossroads.html?from=vessel',800)};
+/* ---------- states (default view = the flow's 'normal') ---------- */
+const two=document.body.dataset.channel!=='Library of Tehuti';
+if(two){$$('.nums').forEach(n=>n.hidden=true);}
+const TABS={publishing:'pub',roots:'story',thumbnails:'thumbs'};const tab=(TABS[Kit.param('tab')]||Kit.param('tab'))||({'reading-again':'story','read-failed':'story','reading-waits-for-the-mac':'story','not-verified':'pub','subtitles-only-channel':'layers'}[ST]||'layers');
+const tb=$(`#tabs [data-panel="t-${tab}"]`);if(tb&&tab!=='layers')tb.click();
+if(silent){on=2;$('#soundmode').innerHTML='<span>Subtitles only</span>';$('#finding h3').textContent='Sound: Subtitles only';$('#capfile').setAttribute('aria-checked','false');$('#capfile').disabled=true}
+if(ST==='layer-changed'){L[0].prev=L[0].cur;L[0].cur='Speeding up';L[0].ver=2}
+if(ST==='option-refused')on=6;
+if(ST==='reading-again'){donors=['youtube.com/@BygonePhilosophy'];drawDonors();readRun(false)}
+if(ST==='read-failed'){donors=['youtube.com/@BygonePhilosophy'];drawDonors();strip(8,true);$('#againvis').hidden=false}
+if(ST==='reading-waits-for-the-mac'){donors=['youtube.com/@BygonePhilosophy'];drawDonors()}
+if(ST==='cannot-open'){$('#ok').hidden=true;$('#cannot').hidden=false;go.textContent='Back to the altar';$('[data-tools]')&&0;}
+drawCab();drawLayer();applyRest();
+const NOTE={'':two?['Add its YouTube channel','need']:null,'layer-changed':['From the next film'],'film-in-making':['A film keeps its own','need'],
+ 'reading-again':['Reading'],'read-failed':['Nothing changed','stop'],'option-refused':['Too faint on a phone','stop'],
+ 'no-numbers':['Add its YouTube channel','need'],resting:['Resting','need'],switching:['Vessel two, same tab.'],'cannot-open':['This channel cannot be opened.','stop'],
+ 'subtitles-only-channel':['Subtitles only, for good'],'reading-waits-for-the-mac':['Kept. Waits for the Mac.','need'],'not-verified':['Not verified yet','need']};
+const nt=NOTE[ST||''];if(nt)say(nt[0],{state:nt[1]||'',ms:4200});
+});
+/* proof aid: ?do=<css>;<css> taps those controls in order so a still can show the result; a missing or dead control is a console error. Not part of the room. */
+document.addEventListener('DOMContentLoaded',()=>{(Kit.param('do')||'').split(';').filter(Boolean).forEach((q,i)=>setTimeout(()=>{const e=document.querySelector(q);const b=e&&e.getBoundingClientRect();if(!e)console.error('no control '+q);else if(e.disabled)console.error('control is off '+q);else if(e.closest('[hidden]')||!b.width||!b.height)console.error('control is hidden '+q);else e.click()},40+i*45))});
+</script>
+</body></html>

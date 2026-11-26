@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Juju · Spell Strip</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script><script>(function(){if(!('serviceWorker' in navigator))return;if(navigator.serviceWorker.controller)return;document.documentElement.style.visibility='hidden';navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(function(){return navigator.serviceWorker.ready}).then(function(){location.reload()})})()</script><script src="phone.js"></script><script src="api.js"></script>
+<style>
+/* Spell Strip: room layout only, on 8 px steps. Every colour is a kit token. */
+body{--focus-x:36%;--focus-y:40%}
+/* no film to show: the jar on its ledge, and how long is left */
+.idle{flex:1;display:grid;grid-template-columns:400px minmax(0,1fr);gap:72px;align-items:center;align-content:center}
+.idle .pot{display:grid;justify-items:center}
+.idle .niche{width:336px;height:408px;--arch:168px} .idle .niche .art.jar{height:352px;width:auto;margin-bottom:-2px} .idle .ledge{width:400px}
+.idle .what{display:grid;gap:24px;justify-items:start;min-width:0} .idle .fig{font-size:64px} .idle .what>:empty{display:none}
+.desk{display:grid;grid-template-columns:minmax(0,768px) minmax(0,1fr);grid-template-areas:"player focus" "film film";gap:24px;align-items:start}
+.player{grid-area:player;display:grid;gap:8px;min-width:0}
+.screen{position:relative;aspect-ratio:16/9;background:var(--a-deep);overflow:hidden;border:2px solid var(--line-hi);cursor:pointer}
+.screen video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+.screen .word{position:absolute;inset:0;display:grid;place-items:center;font:600 24px/32px "Spectral SC",serif;color:var(--ash)}
+.ctl{display:flex;align-items:center;gap:16px}
+.ctl .time{font-size:14px;color:var(--ash);white-space:nowrap}
+.bar{position:relative;flex:1;min-width:0;height:48px;cursor:pointer;touch-action:none}
+.bar::before{content:"";position:absolute;left:0;right:0;top:22px;height:4px;background:var(--line)}
+.bar .done{position:absolute;left:0;top:22px;height:4px;background:var(--obj-lit)}
+.bar .tick{position:absolute;top:18px;width:2px;height:12px;background:var(--line-hi)}
+.bar .knob{position:absolute;top:15px;width:18px;height:18px;margin-left:-9px;background:var(--bone);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.focus-scene{grid-area:focus;display:grid;gap:16px;min-width:0;padding:24px}
+.focus-scene .where,.focus-scene .of{display:flex;align-items:center;gap:16px;min-height:32px}
+.focus-scene .where{min-height:48px;justify-content:space-between}
+.focus-scene .at{margin-left:auto;white-space:nowrap;color:var(--ash);font-size:14px} .focus-scene .at .lab{margin-right:8px}
+.focus-scene .status .num{color:var(--bone)}
+.focus-scene .line{font:italic 400 20px/32px "Spectral",serif;color:var(--bone)}
+.ops{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.ops .btn{min-height:56px} .ops .btn.stop[disabled]{color:var(--smoke)} .ops .btn.stop[disabled]::after{box-shadow:inset 0 0 0 2px var(--line)}
+.ops .stepper{height:56px} .ops .stepper button{width:48px} .ops .stepper output{min-width:80px;padding:0 8px}
+.ops .stepper output small{margin-top:4px}
+.film{grid-area:film;display:grid;gap:8px;min-width:0}
+.strip{gap:24px;margin:0 -4px;padding:16px 4px;scroll-padding:0 24px}
+.strip .act{gap:8px}
+.strip .act .lab{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:16px}
+.strip .scene{width:176px}
+.strip .scene .n{left:8px;bottom:8px}
+.strip .scene .flag{position:absolute;right:8px;bottom:8px;width:16px;height:16px}
+.ops .juju-say{flex-basis:100%}
+/* sheets */
+.slot+.slot{margin-top:24px}
+.pics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}
+.pic{display:grid;gap:8px;padding:0;border:0;background:none;color:inherit;text-align:left;font:inherit;align-content:start}
+button.pic{cursor:pointer}
+.pic img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--a-well);box-shadow:0 0 0 2px var(--line)}
+.pic.now img{box-shadow:0 0 0 2px var(--obj-lit)} button.pic:hover img,button.pic:focus-visible img{box-shadow:0 0 0 3px var(--need)}
+.pic{position:relative} .pic .pip{position:absolute;left:8px;top:8px;width:24px;height:24px}
+.pic .lic{font-size:12.5px;line-height:16px;color:var(--ash)}
+.cutpic{display:block;width:100%;max-width:352px;aspect-ratio:16/9;object-fit:cover;margin-top:16px;box-shadow:0 0 0 2px var(--line)}
+@media (max-width:760px){
+  .idle{grid-template-columns:minmax(0,1fr);gap:24px;justify-items:center} .idle .niche{width:208px;height:264px;--arch:104px} .idle .niche .art.jar{height:224px} .idle .ledge{width:248px} .idle .what{gap:16px;justify-items:center;text-align:center} .idle .fig{font-size:40px}
+  .main{min-height:calc(100dvh - 74px - env(safe-area-inset-bottom))}
+  .desk{grid-template-columns:minmax(0,1fr);grid-template-areas:"player" "film" "focus"}
+  .ctl{gap:8px} .ctl .time{font-size:12.5px} .bar{margin:0 8px}
+  .desk{gap:8px} .focus-scene{padding:8px 16px 16px;gap:8px} .focus-scene .of{gap:8px} .focus-scene .line{font-size:18px;line-height:24px}
+  .strip{margin:0 -16px;padding:0 16px 8px;gap:8px} .strip .act{grid-template-columns:minmax(0,1fr)} .strip .act .lab{letter-spacing:.04em} .strip .act .lab::after{display:none} .strip .scene{width:112px}
+  .ops .stepper output{min-width:64px} .ops #swap{width:56px;padding:0}
+}
+</style>
+</head>
+<body data-skin="nocturne" data-room="spell-strip" data-title="Spell Strip" data-channel="Library of Tehuti" data-chan-state="need" data-back="altar.html" data-back-label="Altar" data-door="altar" data-tank="asleep" data-who="A">
+<main>
+ <div class="idle" id="idle" hidden><div class="pot"><div class="niche"></div><i class="ledge"></i></div><div class="what"><b class="h2" data-d id="idlename"></b><span class="pill" id="idlepill"></span><b class="fig" data-d id="idleleft"></b></div></div>
+ <div class="desk" id="desk" hidden>
+  <section class="player" aria-label="The film">
+   <div class="screen" id="screen"><b class="word" id="word" hidden>Failed</b></div>
+   <div class="ctl">
+    <button class="btn icon" id="play" aria-label="Play"></button>
+    <div class="bar" id="bar" role="slider" aria-label="Film time" aria-valuemin="0" tabindex="0"><i class="done"></i><i class="knob"></i></div>
+    <span class="time num" data-d id="time"></span>
+    <button class="btn icon" id="full" aria-label="Full screen"><svg class="art glyph" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+   </div>
+  </section>
+  <section class="focus-scene panel" data-frame id="focus">
+   <div class="where"><span class="status" id="state"></span><button class="btn" id="putback" hidden>Put back</button></div>
+   <div class="of"><b class="h2" data-d id="act"></b><span class="at" data-d><span class="lab only-desk" id="kind"></span><span class="num" id="span"></span></span></div>
+   <p class="line" data-d id="line"></p>
+   <div class="ops">
+    <div class="stepper" id="hold" data-min="0" data-max="3" data-step="0.5" data-unit="hold"><output data-v="0"></output></div>
+    <button class="btn" data-open="sh-swap" id="swap" aria-label="Swap picture" hidden><span class="only-desk">Swap</span></button>
+    <button class="btn stop" data-act="cut" id="cut" hidden>Cut</button>
+   </div>
+    </section>
+  <section class="film">
+   <div class="strip" data-scroll id="strip"></div>
+  </section>
+ </div>
+</main>
+<footer class="deck"><div class="aside"></div><button class="primary" id="go" disabled>Approve the film</button></footer>
+
+<section class="sheet" id="sh-swap" hidden><h3>Swap picture</h3><div id="slots"></div></section>
+<section class="sheet" id="sh-cut" hidden><h3>Cut scene</h3><span id="cutpic"></span><div class="acts"><button class="btn stop" data-act="cutyes">Cut</button><button class="btn" data-close>Keep</button></div></section>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const J=window.JUJU,esc=J.esc,enc=encodeURIComponent;
+const clock=s=>{s=Math.max(0,Math.floor(s+.02));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const left=m=>m==null?'':m<1?Math.max(1,Math.ceil(m*60))+' s':Math.ceil(m)+' min';
+let F=null,id=J.param('film')||'',cur='',sig='',note='',sending=false,P=null,vid=null,fine=true;
+const path=()=>'/api/films/'+enc(id);
+const scenes=()=>F?F.acts.flatMap(a=>a.scenes.map(s=>({...s,act:a.name}))):[];
+const scene=()=>{const S=scenes();return S.find(s=>s.id===cur)||S[0]};
+const running=()=>F&&F.job&&F.job.state!=='failed'&&F.job.state!=='done'?F.job:null;
+const busy=()=>sending||!!running()||!!(F&&F.state==='redrawing');
+
+/* ---------- what the server says ---------- */
+async function find(){
+ if(id)return id;
+ if(J.param('run')){const r=await J.get('/api/runs/'+enc(J.param('run')));if(r.film)return id=r.film}
+ const l=((await J.get('/api/films?vessel='+enc(J.vessel))).films||[]).slice().sort((a,b)=>String(b.made).localeCompare(String(a.made)));
+ return id=(l[0]||{}).id||''}
+async function load(){
+ try{if(!await find())return none('Nothing yet','Make a film','crossroads.html')}
+ catch(e){if(lost(e)!==false)setTimeout(load,4000);return}
+ if(P)P.stop();
+ P=J.poll(path(),f=>{fine=true;took(f);return busy()||f.state==='drawing'},{fail:e=>{if(lost(e)===false)P.stop()}})}
+function lost(e){
+ if(e.status===409){none();follow(e.run);return false}
+ if(e.status===404){none('Nothing yet','Make a film','crossroads.html');return false}
+ fine=false;if(F)draw();else none(e.status?'Failed':'Offline')}
+function took(f){const was=F&&F.job;F=f;
+ if(f.job&&f.job.state==='failed')note=f.job.say||f.job.why||'Failed';else if(f.job||was)note='';if(!f.job)sent=null;
+ if(!cur||!scenes().some(s=>s.id===cur)){const S=scenes();cur=(S.find(s=>vid&&vid.currentTime<s.to_s)||S[0]||{}).id||''}
+ film();draw()}
+/* no film to show: one jar, one word, how long is left, one way on */
+const JAR={Working:['working','work'],Waiting:['working','work'],Ready:['done','need'],Stopped:['stopped','stop'],Failed:['stopped','stop']};
+let R=null;
+function idle(word,label,href,r){const[jar,c]=JAR[word]||['asleep','dim'],n=$('.idle .niche');$('#idle').hidden=false;
+ if(n.dataset.jar!==jar){n.dataset.jar=jar;n.className='niche '+(c==='work'?'work':c==='need'?'need':'');n.innerHTML=Art.jar({state:jar,label:'LT'})}
+ $('#idlename').textContent=r?r.title:'';$('#idlepill').textContent=word;$('#idlepill').className='pill '+c;
+ $('#idleleft').textContent=word==='Working'&&r&&r.left_min!=null?J.minutes(r.left_min):'';go(label||'Approve the film',href?'href:'+href:'',!href)}
+function none(word,label,href){F=null;sig='';if(vid)vid.pause();$('#desk').hidden=true;if(word)idle(word,label,href)}
+/* a film still being drawn: follow its run, and open when it is there */
+function follow(run){const href=run?J.to.run(run):'conjuring.html';if(R)R.stop();if(!run)return idle('Working','Open Conjuring',href);
+ const W={working:'Working',waiting:'Waiting',stopped:'Stopped',failed:'Failed'};
+ R=J.poll('/api/runs/'+enc(run),r=>{if(r.state==='done'){load();return false}idle(W[r.state]||'Working','Open Conjuring',href,r)},{fail:e=>idle(e.status?'Failed':'Offline','Open Conjuring',href)})}
+function go(label,act,off,cls){const g=$('#go');g.textContent=label;g.dataset.do=act||'';g.disabled=!!off;g.className='primary'+(cls?' '+cls:'')}
+
+/* ---------- the film itself ---------- */
+function film(){if(!F.video)return;
+ if(!vid){vid=document.createElement('video');vid.playsInline=true;vid.preload='metadata';vid.setAttribute('aria-label',F.title);
+  ['play','pause','ended'].forEach(k=>vid.addEventListener(k,buttons));
+  vid.addEventListener('timeupdate',tick);vid.addEventListener('loadedmetadata',tick);vid.addEventListener('seeked',tick);
+  vid.addEventListener('error',()=>{$('#word').hidden=false;setTimeout(()=>{vid.dataset.src='';load()},4000)});
+  vid.addEventListener('loadeddata',()=>$('#word').hidden=true);
+  $('#screen').prepend(vid)}
+ const s=scene();if(s&&!vid.played.length)vid.poster=s.still;
+ if(vid.dataset.src!==F.video){const at=vid.dataset.src?vid.currentTime:0,on=!!vid.dataset.src&&!vid.paused;vid.dataset.src=F.video;vid.src=F.video;
+  if(at)vid.addEventListener('loadedmetadata',()=>{vid.currentTime=Math.min(at,Math.max(0,vid.duration-.1));if(on)vid.play().catch(()=>{})},{once:true})}
+ }
+const total=()=>vid&&isFinite(vid.duration)&&vid.duration||F&&F.seconds||0;
+function tick(){if(!F||!vid)return;const t=vid.currentTime,T=total(),p=T?Math.min(100,t/T*100):0,b=$('#bar');
+ b.querySelector('.done').style.width=p+'%';b.querySelector('.knob').style.left=p+'%';
+ b.setAttribute('aria-valuemax',Math.round(T));b.setAttribute('aria-valuenow',Math.round(t));b.setAttribute('aria-valuetext',clock(t));
+ $('#time').textContent=clock(t)+' / '+clock(T);
+ const S=scenes(),n=S.find(s=>t<s.to_s-.02)||S[S.length-1];if(n&&n.id!==cur&&!dragging&&(!vid.paused||followed)){cur=n.id;flush();draw()}followed=false}
+let followed=false,dragging=false;
+function buttons(){const on=vid&&!vid.paused&&!vid.ended;$('#play').innerHTML=Art.glyph(on?'pause':'play');$('#play').setAttribute('aria-label',on?'Pause':'Play')}
+function toggle(){if(!vid||!F)return;if(vid.paused||vid.ended)vid.play().catch(()=>J.say($('#screen').parentNode,'Press play again','need'));else vid.pause()}
+function seek(t,follow){if(!vid)return;followed=!!follow;const T=total();vid.currentTime=Math.max(0,Math.min(T?T-.05:0,t));tick()}
+function pick(k,move){flush();cur=k;const s=scene();note='';if(vid&&!vid.played.length)vid.poster=s.still;if(move!==false)seek(s.from_s?Math.min(s.from_s+.4,s.to_s-.1):0);draw()}
+
+/* ---------- drawing the room ---------- */
+function draw(){const S=scenes(),s=scene(),j=running(),off=busy();
+ $('#desk').hidden=!s;$('#idle').hidden=!!s;if(!s)return;
+ /* the strip is drawn again only when something in it changed */
+ const g=JSON.stringify([F.acts,F.v,j&&j.scene]);
+ if(g!==sig){sig=g;let n=0;$('#strip').innerHTML=F.acts.map(a=>`<div class="act"><span class="lab" data-d>${esc(a.name)}</span><div class="scenes">`+a.scenes.map(x=>{n++;return `<button class="scene drawn${j&&j.scene===x.id?' working':''}" data-scene="${esc(x.id)}" aria-label="Scene ${n}, ${esc(a.name)}${x.faults?', at fault':''}"><img src="${esc(x.still)}" alt=""><span class="n" data-d>${n}</span>${x.faults?`<span class="flag">${Art.pip({state:'next'})}</span>`:''}</button>`}).join('')+'</div></div>').join('');
+  const T=F.seconds;$$('#bar .tick').forEach(e=>e.remove());S.slice(1).forEach(x=>$('#bar').insertAdjacentHTML('afterbegin',`<i class="tick" style="left:${x.from_s/T*100}%"></i>`))}
+ $$('#strip .scene').forEach(b=>{const on=b.dataset.scene===s.id;if(on&&!b.classList.contains('picked')){const st=$('#strip'),l=b.offsetLeft-16,r=b.offsetLeft+b.offsetWidth+16;if(l<st.scrollLeft)st.scrollLeft=l;else if(r>st.scrollLeft+st.clientWidth)st.scrollLeft=r-st.clientWidth}b.classList.toggle('picked',on);b.setAttribute('aria-pressed',on)});
+ $('#act').textContent=s.act;$('#kind').textContent=s.kind;$('#span').textContent=clock(s.from_s);$('#line').textContent=/[.?!]$/.test(s.say)?s.say:s.say.replace(/[,;:]$/,'')+' …';
+ const sw=$('#swap'),cu=$('#cut');sw.hidden=!(s.swap&&s.swap.some(x=>x.others.length));cu.hidden=!s.can_cut;sw.disabled=cu.disabled=off;
+ step(want&&want.scene===s.id?want.v:sent&&off&&sent.scene===s.id?sent.v:s.hold_s||0,off);
+ refuse(note);
+ const h=j?`${Art.pip({state:'now'})}<span>${j.state==='waiting'?'Waiting':'Redrawing'}</span>${j.left_min!=null?`<span class="num" data-d>${left(j.left_min)}</span>`:''}`:!fine?`${Art.pip({state:'failed'})}<span>Offline</span>`:F.gates_pass===false?`${Art.pip({state:'failed'})}<span>Checks failed</span>`:`${F.state==='approved'?Art.pip({state:'done'}):''}<span data-d>${esc(F.title)}</span>`,st=$('#state');
+ if(st.dataset.h!==h){st.dataset.h=h;st.innerHTML=h}
+ const pb=$('#putback');pb.hidden=!F.can_put_back;pb.disabled=off;
+ if(F.state==='approved'&&!j)go('Open Publish Kit','href:'+J.to.kit(id));
+ else go('Approve the film','approve',off||!fine||F.gates_pass===false);
+ buttons()}
+function refuse(t){const o=$('.ops');t?J.say(o,t):J.unsay(o)}
+
+/* ---------- hold: the kit counts, the last tap sends it once ---------- */
+let want=null,sent=null,ht=0;
+function step(v,off){const o=$('#hold output');o.dataset.v=v;o.innerHTML=`${(+v).toFixed(1)} s<small>hold</small>`;const[a,b]=$$('#hold button');if(!a)return;a.disabled=off||v<=0;b.disabled=off||v>=3}
+$('#hold').addEventListener('click',e=>{if(!e.target.closest('button')||!F||busy())return;const v=+$('#hold output').dataset.v;want={scene:scene().id,v};note='';refuse('');step(v,false);clearTimeout(ht);ht=setTimeout(flush,800)});
+function flush(){clearTimeout(ht);if(!want)return;const w=want;want=null;const s=scenes().find(x=>x.id===w.scene);if(!s||(s.hold_s||0)===w.v)return;
+ sent=w;
+ change(()=>J.patch(path()+'/scenes/'+enc(w.scene),{op:'hold',seconds:w.v}))}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)flush();else if(id)load()});
+/* every change is one call: it answers the job, then the room follows the job */
+async function change(work){if(sending)return;sending=true;note='';if(P)P.stop();draw();
+ try{const r=await work();if(r.job)F.job=r.job}catch(e){note=e.say||'Failed';fine=e.error!=='offline'}
+ sending=false;draw();const n=note;load();note=n}
+/* ---------- presses ---------- */
+document.addEventListener('click',e=>{
+ const sc=e.target.closest('#strip [data-scene]');if(sc){Kit.press(sc);return pick(sc.dataset.scene)}
+ const pc=e.target.closest('[data-picture]');if(pc){Kit.sheet('sh-swap').close();return change(()=>J.patch(path()+'/scenes/'+enc(scene().id),{op:'swap',slot:pc.dataset.slot,at:+pc.dataset.at,picture:pc.dataset.picture}))}
+ if(e.target.closest('#putback:not([disabled])')){want=null;clearTimeout(ht);return change(()=>J.post(path()+'/put_back'))}
+ const b=e.target.closest('[data-act]');if(!b||b.disabled)return;
+ if(b.dataset.act==='cut'){$('#cutpic').innerHTML=`<img class="cutpic" src="${esc(scene().still)}" alt="">`;Kit.sheet('sh-cut').open()}
+ if(b.dataset.act==='cutyes'){want=null;clearTimeout(ht);Kit.sheet('sh-cut').close();const k=scene().id;change(()=>J.patch(path()+'/scenes/'+enc(k),{op:'cut'}))}});
+/* the swap sheet is filled before the kit opens it */
+document.addEventListener('click',e=>{if(!e.target.closest('[data-open="sh-swap"]')||!F)return;const P=F.pictures||{},src=k=>(P[k]||{}).still||path()+'/pictures/'+enc(k)+'.jpg';
+ const tell=k=>`<img src="${esc(src(k))}" alt="${esc((P[k]||{}).shows||'')}"><span class="lic" data-d>${esc((P[k]||{}).licence||'')}</span>`;
+ $('#slots').innerHTML=scene().swap.filter(x=>x.others.length).map(x=>`<div class="slot"><div class="pics"><div class="pic now">${tell(x.now)}${Art.pip({state:'done'})}</div>${x.others.map(k=>`<button class="pic" data-picture="${esc(k)}" data-slot="${esc(x.slot)}" data-at="${x.at}" aria-label="${esc((P[k]||{}).shows||k)}">${tell(k)}</button>`).join('')}</div></div>`).join('')},true);
+$('#play').onclick=toggle;
+$('#screen').addEventListener('click',toggle);
+$('#full').onclick=()=>{if(!vid)return;if(document.fullscreenElement)return document.exitFullscreen();if(vid.requestFullscreen)vid.requestFullscreen().catch(()=>{});else if(vid.webkitEnterFullscreen)vid.webkitEnterFullscreen()};
+const bar=$('#bar'),at=e=>{const r=bar.getBoundingClientRect();return(e.clientX-r.left)/r.width*total()};
+bar.addEventListener('pointerdown',e=>{dragging=true;bar.setPointerCapture(e.pointerId);seek(at(e),false)});
+bar.addEventListener('pointermove',e=>{if(dragging)seek(at(e),false)});
+['pointerup','pointercancel'].forEach(k=>bar.addEventListener(k,()=>{if(!dragging)return;dragging=false;const S=scenes(),n=S.find(s=>vid.currentTime<s.to_s-.02)||S[S.length-1];if(n&&n.id!==cur)pick(n.id,false)}));
+document.addEventListener('keydown',e=>{if(!F||e.target.closest('input,textarea,.sheet')||e.metaKey||e.ctrlKey||e.altKey)return;const d=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;
+ if(d&&e.target===bar){e.preventDefault();seek(vid.currentTime+d,true)}
+ else if(d&&!e.target.closest('.stepper')){const S=scenes(),i=S.findIndex(s=>s.id===cur),n=S[Math.max(0,Math.min(S.length-1,i+d))];if(n&&n.id!==cur)pick(n.id)}
+ else if(e.key===' '&&!e.target.closest('button,a')){e.preventDefault();toggle()}});
+$('#go').addEventListener('click',()=>{const g=$('#go'),a=g.dataset.do;if(g.disabled||!a)return;
+ if(a.startsWith('href:'))return J.go(a.slice(5));
+ if(want){flush();return}
+ J.once(g,async()=>{await J.post(path()+'/approve');if(vid)vid.pause();Kit.finish(g);await new Promise(y=>setTimeout(y,480));J.go(J.to.kit(id))},{at:g})});
+J.ready(()=>{$('#swap').insertAdjacentHTML('afterbegin',Art.glyph('swap'));$('#play').innerHTML=Art.glyph('play');load()});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Juju · The Arcana</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script>
+<style>
+/* The Arcana, round 2. Layout only; colours are kit tokens (the swatches are the film's ground colours, data measured
+   from the plate each look learned from). Every drawn thing comes from art.js; frames are the engine's own test stills.
+   Parts this room adds (missing from the kit): .looks (the dealt looks as a grid on the desk), .big (the focused card,
+   with a back), .ground (a look's ground colours), .scenes9 (the engine's scene types as frames), .field (a text box). */
+body{--focus-x:52%;--focus-y:42%}
+.arcana{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr) minmax(0,.9fr);gap:34px;align-items:start;padding-top:10px}
+.pick{display:grid;gap:14px;align-content:start}
+.pick .find{display:flex;gap:8px}
+.looks.hand{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;min-height:0;padding:0;justify-content:stretch;align-items:start}
+.looks .card .proof .num{white-space:nowrap}
+.pick .tabs .tab{padding:3px 10px 0;font-size:12.5px;letter-spacing:.06em}
+.looks.hand .card,.looks.hand .card:hover{margin:0;transform:none;width:100%;aspect-ratio:auto;padding:7px}
+.looks .card .t{font-size:13.5px;margin-top:7px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.looks .card .proof{font-size:12.5px;padding-top:6px} .looks .card .proof>span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.frames3{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px;margin-top:14px} .frames3 img{width:100%;height:170px;object-fit:cover;display:block;min-height:0;box-shadow:inset 0 0 0 2px #000}
+.looks .card.off{filter:saturate(.25) brightness(.7)}
+.looks .card.worn::before{background:linear-gradient(135deg,var(--need-hi),var(--need) 40%,var(--need-lo))}
+.looks .card .stamp{position:absolute;right:-10px;top:-10px;width:44px;height:44px}
+.ground{display:flex;height:8px;margin-top:6px} .ground i{flex:1}
+.big{perspective:1400px;justify-self:center;width:100%;max-width:360px}
+.big .face{position:relative;transition:transform .5s cubic-bezier(.2,.9,.3,1.05);transform-style:preserve-3d}
+.big.flipped .face{transform:rotateY(180deg)}
+.big .card{width:100%;aspect-ratio:5/7.4;cursor:pointer;backface-visibility:hidden}
+.big .card.rev{position:absolute;inset:0;transform:rotateY(180deg)}
+.big:not(.flipped) .card.rev,.big.flipped .card:not(.rev){visibility:hidden;transition:visibility 0s .25s}
+.big .card .t{font-size:24px;margin-top:16px}
+.big .card .ground{height:12px;margin-top:10px}
+.big .card .pic .lab{position:absolute;left:8px;bottom:8px;padding:5px 8px 3px;background:var(--a-deep);color:var(--ash)}
+.big .card.off .pic{opacity:.45}
+.big .card .stamp{position:absolute;right:-16px;top:-16px;width:70px;height:70px}
+.big .card.worn::before{background:linear-gradient(135deg,var(--need-hi),var(--need) 40%,var(--need-lo))}
+.rev .scenes3{display:grid;gap:8px;margin-top:10px}
+.rev .scenes3 .sc{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:center}
+.rev .scenes3 .sc img,.rev .scenes3 .sc .plate{width:96px;aspect-ratio:16/9;object-fit:cover;display:block;min-height:0}
+.rev .nofr{width:96px;display:grid;place-items:center} .rev .nofr .pip{width:22px;height:22px}
+.rev .scenes3 .sc b{font:600 15px/1.2 "Spectral SC",serif}
+.rev .scenes3 .sc.struck b{text-decoration:line-through;text-decoration-color:var(--stop);color:var(--smoke)}
+.facts{display:grid;gap:16px;align-content:start}
+.facts .fig{font-size:44px} .figbtn{display:block;min-height:48px}
+.facts .acts{display:flex;flex-wrap:wrap;gap:8px}
+.facts .from{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:center;text-decoration:none;color:inherit;min-height:44px}
+.facts .from img{width:120px;aspect-ratio:16/9;object-fit:cover;display:block;box-shadow:inset 0 0 0 2px #000}
+.facts .from .name{font-size:15.5px;display:block} .facts .from .num{display:block;margin-top:4px}
+.facts .from .num{color:var(--work)}
+.field{width:100%;min-height:52px;padding:12px 16px;border:0;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line);color:var(--bone);font:400 16px/1.45 "Lato",sans-serif;border-radius:0}
+.field:focus{outline:none;box-shadow:inset 0 0 0 2px var(--act)}
+.sheet .rows{margin-top:14px}
+.empty{display:grid;gap:22px;justify-items:start;padding-top:8px;grid-column:1/-1}
+.scenes9{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:10px;width:100%}
+.scenes9 button{position:relative;padding:0;border:0;cursor:pointer;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line);aspect-ratio:9/16;overflow:hidden}
+.scenes9 button img{width:100%;height:100%;object-fit:cover;display:block;opacity:.9;transition:transform .3s}
+.scenes9 button:hover img{transform:scale(1.06)}
+.empty .big-say{font:600 30px/1.1 "Spectral SC",serif}
+.reading .card .pic{display:grid;place-items:center}
+@media (max-width:760px){
+  .arcana{grid-template-columns:1fr;gap:16px;padding-top:4px}
+  .big{display:none}
+  .looks.hand{display:flex;grid-template-columns:none;gap:12px;padding:20px 16px 8px;margin:0 -16px}
+  .looks.hand .card,.looks.hand .card:hover{flex:0 0 64%;padding:10px}
+  .looks .card .t{font-size:17px}
+  .looks .card .ground{height:10px}
+  .facts .fig{font-size:34px}
+  .empty{justify-items:stretch} .btn.only-phone{display:inline-flex!important}
+  .scenes9{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .scenes9 button{aspect-ratio:3/4}
+  .empty .big-say{font-size:24px}
+}
+</style></head>
+<body data-skin="nocturne" data-room="arcana" data-door="cauldron" data-title="The Arcana" data-channel="Library of Tehuti" data-chan-state="need" data-back="cauldron.html" data-back-label="Cauldron" data-tank="asleep" data-who="A">
+<main>
+ <div class="arcana" id="room">
+  <div class="pick" id="pick">
+   <div class="tabs" data-tabs data-scroll id="groups"><button class="tab" aria-selected="true" data-g="All" data-u="u3">All</button><button class="tab" data-g="Maps" data-u="u3">Maps</button><button class="tab" data-g="Numbers" data-u="u3">Numbers</button><button class="tab" data-g="Painted" data-u="u3">Painted</button><button class="tab" data-g="Space" data-u="u3">Space</button><button class="tab" data-g="Words" data-u="u3">Words</button></div>
+   <div class="looks hand" data-pick data-scroll id="looks"></div>
+  </div>
+  <div class="big" id="big"></div>
+  <div class="facts" id="facts"></div>
+ </div>
+</main>
+<div data-tools><button class="chip only-phone" data-open="sh-all" data-u="u5" aria-label="All looks"><span data-art="glyph" data-name="search"></span><span class="lbl">All looks</span></button><button class="chip only-desk" data-open="sh-video" data-u="u14" aria-label="From a video"><span data-art="glyph" data-name="plus"></span><span class="lbl">From a video</span></button></div>
+<footer class="deck"><div class="aside" id="aside"></div><button class="primary" id="wear" data-u="u9" disabled>Wear this look</button></footer>
+
+<section class="sheet" id="sh-all" hidden><h3>All looks</h3><div class="acts"><button class="btn" id="all-video" data-u="u14"><span data-art="glyph" data-name="plus"></span>From a video</button></div>
+ <input class="field" id="q" placeholder="Search looks" aria-label="Search looks" data-u="u4" style="margin-top:12px">
+ <div class="rows" id="all-rows"></div></section>
+
+<section class="sheet" id="sh-video" hidden><h3>From a video</h3>
+ <input class="field" id="link" placeholder="A YouTube link" aria-label="A YouTube link" data-u="u15" style="margin-top:12px">
+ <div class="rows" id="link-row"></div><p class="say" id="link-say" hidden></p>
+ <div class="acts"><button class="btn need" id="read" data-u="u16" disabled>Read it</button></div></section>
+
+<section class="sheet" id="sh-keep" hidden><h3>Every new film</h3>
+ <div class="acts"><button class="btn need" id="keep" data-u="u13">Keep it for <span data-d>Library of Tehuti</span></button><button class="btn bare" data-close>Not now</button></div></section>
+
+<section class="sheet" id="sh-proof" hidden><h3>Proof</h3>
+ <div class="plate empty" style="margin-top:14px"><span data-art="plate" data-state="empty"></span><span class="says"><b>Not made yet</b></span></div></section>
+
+<section class="sheet" id="sh-scene" hidden><h3 id="sc-h">Scene</h3><img id="sc-img" src="../../runs/stage-y/rounds/3/still-021.66.jpg" alt="" style="width:100%;margin-top:14px;display:block;box-shadow:inset 0 0 0 2px #000"><p class="lab" style="margin-top:10px">Engine test</p></section>
+
+<section class="sheet" id="sh-price" hidden><h3>Estimate</h3><div class="rows" id="price-rows"></div>
+ <div class="acts"><a class="btn bare" href="tank.html?from=arcana" data-u="u26">Open the tank</a></div></section>
+<script>
+/* flow map: u2 swipe the deck (scroll handler on the phone, arrow keys on the desk), u22 Back to cauldron.html and u25 Back to the receipt (pact.html): the head back, set from ?from=, u27 Altar: the rail door to altar.html built by kit2.js */
+(()=>{
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const esc=t=>String(t).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+const LIB='../../../../context-repo/09-assets/library/',STG='../../runs/stage-y/rounds/3/';
+/* the renderer's nine scene types (crates/juju-stage/src/catalog.rs), each with the engine's own test still (runs/stage-y round 3) */
+const SC={layered_painting:['Layered painting','still-021.66.jpg'],document_page:['Document page','still-052.10.jpg'],map_theatre:['Map theatre','still-074.12.jpg'],lineage_tree:['Lineage tree','still-097.20.jpg'],
+ group_chat:['Group chat','still-115.63.jpg'],route_chart:['Route chart','still-133.00.jpg'],scale_flight:['Scale flight','still-147.62.jpg'],instrument_view:['Instrument view','still-164.79.jpg'],archive_footage:['Archive footage','still-181.54.jpg'],
+ quote_canvas:['Quote canvas',null]};
+/* candidate looks, used only in the example states: no look file exists today (looks/ is empty).
+   learned: [plate, channel, title, multiple, views]; ground: five colours measured from that plate. */
+const LOOKS=[
+ {id:'museum',name:'Museum Night',g:'Painted',learned:['070-vvLRZOHdNqA-outlier.jpg','Bygone Philosophy','The Art of Not Trying','8.41x','349,000 views','vvLRZOHdNqA'],ground:['#123A2A','#DAD3A5','#697863','#474D59','#4B2526'],scenes:['layered_painting','document_page','archive_footage'],sound:'Full voice'},
+ {id:'atlas',name:'Living Atlas',g:'Maps',learned:['042-LqvlFsTaZgE-outlier.jpg','Mapocalypse','I Simulated Yellowstone Erupting, Day by Day','8.00x','392,000 views','LqvlFsTaZgE'],ground:['#CDAC65','#312518','#725F3D','#3F2F1E','#51361E'],scenes:['map_theatre','route_chart','archive_footage'],sound:'Full voice'},
+ {id:'underworld',name:'Underworld Walk',g:'Painted',learned:['072-jP0D3gcqe5Q-outlier.jpg','Jade Rabbit Hole','The ENTIRE Chinese Hell Walkthrough in 10 Minutes','6.4x','1,100,000 views','jP0D3gcqe5Q'],ground:['#07090B','#89664A','#422117','#100C0C','#03070A'],scenes:['layered_painting','route_chart','document_page'],sound:'Full voice'},
+ {id:'blood',name:'Bloodline',g:'Maps',learned:['035-umstrUXqmRg-packaging.jpg','GeoPanda','Human Evolution: 2 Million Years of Human Species on One Map','27.78x','250,000 views','umstrUXqmRg'],ground:['#0A1215','#1B2227','#9A938D','#081219','#060B0F'],scenes:['map_theatre','lineage_tree'],sound:'Full voice'},
+ {id:'gauge',name:'Gauge Room',g:'Numbers',learned:['076-0Ei7uVIEfQg-outlier.jpg','Δ Delta',"What If the Human Population Kept Growing and Couldn't Stop?",'48.47x','921,000 views','0Ei7uVIEfQg'],ground:['#2F2D36','#020203','#9E896D','#0A0B11','#010101'],scenes:['instrument_view','scale_flight'],sound:'Full voice'},
+ {id:'scale',name:'True Scale',g:'Space',learned:['088-xU60JQSjxLc-outlier.jpg','Universe Dimensions','What TON 618 Would Look Like at Different Distances','81.3x','10,000,000 views','xU60JQSjxLc'],ground:['#1E332B','#4D3616','#977A29','#EAB359','#FAECCE'],scenes:['scale_flight','route_chart'],sound:'Silent'},
+ {id:'wire',name:'Wire Room',g:'Words',learned:['091-51ZathOeW2E-outlier.jpg','Server History','IF WW2 WAS A DISCORD CHAT (HISTORICALLY ACCURATE)','10.88x','3,100,000 views','51ZathOeW2E'],ground:['#1A191E','#17191D','#837B81','#391922','#1E1217'],scenes:['group_chat','document_page','archive_footage'],sound:'Full voice'},
+ {id:'last',name:'Last Light',g:'Words',learned:['075-KJg1-FCweWI-outlier.jpg','The Opening',"What you'll see when you die",'8.19x','2,800,000 views','KJg1-FCweWI'],ground:['#11151A','#342E2B','#6B5242','#B38E6A','#ECDCB2'],scenes:['layered_painting','document_page','quote_canvas'],sound:'Full voice'}];
+const raw=(Kit.state||'').toLowerCase().replace(/[\s-]+/g,'_'),from=Kit.param('from')||'cauldron';
+/* who sent the person here decides Back */
+if(from==='pact'){document.body.dataset.back='pact.html';document.body.dataset.backLabel='Pact'}
+if(from==='conjuring'){document.body.dataset.back='conjuring.html';document.body.dataset.backLabel='Conjuring'}
+
+/* today: no look files exist. Every other state is an example built from the candidate looks above. */
+const A={looks:[],ready:{},focus:0,worn:null,saved:null,flipped:false,group:'All',q:'',reading:null,offline:false,making:from==='conjuring',off:{},proofMaking:false};
+const allReady=()=>{A.looks=LOOKS.slice();A.ready={museum:1,atlas:1,underworld:1,blood:1,gauge:1,scale:1,wire:1,last:0}};
+const ST={
+ empty:()=>{},
+ at_rest:()=>{allReady()},
+ ready_look:()=>{allReady()},
+ being_built:()=>{allReady();A.focus=7},
+ worn:()=>{allReady();A.worn='museum'},
+ sound_mismatch:()=>{allReady();A.focus=5},
+ saved_for_channel:()=>{allReady();A.saved='atlas';A.focus=1;A.worn='atlas'},
+ proof_missing:()=>{allReady();A.ready.gauge=0;A.noproof='gauge';A.focus=4},
+ proof_making:()=>{allReady();A.ready.blood=0;A.proofMaking='blood';A.focus=3},
+ reading_video:()=>{allReady();A.reading={st:'reading',n:2,name:'galactic empires',plate:null}},
+ reading_passed:()=>{allReady();A.reading={st:'passed',name:'galactic empires'}},
+ reading_failed:()=>{allReady();A.reading={st:'failed',name:'galactic empires',got:1}},
+ nothing_found:()=>{allReady();A.q='zzz';setTimeout(()=>{$('#q').value='zzz';allRows();Kit.sheet('sh-all').open()},60)},
+ offline:()=>{allReady();A.offline=true},
+ none_ready:()=>{A.looks=LOOKS.slice();A.ready={}},
+ for_the_film_being_made:()=>{allReady();A.making=true},
+ scene_turned_off:()=>{allReady();A.off={group_chat:1};A.focus=6;A.flipped=true}};
+(ST[raw]||ST.empty)();
+if(A.making){document.body.dataset.back='conjuring.html';document.body.dataset.backLabel='Conjuring'}
+
+const shown=()=>A.looks.filter(l=>(A.group==='All'||l.g===A.group));
+const cur=()=>A.looks[A.focus];
+const isReady=l=>!!A.ready[l.id]&&!l.scenes.some(s=>!SC[s][1]);
+const scenesOk=l=>l.scenes.filter(s=>SC[s][1]&&!A.off[s]).length;
+const ground=g=>`<span class="ground">${g.map(c=>`<i style="background:${c}"></i>`).join('')}</span>`;
+function cardHTML(l,i,big){const r=isReady(l),w=A.worn===l.id;
+ return `<button class="card${r?'':' off'}${w?' worn':''}${!big&&i===A.focus?' on':''}" data-card data-i="${i}" data-u="${big?'u6':'u1'}" aria-label="${esc(l.name)}"><span class="pic"><img src="${LIB+l.learned[0]}" alt="">${big?'<span class="lab">Learned from</span>':''}</span>${ground(l.ground)}<span class="t">${esc(l.name)}</span>${big?`<span class="frames3">${l.scenes.filter(sc=>SC[sc][1]).map(sc=>`<img src="${STG+SC[sc][1]}" alt="">`).join('')}</span>`:''}<span class="proof"><span data-d>${esc(l.learned[1])}</span><span class="num" data-d>${r?l.learned[3]:scenesOk(l)+' / '+l.scenes.length}</span></span>${w?'<span class="stamp">'+Art.seal({state:'pressed',emblem:'arcana'})+'</span>':''}</button>`}
+function backHTML(l){return `<div class="card rev" data-u="u6"><span class="t">${esc(l.name)}</span><div class="scenes3">${l.scenes.map(s=>`<div class="sc${A.off[s]?' struck':''}">${SC[s][1]?`<img src="${STG+SC[s][1]}" alt="">`:`<span class="nofr">${Art.pip({state:'none'})}</span>`}<b>${SC[s][0]}</b></div>`).join('')}</div><span class="proof"><span>Scenes</span><span class="num" data-d>${scenesOk(l)} / ${l.scenes.length}</span></span></div>`}
+
+function render(){
+ const room=$('#room'),L=A.looks;
+ /* today: no looks. The engine's nine scene types are what a look is built from. */
+ if(!L.length){room.innerHTML=`<div class="empty"><span class="big-say">No looks yet</span><div class="scenes9" data-scroll>${Object.keys(SC).filter(k=>SC[k][1]).map(k=>`<button data-sc="${k}" aria-label="${SC[k][0]}"><img src="${STG+SC[k][1]}" alt=""></button>`).join('')}</div><button class="btn only-phone" data-open="sh-video" data-u="u14">${Art.glyph('plus')}From a video</button></div>`;
+  $$('[data-sc]').forEach(b=>b.onclick=()=>{const k=b.dataset.sc;$('#sc-h').textContent=SC[k][0];$('#sc-img').src=STG+SC[k][1];Kit.sheet('sh-scene').open()});
+  $('#aside').innerHTML='';wearBtn();return}
+ const sh=shown();if(!sh.includes(cur()))A.focus=L.indexOf(sh[0]);
+ let cards=sh.map(l=>cardHTML(l,L.indexOf(l),false)).join('');
+ if(A.reading)cards+=readingCard();
+ $('#looks').innerHTML=cards;
+ const l=cur();
+ $('#big').className='big'+(A.flipped?' flipped':'');
+ $('#big').innerHTML=`<div class="face">${cardHTML(l,A.focus,true)}${backHTML(l)}</div>`;
+ $$('#big .card').forEach(c=>c.onclick=()=>{A.flipped=!A.flipped;$('#big').classList.toggle('flipped',A.flipped)});
+ /* facts beside the card: what it costs, whether it can be made today, where it came from */
+ const r=isReady(l),mism=l.sound!=='Full voice';
+ let f=`<button class="figbtn" style="all:unset;cursor:pointer;display:block;min-height:48px" data-u="u20" data-open="sh-price"><span class="fig" data-d>$1.24</span></button>`;
+ f+=`<div class="status"><span>${Art.pip({state:A.worn===l.id?'done':r?'done':A.proofMaking===l.id?'now':'none'})}</span>${A.worn===l.id&&!A.making?'This film only':r?'Ready':A.proofMaking===l.id?'Proof next':A.noproof===l.id?'No proof':'Being built'}</div>`;
+ if(mism&&r)f+=`<div class="say need">Made for ${l.sound}</div><a class="btn need" href="pact.html?from=arcana&at=sound&look=${l.id}" data-u="u10" style="justify-self:start">Change the sound</a>`;
+ if(!r&&A.ready&&Object.keys(A.ready).some(k=>A.ready[k])){const near=A.looks.find(x=>x.g===l.g&&isReady(x)&&x!==l)||A.looks.find(x=>isReady(x));if(near)f+=`<button class="btn" id="near" data-i="${A.looks.indexOf(near)}">${esc(near.name)}</button>`}
+ f+=`<a class="from" href="https://www.youtube.com/watch?v=${l.learned[5]}" target="_blank" rel="noopener" data-u="u8"><img src="${LIB+l.learned[0]}" alt=""><span><b class="name" data-d>${esc(l.learned[2])}</b><span class="num" data-d>${l.learned[3]} · ${l.learned[4]}</span></span></a>`;
+ f+=`<div class="acts"><button class="btn" id="proof" data-u="u7"${r?'':' disabled'}><span>${Art.glyph('play')}</span>Watch <span data-d>60s</span></button></div>`;
+ if(A.worn===l.id&&!A.making&&A.saved!==l.id)f+=`<div class="acts"><button class="btn bare" data-open="sh-keep" data-u="u12">Keep for all</button></div>`;
+ if(A.saved)f+=`<div class="acts"><span class="pill need" data-d>${esc((A.looks.find(x=>x.id===A.saved)||{}).name||'')}</span><button class="btn bare" id="putback" data-u="u11">Put back</button></div>`;
+ $('#facts').innerHTML=f;
+ const nb=$('#near');if(nb)nb.onclick=()=>{A.focus=+nb.dataset.i;A.flipped=false;render()};
+ const fl=$('#flip');if(fl)fl.onclick=()=>{A.flipped=!A.flipped;$('#big').classList.toggle('flipped',A.flipped);if(matchMedia('(max-width:760px)').matches){const c=$(`#looks .card[data-i="${A.focus}"]`);if(c){c.outerHTML=A.flipped?backHTML(l).replace('class="card rev"',`class="card on" data-i="${A.focus}" data-card`):cardHTML(l,A.focus,false)}}};
+ $('#proof').onclick=()=>Kit.sheet('sh-proof').open();
+ const pb=$('#putback');if(pb)pb.onclick=()=>{const was=A.saved;A.saved=null;render();undoLine(()=>{A.saved=was;render()},7,'Put back')};
+ /* the deck */
+ let a='';
+  if(A.offline)a+=`<span class="status"><span>${Art.pip({state:'none'})}</span>Offline</span>`;
+ if(A.making)a+=`<a class="btn" href="conjuring.html?from=arcana" data-u="u24">Back to the making</a>`;
+ if(!Object.values(A.ready).some(Boolean))a+=`<span class="status"><span>${Art.pip({state:'none'})}</span>None ready</span>`;
+ $('#aside').innerHTML=a;
+ wearBtn();
+ const c=$(`#looks .card[data-i="${A.focus}"]`);if(c&&document.querySelector('.room')&&matchMedia('(max-width:760px)').matches&&!render.scrolled){render.scrolled=1;const h=$('#looks');h.scrollLeft=c.offsetLeft-(h.clientWidth-c.offsetWidth)/2}
+}
+function wearBtn(){const w=$('#wear'),l=cur(),r=l&&isReady(l);
+ if(A.making){w.textContent='Wear on this film';w.dataset.u='u23';w.disabled=!r;w.dataset.go=r?'conjuring.html?from=arcana&look='+l.id:'';return}
+ if(A.worn&&l&&A.worn===l.id){w.textContent='Review the pact';w.dataset.u='u21';w.disabled=false;w.dataset.go='pact.html?from=arcana';return}
+ w.textContent='Wear this look';w.dataset.u='u9';w.disabled=!r;w.dataset.go=''}
+function readingCard(){const R=A.reading;const st=R.st;const lab=st==='reading'?`<span data-d>${R.n} / 5</span>`:st==='guess'?'Guessing':st==='passed'?'New':`<span data-d>${R.got} / 3</span>`;
+ return `<div class="card reading${st==='failed'?' off':''}" id="rcard"><span class="pic"><span class="plate ${st==='failed'?'failed':st==='passed'?'':'working'}">${Art.plate({state:st==='failed'?'failed':st==='passed'?'empty':'working'})}</span></span><span class="t" data-d>${esc(R.name)}</span><span class="proof"><span class="status"><span>${Art.pip({state:st==='failed'?'failed':st==='passed'?'next':'now'})}</span>${lab}</span></span>
+  <span class="acts" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${st==='reading'||st==='guess'?'<button class="btn bare" id="stopread" data-u="u17">Stop</button>':st==='passed'?'<button class="btn need" id="addlook" data-u="u18">Add this look</button><button class="btn bare" id="throw" data-u="u19">Throw it away</button>':'<button class="btn" data-open="sh-video">Try another link</button>'}</span></div>`}
+
+/* pick a card, swipe the deck, arrow keys on the desk */
+$('#looks').addEventListener('click',e=>{const c=e.target.closest('.card[data-i]');if(c){A.focus=+c.dataset.i;A.flipped=false;render();const b=$('#big .card');b&&Kit.press(b)}
+ if(e.target.closest('#stopread')){clearInterval(readT);A.reading=null;render();Kit.toast('Stopped. Nothing charged.')}
+ if(e.target.closest('#addlook')){const n={id:'new'+Date.now(),name:'New look',g:'Maps',learned:LOOKS[1].learned,ground:LOOKS[1].ground,scenes:['map_theatre','route_chart'],sound:'Full voice'};A.looks.push(n);A.ready[n.id]=1;A.reading=null;A.focus=A.looks.length-1;render();Kit.toast('The look joins the list')}
+ if(e.target.closest('#throw')){const was=A.reading;A.reading=null;render();undoLine(()=>{A.reading=was;render()},7,'Thrown away')}});
+let swT=null,swiped=false;['pointerdown','touchstart','wheel'].forEach(k=>document.addEventListener(k,e=>{if(e.target.closest&&e.target.closest('#looks'))swiped=true},{passive:true}));$('#looks').addEventListener('scroll',()=>{if(!swiped||!matchMedia('(max-width:760px)').matches)return;clearTimeout(swT);swT=setTimeout(()=>{const box=$('#looks').getBoundingClientRect(),mid=box.left+box.width/2;let best=null,bd=1e9;$$('#looks .card[data-i]').forEach(c=>{const r=c.getBoundingClientRect(),d=Math.abs(r.left+r.width/2-mid);if(d<bd){bd=d;best=c}});if(best&&+best.dataset.i!==A.focus){A.focus=+best.dataset.i;A.flipped=false;const keep=$('#looks').scrollLeft;render();$('#looks').scrollLeft=keep}},140)},{passive:true});
+document.addEventListener('keydown',e=>{if(!A.looks.length||document.querySelector('.sheet:not([hidden])')||/INPUT|TEXTAREA/.test(document.activeElement.tagName))return;const sh=shown(),i=sh.indexOf(cur());if(e.key==='ArrowRight'&&i<sh.length-1){A.focus=A.looks.indexOf(sh[i+1]);A.flipped=false;render()}if(e.key==='ArrowLeft'&&i>0){A.focus=A.looks.indexOf(sh[i-1]);A.flipped=false;render()}});
+$('#groups').addEventListener('click',e=>{const t=e.target.closest('.tab');if(!t)return;A.group=t.dataset.g;const l=shown();if(l.length)A.focus=A.looks.indexOf(l[0]);A.flipped=false;render();Kit.deal($('#looks'))});
+
+/* wear it: this film only. The button becomes Review the pact. */
+$('#wear').addEventListener('click',()=>{const w=$('#wear');if(w.disabled)return;if(w.dataset.go){location.href=w.dataset.go;return}
+ A.worn=cur().id;store.set('juju.look',{id:A.worn,name:cur().name});A.flipped=false;render();Kit.finish(w);const s=$('#big .stamp');if(s)Kit.seal(s,'pressed',{emblem:'arcana'})});
+$('#keep').onclick=()=>{A.saved=A.worn;Kit.sheet('sh-keep').close();render();Kit.toast('Kept for every new film')};
+
+/* all looks, and search */
+function allRows(){const q=$('#q').value.trim().toLowerCase();const R=A.looks.filter(l=>!q||l.name.toLowerCase().includes(q)||l.learned[1].toLowerCase().includes(q));
+ $('#all-rows').innerHTML=R.length?R.map(l=>`<button class="row${isReady(l)?'':' off'}" data-i="${A.looks.indexOf(l)}"><span class="tile"><img src="${LIB+l.learned[0]}" alt="" style="width:100%;height:100%;object-fit:cover"></span><b class="name" data-d>${esc(l.name)}</b><span class="val pill ${isReady(l)?'work':'dim'}">${isReady(l)?'ready':'building'}</span></button>`).join(''):`<p class="say">No such look <button class="btn bare" id="clearq">Clear</button></p>`;
+ const cq=$('#clearq');if(cq)cq.onclick=()=>{$('#q').value='';allRows()}}
+$('#q').addEventListener('input',allRows);
+$('#all-video').onclick=()=>{Kit.sheet('sh-all').close();setTimeout(()=>Kit.sheet('sh-video').open(),230)};
+document.addEventListener('click',e=>{if(e.target.closest('[data-open="sh-all"]'))allRows()});
+$('#all-rows').addEventListener('click',e=>{const r=e.target.closest('[data-i]');if(!r)return;A.focus=+r.dataset.i;A.group='All';$$('#groups .tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.g==='All'));Kit.sheet('sh-all').close();render()});
+
+/* from a video: paste, read 5 films, guess 3 unseen; a person adds it, code never does */
+const OUTL={'J0wWNytEXS4':['galactic empires don\'t actually make sense','Atticus King']};LOOKS.forEach(l=>OUTL[l.learned[5]]=[l.learned[2],l.learned[1]]);
+let readT=null;
+$('#link').addEventListener('input',e=>{const m=e.target.value.match(/(?:youtu\.be\/|v=)([\w-]{11})/);const say=$('#link-say');say.hidden=true;$('#read').disabled=!m||A.offline;$('#link-row').innerHTML='';
+ if(A.offline&&m){say.hidden=false;say.className='say need';say.textContent='Needs a connection';return}
+ if(m){const o=OUTL[m[1]];$('#link-row').innerHTML=`<div class="row" style="cursor:default"><span class="tile">${Art.glyph('play')}</span><b class="name" data-d>${esc(o?o[0]:'youtu.be/'+m[1])}</b><span class="val num" data-d>${esc(o?o[1]:'')}</span></div>`}});
+$('#read').onclick=()=>{const m=$('#link').value.match(/(?:youtu\.be\/|v=)([\w-]{11})/);const o=OUTL[m[1]];if(!A.looks.length){A.looks=[];}
+ A.reading={st:'reading',n:1,name:o?o[0]:'youtu.be/'+m[1]};Kit.sheet('sh-video').close();if(!A.looks.length){A.looks=[];render.noLooks=true}
+ if(A.looks.length)render();else{allReadyEmpty()}
+ readT=setInterval(()=>{const R=A.reading;if(!R){clearInterval(readT);return}if(R.st==='reading'){R.n++;if(R.n>5){R.st='guess'}}else if(R.st==='guess'){R.st='passed';clearInterval(readT)}render()},900)};
+function allReadyEmpty(){/* the list was empty: the reading card is the only card */A.looks=[];A.focus=0;const rm=$('#room');rm.innerHTML='<div class="pick"><div class="looks hand" id="looks" data-scroll></div></div>';$('#looks').innerHTML=readingCard()}
+
+/* price: no paid pictures in any look, so the price does not move */
+document.addEventListener('click',e=>{if(e.target.closest('[data-open="sh-price"]'))$('#price-rows').innerHTML=[['tongue','Voice','$0.81','$0.81'],['elder','Words','$0.43','$0.43'],['reliquary','Pictures','$0.00','$0.00']].map(r=>`<div class="row" style="cursor:default"><span class="tile">${Art.emblem(r[0])}</span><b class="name">${r[1]}</b><span class="val num" data-d>${r[2]} → ${r[3]}</span></div>`).join('')});
+function undoLine(fn,secs,label){const Ad=$('#aside');const u=document.createElement('span');u.className='status';u.innerHTML=`${label} <button class="btn need">Undo <span class="num">${secs}</span></button>`;Ad.prepend(u);let n=secs;const t=setInterval(()=>{n--;const x=u.querySelector('.num');if(x)x.textContent=n;if(n<=0){clearInterval(t);u.remove()}},1000);u.querySelector('button').onclick=()=>{clearInterval(t);u.remove();fn()}}
+if(A.making){document.body.dataset.title='The Arcana'}
+render();
+document.addEventListener('DOMContentLoaded',()=>{if(A.making){const p=document.querySelector('.head .chan');if(p)p.lastChild.textContent='The ENTIRE Journey After Death in 52 Minutes'}render()});
+
+/* a sheet is modal: the room behind it is hidden from reading while it is open */
+document.addEventListener('DOMContentLoaded',()=>{const room=document.querySelector('.room');if(!room)return;const behind=()=>[...room.querySelectorAll(':scope>.rail,.main>.head,.main>main')];const sync=()=>{const open=[...document.querySelectorAll('.sheet')].some(s=>!s.hidden&&!s.classList.contains('closing'));behind().forEach(e=>{if(open)e.setAttribute('aria-hidden','true');else e.removeAttribute('aria-hidden')})};new MutationObserver(sync).observe(document.body,{subtree:true,attributes:true,attributeFilter:['hidden','class']});sync()});
+
+/* ?selftest=1 presses every control that stays in this room once, so a render shows any script error */
+if(Kit.param('selftest'))document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{document.addEventListener('click',e=>{const a=e.target.closest('a[href]');if(a)e.preventDefault()},true);
+ const skip=new Set(["u10", "u13", "u14", "u15", "u21", "u22", "u23", "u24", "u25", "u26", "u27", "u34"]);let n=0;[...document.querySelectorAll('[data-u]')].forEach(el=>{if(skip.has(el.dataset.u)||el.type==='file')return;el.click();n++});
+ document.querySelectorAll('.sheet:not([hidden])').forEach(s=>Kit.sheet(s.id).close());console.log('selftest pressed',n)},60));
+})();
+</script>
+</body></html>

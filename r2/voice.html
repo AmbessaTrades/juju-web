@@ -1,0 +1,290 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Juju · The Voice</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script>
+<style>
+/* voice room layout. Parts the kit lacks, kept here: .field (text box), .picker (a lit choice among a few buttons), .holdbtn (hold to confirm),
+   .line (the spoken line, word by word, with its rests drawn as dotted gaps), .meter (recording level). */
+body{--focus-x:30%;--focus-y:38%}
+.field{width:100%;min-height:52px;padding:12px 16px;border:0;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line);color:var(--bone);font:400 16px/1.4 "Lato",sans-serif;resize:vertical}
+.field::placeholder{color:var(--smoke)} .field:focus{outline:none;box-shadow:inset 0 0 0 2px var(--act)}
+.picker{display:flex;gap:6px;flex-wrap:wrap}
+.picker .btn{min-height:44px;padding:0 14px 3px}
+.picker .btn[aria-pressed=true]{color:var(--on-act);background:linear-gradient(180deg,var(--act-hi) -60%,var(--act) 60%,var(--act-lo))} .picker .btn[aria-pressed=true]::after{box-shadow:none}
+.holdbtn{overflow:hidden} .holdbtn::before{content:"";position:absolute;left:0;top:0;bottom:0;width:calc(var(--p,0)*100%);background:color-mix(in oklab,var(--stop) 35%,transparent);pointer-events:none}
+.vo{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:34px;align-items:start}
+.who-panel{display:grid;gap:14px;justify-items:start}
+.who-panel .niche{width:100%;height:230px;--arch:120px;padding:0 24px 8px}
+.who-panel .niche .art.voice{width:min(320px,100%);height:auto}
+.who-panel .h2{overflow-wrap:anywhere}
+.who-panel .acts,.acts{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.who-panel .play .glyph{width:22px;height:22px}
+.speaks{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.second{width:100%;display:grid;gap:10px;padding-top:6px}
+.right{display:grid;gap:18px;align-content:start}
+.line{font:400 30px/1.55 "Spectral",serif;color:var(--bone);display:flex;flex-wrap:wrap;column-gap:.32em;row-gap:4px;align-items:baseline}
+.line .w{border-bottom:3px solid var(--line);transition:border-color .12s,color .12s}
+.line .w.lit{border-bottom-color:var(--act);color:var(--bone)} .line .w.now{color:var(--act-hi);border-bottom-color:var(--act)}
+.line .gap{display:inline-flex;align-items:center;gap:4px;font:600 12.5px/1 "JetBrains Mono",monospace;color:var(--need);padding:0 2px}
+.line .gap::before,.line .gap::after{content:"";width:calc(var(--g,1)*14px);border-top:2px dotted var(--need)}
+.line .gap.turn{color:var(--ash)} .line .gap.turn::before,.line .gap.turn::after{border-color:var(--ash)}
+.line .gap.lit{color:var(--act)}
+.line.empty{font-size:20px;color:var(--smoke)}
+.from{font-size:14px;color:var(--ash)}
+.dials{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px 22px;align-items:center}
+.dials .lab{white-space:nowrap} .dials .stepper,.dials>div{justify-self:start}
+.lists{display:grid;gap:12px}
+.empty-line{padding:14px 2px;color:var(--ash);font-size:15px}
+.row .keep{min-height:44px;padding:0 12px 3px}
+.ways .row{min-height:64px}
+.slots{display:grid;gap:8px;margin-top:12px}
+.meter{display:flex;align-items:flex-end;gap:3px;height:40px}
+.meter i{width:6px;background:var(--line);height:20%}
+.meter.on i{background:var(--work)}
+@media (max-width:760px){
+ .vo{grid-template-columns:1fr;gap:22px}
+ .who-panel{gap:10px} .who-panel .niche{height:128px;--arch:70px} .who-panel .niche .art.voice{width:180px} .speaks{gap:4px}
+ .line{font-size:23px}
+ .dials{grid-template-columns:1fr;gap:8px} body.tab-voices .speaks{display:none}
+}
+</style></head>
+<body data-skin="nocturne" data-room="voice" data-door="altar" data-title="The Voice" data-channel="Library of Tehuti" data-chan-state="need" data-back="vessel.html" data-back-label="Vessel" data-tank="asleep" data-who="A">
+<script>(()=>{const q=new URLSearchParams(location.search.replace(/\.html$/,'')),st=q.get('state')||'';let f=q.get('from')||'';
+ if(!f&&st==='for-this-film-only')f='pact';if(!f&&st==='from-a-stopped-film')f='conjuring';const b=document.body.dataset;
+ if(f==='pact'){b.back='pact.html';b.backLabel='Back to the receipt'}else if(f==='cauldron'){b.back='cauldron.html';b.backLabel='Back to the pot'}else if(f==='conjuring'){b.back='conjuring.html';b.backLabel='Back to the film'}})();</script>
+<main>
+ <div class="vo">
+  <section class="panel focus who-panel" data-frame="crest" aria-label="This channel's voice">
+   <div class="acts" style="width:100%;justify-content:space-between"><span class="pill" id="vstate">Asleep</span><span class="lab" id="door" data-d></span><span id="tag"></span></div>
+   <div class="niche" id="niche"><span id="horn"></span></div>
+   <h2 class="h2" id="vname">No voice</h2><p class="say" id="vsay" hidden></p>
+   <div class="acts"><button class="btn" id="play" data-u="u1"><span data-art="glyph" data-name="play"></span><span id="playw">Play</span></button><span id="wake"><a class="btn need" href="tank.html?from=voice" data-u="u34" aria-label="Wake the Tongue in the tank">Wake it</a></span><button class="btn icon" id="another" data-u="u2" aria-label="Read another line"><span data-art="glyph" data-name="swap"></span></button></div>
+   <div class="acts" id="opentank" hidden><a class="btn" href="tank.html?from=voice" data-u="u35">Open the tank</a></div>
+   <div class="speaks"><a class="btn bare" href="vessel.html?tab=voice" data-u="u10" aria-label="How it speaks"><span data-art="emblem" data-name="voice"></span><span id="speaks">Elder brother</span></a><a class="btn bare" href="vessel.html?tab=story" data-u="u11">New way</a><button class="btn bare holdbtn" id="del" hidden data-u="u32" aria-label="Hold to delete this voice">Delete</button></div>
+   <div class="second" id="second" hidden><div class="rule"><i></i></div><span class="lab">Second</span><div class="acts"><button class="btn" id="play2">Play</button><button class="btn" id="use2" aria-label="Use for the second side">Use</button><span class="small" id="v2name" data-d></span></div></div>
+   <button class="btn" id="add2" hidden data-u="u12">Add a second speaker</button>
+  </section>
+
+  <section class="right">
+   <div class="tabs" data-tabs data-scroll><button class="tab" aria-selected="true" data-panel="p-line">Line</button><button class="tab" data-panel="p-voices" id="tvoices">Voices</button></div>
+   <div id="p-line" class="right">
+    <div class="from" id="from" data-d hidden></div>
+    <div id="lineview" data-d></div>
+    <textarea class="field" id="say" rows="3" maxlength="300" placeholder="It should say…" aria-label="It should say" data-u="u3"></textarea>
+    <div class="acts" id="saybar"><button class="btn" id="setline">Set line</button><button class="btn bare" id="editline" hidden>Change</button><span class="small" id="pace" hidden></span></div>
+    <div class="rule"><i></i></div>
+    <div class="dials">
+     <span class="lab"></span><div class="stepper" id="speed" data-min="0.5" data-max="1.5" data-step="0.05" data-u="u13"><output data-v="1">1</output></div>
+     <span class="lab"></span><div><button class="btn" data-open="rests" id="restsbtn" data-u="u14">Rests</button></div>
+    </div>
+   </div>
+   <div id="p-voices" class="lists" hidden>
+    <input class="field" id="find" type="search" placeholder="Find a voice" aria-label="Find a voice" data-u="u17">
+    <div class="picker" id="lists" data-u="u18"><button class="btn" aria-pressed="true" data-l="ours">Ours</button><button class="btn" data-l="ready">Ready</button><button class="btn" data-l="used" aria-label="Used before">Used</button><button class="btn" data-l="kept">Kept</button></div>
+    <div class="picker" id="filters" hidden data-u="u19"><button class="btn">Language</button><button class="btn">Sex</button><button class="btn">Age</button><button class="btn">Style</button></div>
+    <div class="rows" id="vlist"></div>
+    <div><button class="btn" data-open="newvoice" data-u="u21"><span data-art="glyph" data-name="plus"></span>New</button></div>
+   </div>
+  </section>
+ </div>
+</main>
+<footer class="deck"><div class="aside"><span id="statusw" hidden></span><button class="btn" id="keepch" hidden data-u="u8" aria-label="Keep the channel's voice">Keep channel voice</button></div><button class="primary" id="go" data-u="u4" disabled>Use this voice</button></footer>
+
+<section class="sheet" id="rests" hidden><h3>Rests</h3><div class="dials" style="margin-top:14px">
+     <span class="lab">After a heavy number</span><div class="picker" data-rest="heavy" data-u="u14"><button class="btn">Short</button><button class="btn" aria-pressed="true">Normal</button><button class="btn">Long</button></div>
+     <span class="lab">At a turn</span><div class="picker" data-rest="turn" data-u="u15"><button class="btn">Short</button><button class="btn" aria-pressed="true">Normal</button><button class="btn">Long</button></div>
+     <span class="lab">Around the product</span><div class="picker" data-rest="product" data-u="u16"><button class="btn">Short</button><button class="btn" aria-pressed="true">Normal</button><button class="btn">Long</button></div>
+</div></section>
+
+<section class="sheet" id="sayedit" hidden><h3>It should say</h3><textarea class="field" id="say2" rows="4" maxlength="300" style="margin-top:12px" aria-label="It should say"></textarea><div class="acts"><button class="btn need" id="setline2" data-close>Set the line</button></div></section>
+
+<section class="sheet" id="newvoice" hidden><h3>New voice</h3>
+ <div class="tabs" data-tabs data-scroll style="margin-top:10px"><button class="tab" aria-selected="true" data-panel="w-desc" data-u="u22">Describe</button><button class="tab" data-panel="w-rec" data-u="u27">Record</button><button class="tab" data-panel="w-file" data-u="u28">Own file</button></div>
+ <div id="w-desc" style="display:grid;gap:12px;margin-top:14px">
+  <div class="picker" id="starts" data-u="u23"><button class="btn">Old map maker</button><button class="btn">Calm teacher</button><button class="btn">Radio reporter</button><button class="btn">Field scientist</button><button class="btn">Night storyteller</button></div>
+  <textarea class="field" id="desc" rows="3" placeholder="Age, accent, tone, how it delivers a line" aria-label="Describe the voice"></textarea>
+  <div class="acts"><button class="btn need" id="make3" data-u="u24">Make three</button><span class="small" id="m3say"></span><button class="btn bare" id="over" data-u="u26">Start over</button></div>
+  <div class="rows slots" id="slots" data-u="u25"></div>
+  <button class="btn" id="retry" hidden data-u="u33">Make the missing one</button>
+  <button class="btn need" id="usenew" hidden>Use this voice</button>
+ </div>
+ <div id="w-rec" hidden style="display:grid;gap:12px;margin-top:14px">
+  <p class="from" data-d>“The first soul to choose had come down from heaven.”</p>
+  <div class="acts"><button class="btn need" id="rec" style="touch-action:none">Hold to record</button><div class="meter" id="meter"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="num" id="clock" data-d>0:00 / 1:00</span></div>
+  </div>
+ <div id="w-file" hidden style="display:grid;gap:12px;margin-top:14px"><div class="acts"><button class="btn" id="pick">Pick an audio file</button><span class="small" id="fname" data-d></span></div></div>
+ <div id="consent" style="display:grid;gap:10px;margin-top:16px" hidden>
+  <span class="lab">Whose voice</span><div class="picker" id="whose" data-u="u29"><button class="btn">Mine</button><button class="btn">A person who said yes</button></div>
+  <span class="lab">Sent to the Tongue</span><button class="btn need" id="copyv" disabled data-u="u30">Copy this voice</button>
+  <span class="lab">Who may use it</span><div class="picker" data-u="u31"><button class="btn" aria-pressed="true">This channel only</button><button class="btn">Our channels</button><button class="btn">Both of us</button></div>
+ </div>
+</section>
+
+<section class="sheet" id="channels" hidden><h3>Channels</h3><input class="field" placeholder="Find a channel" aria-label="Find a channel" style="margin:10px 0 12px">
+ <div class="rows" data-pick><button class="row on" data-card data-close><span class="tile"><span data-art="emblem" data-name="vessel"></span></span><span><b class="name" data-d>Library of Tehuti</b></span></button><button class="row" data-card data-close><span class="tile"><span data-art="emblem" data-name="vessel"></span></span><span><b class="name" data-d>Vessel two</b></span></button><button class="row" data-card data-close><span class="tile"><span data-art="emblem" data-name="vessel"></span></span><span><b class="name" data-d>Vessel three</b></span></button></div></section>
+
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const ST=Kit.state,reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let FROM=Kit.param('from')||(ST==='for-this-film-only'?'pact':ST==='from-a-stopped-film'?'conjuring':'vessel');
+/* the world today: no key, no voice heard, no voice chosen */
+const W={key:false,mode:'off',voice:null,chanVoice:null,heard:false,line:'',lineFrom:'',sample:false,net:true,ways:'Elder brother',silent:false,two:false,refused:false,making3:false,copying:false};
+const FILM='The ENTIRE Journey After Death in 52 Minutes';
+const L1F0='';const L1='He says it fell due once in a hundred years, so you lay ten lives of a hundred years end to end.',L1F='Act II · The Meadow and the Mouth';
+const LINES=[[L1,L1F],['The dusty ones weep as they tell it, because their journey under the earth lasted a thousand years.',L1F],['But nothing chosen here is final yet, and the line takes you to Atropos, one of the three Fates.','Act VIII · The River and the Waking']];
+const sampleVoice={name:'Night storyteller',list:'ours',sub:'Made from words, kept on this channel'};
+const set=(o)=>Object.assign(W,o);
+const states={
+ 'no-voice-on-this-channel':()=>set({key:true,mode:'test',sample:true}),
+ 'listening':()=>set({key:true,mode:'test',voice:sampleVoice,heard:true,line:L1,lineFrom:L1F,sample:true,autoplay:true}),
+ 'in-use':()=>set({key:true,mode:'test',voice:sampleVoice,chanVoice:sampleVoice,heard:true,line:L1,lineFrom:L1F,sample:true}),
+ 'changed-from-the-next-film':()=>set({key:true,mode:'test',voice:{name:'Calm teacher',list:'ours',sub:'Made from words'},chanVoice:sampleVoice,heard:true,line:L1,lineFrom:L1F,sample:true,changed:true}),
+ 'for-this-film-only':()=>set({key:true,mode:'test',voice:{name:'Calm teacher',list:'ours',sub:'Made from words'},chanVoice:sampleVoice,heard:true,line:L1,lineFrom:L1F,sample:true}),
+ 'making-three':()=>set({key:true,mode:'test',sample:true,making3:true}),
+ 'copying':()=>set({key:true,mode:'test',sample:true,copying:true}),
+ 'refused':()=>set({key:true,mode:'test',sample:true,refused:true,line:L1,lineFrom:L1F,voice:sampleVoice}),
+ 'spending-locked':()=>set({key:true,mode:'locked',voice:sampleVoice,heard:true,line:L1,lineFrom:L1F,sample:true}),
+ 'practice-mode':()=>set({key:true,mode:'practice',voice:sampleVoice,line:L1,lineFrom:L1F,sample:true}),
+ 'test-mode':()=>set({key:true,mode:'test',voice:sampleVoice,line:L1,lineFrom:L1F,sample:true}),
+ 'two-speakers':()=>set({key:true,mode:'test',voice:sampleVoice,chanVoice:sampleVoice,heard:true,line:L1,lineFrom:L1F,sample:true,ways:'Two sides',two:true}),
+ 'no-network':()=>set({key:true,mode:'test',voice:sampleVoice,chanVoice:sampleVoice,heard:true,line:L1,lineFrom:L1F,sample:true,net:false}),
+ 'done':()=>set({key:true,mode:'test',voice:sampleVoice,chanVoice:sampleVoice,heard:true,line:L1,lineFrom:L1F,sample:true,done:true}),
+ 'from-a-stopped-film':()=>set({key:true,mode:'test',voice:sampleVoice,line:L1,lineFrom:L1F,sample:true}),
+ 'silent-channel':()=>set({silent:true}),
+ 'voicing':()=>set({key:true,mode:'test',voice:sampleVoice,chanVoice:sampleVoice,heard:true,line:L1,lineFrom:L1F,sample:true}),
+ /* default view = the flow's 'today, nothing connected' */
+};
+(states[ST]||(()=>{}))();
+let rests={heavy:'Normal',turn:'Normal',product:'Normal'};const RS={Short:0.9,Normal:1.2,Long:1.5},RW={Short:.6,Normal:1,Long:1.4};
+const HEAVY=/\d|hundred|thousand|million/i,TURN=/^(but|so|yet)$/i;
+/* ---------- the line ---------- */
+function drawLine(){const v=$('#lineview');
+ if(!W.line){v.innerHTML='';v.hidden=true;$('#say').hidden=false;$('#setline').hidden=false;$('#editline').hidden=true;$('#from').hidden=true;return}
+ v.hidden=false;$('#say').hidden=true;$('#setline').hidden=true;$('#editline').hidden=false;$('#from').hidden=!W.lineFrom;$('#from').textContent=W.lineFrom;
+ const words=W.line.split(/\s+/);let h='';words.forEach((w,i)=>{if(TURN.test(w.replace(/\W/g,''))&&i>0)h+=`<span class="gap turn" style="--g:${RW[rests.turn]}" data-gap></span>`;
+  h+=`<span class="w" data-w="${i}">${w}</span>`;const nx=words[i+1]||'';const pv=words[i-1]||'';if(HEAVY.test(pv)&&!HEAVY.test(w)&&i<words.length-1&&!TURN.test(nx.replace(/\W/g,'')))h+=`<span class="gap" style="--g:${RW[rests.heavy]}" data-gap>${RS[rests.heavy].toFixed(2)} s</span>`});
+ v.className='line';v.innerHTML=h}
+let timer=null;function speak(){const ws=$$('#lineview .w, #lineview .gap');ws.forEach(e=>e.classList.remove('lit','now'));let i=0;clearTimeout(timer);W.speaking=true;paint();
+ const nx=()=>{if(i>0)ws[i-1].classList.replace('now','lit');if(i>=ws.length){W.speaking=false;paint();if(!W.measured){W.measured=true;$('#pace').hidden=false;$('#pace').textContent='Measured'}return}
+  ws[i].classList.add('now');const g=ws[i].classList.contains('gap');i++;timer=setTimeout(nx,reduce?0:g?(ws[i-1].classList.contains('turn')?380:520)*RW[g?'Normal':'Normal']:230/(+$('#speed output').dataset.v||1))};nx()}
+/* ---------- the voice panel ---------- */
+const go=$('#go');
+function paint(){const v=W.voice,hornSt=W.silent?'none':W.speaking?'speaking':v?'chosen':W.mode==='practice'?'standin':'none';
+ $('#horn').innerHTML=Art.voice({state:hornSt});
+ $('#vname').textContent=W.silent?'No voice':v?v.name:'No voice';$('#vname').toggleAttribute('data-d',!!v&&!W.silent);
+ const P=W.silent?['dim','For good']:!W.key?['need','Asleep']:W.refused?['stop','Refused']:W.mode==='locked'?['stop','Locked']:W.mode==='practice'?['need','Practice']:!W.net?['need','Offline']:W.speaking?['work','Speaking']:W.making3?['work','Making three']:W.copying?['work','Copying']:FROM!=='vessel'&&v?['need','This film']:v&&W.chanVoice===v?['work','In use']:v?['','Not in use']:['dim','No voice'];
+ if(ST==='voicing'){P[0]='work';P[1]='Voice: act 3 of 9'}const ps=$('#vstate');ps.className='pill '+P[0];ps.textContent=P[1];
+ const say=$('#vsay');let s='No voice heard yet.',c='say';
+ if(W.silent){s='This channel has no voice, for good. Its way of speaking still shapes the words.';c='say'}
+ else if(!W.key){s='No voice heard yet.';c='say need'}
+ else if(W.refused){s='The voice service said: “Audio too short to copy. Send at least 3 seconds.”';c='say stop'}
+ else if(W.mode==='locked'){s='Spending is locked. Lines already heard still play.';c='say stop'}
+ else if(W.mode==='practice'){s='Practice mode. A new line cannot be heard yet.';c='say need'}
+ else if(!W.net){s='No network. Heard lines still play; new lines wait.';c='say need'}
+ else if(W.done){s='In use. From the next film. Past films keep theirs.';c='say work'}
+ else if(W.changed){s='From the next film. Past films keep theirs.';c='say work'}
+ else if(W.speaking){s='Speaking';c='say work'}
+ else if(FROM!=='vessel'&&v){s='For this film only. The channel keeps '+(W.chanVoice?W.chanVoice.name:'no voice')+'.';c='say need'}
+ else if(v&&W.chanVoice===v){s='In use on this channel.';c='say work'}
+ else if(v){s=W.mode==='test'?'A new line costs under 1 cent and counts against the $0.75 test.':'Ready to hear.';c='say'}
+ else {s='No voice yet. Pick one in Voices, or make a new one.';c='say'}
+ say.className=c;say.textContent=s;
+ $('#wake').hidden=W.key||W.silent;$('#opentank').hidden=!(W.mode==='locked'||W.mode==='practice');
+ $('#play').hidden=W.silent;$('#another').hidden=W.silent;$('#playw').textContent=W.speaking?'Stop':'Play';$('#play').firstElementChild.outerHTML=Art.glyph(W.speaking?'pause':'play');
+ $('#speaks').textContent=W.ways;$('#statusw').textContent=say.textContent;$('#add2').hidden=!W.two||!$('#second').hidden;$('#del').hidden=!(v&&v.list==='ours'&&FROM==='vessel'&&!W.silent);
+ $('#tag').innerHTML='';
+ $('#door').textContent=FROM==='conjuring'?FILM+' · III':FROM==='pact'||FROM==='cauldron'?FILM:'';$('#door').hidden=FROM==='vessel';
+ $('#keepch').hidden=!(FROM==='pact'&&W.chanVoice);
+ const sw=$('#statusw');sw.textContent=W.silent?'No voice, for good':!W.key?'Wake the Tongue to hear a voice':W.mode==='locked'?'Spending is locked':W.mode==='practice'?'Practice mode':W.making3?'Making three':W.copying?'Copying the voice':!v?'No voice yet':W.done?'In use':'Not in use yet';
+ const lab=FROM==='pact'||FROM==='cauldron'?'Use for this film':FROM==='conjuring'?'Use and carry on':W.done||W.chanVoice===v&&v?'In use':'Use this voice';
+ go.textContent=lab;go.dataset.u=FROM==='pact'?'u5':FROM==='cauldron'?'u6':FROM==='conjuring'?'u7':'u4';
+ go.disabled=!v||W.silent||(FROM==='vessel'&&W.chanVoice===v)}
+/* ---------- play ---------- */
+$('#play').onclick=()=>{if(W.speaking){clearTimeout(timer);W.speaking=false;$$('#lineview .now').forEach(e=>e.classList.remove('now'));paint();return}
+ if(!W.line){$('#say').focus();Kit.toast('Type a line first',{state:'need'});return}
+ if(!W.key){Kit.toast('The Tongue is asleep. Wake it in the tank.',{state:'need'});return}
+ if(!W.voice){Kit.toast('Pick a voice in Voices first',{state:'need'});$('#tvoices').click();return}
+ if(!W.heard&&W.mode==='locked'){Kit.toast('Spending is locked',{state:'stop'});return}
+ if(!W.heard&&W.mode==='practice'){Kit.toast('Practice mode. A new line cannot be heard yet.',{state:'need'});return}
+ if(!W.heard&&!W.net){Kit.toast('No network. This line waits.',{state:'need'});return}
+ W.heard=true;speak()};
+let li=0;$('#another').onclick=()=>{if(!W.lineFrom&&!W.sample){$('#say').hidden=false;$('#say').focus();Kit.toast('No script for this channel yet. Type a line.',{state:'need'});return}
+ li=(li+1)%LINES.length;[W.line,W.lineFrom]=LINES[li];W.heard=false;drawLine();paint()};
+const setLine=t=>{t=t.trim();if(!t)return;W.line=t;W.lineFrom='';W.heard=false;drawLine();paint()};
+$('#setline').onclick=()=>setLine($('#say').value);
+$('#editline').onclick=()=>{$('#say2').value=W.line;Kit.sheet('sayedit').open()};
+$('#setline2').onclick=()=>setLine($('#say2').value);
+/* ---------- speed: 0.50 to 1.50 in steps of 0.05 ---------- */
+(()=>{const st=$('#speed'),o=st.querySelector('output'),[mi,pl]=st.querySelectorAll('button');mi.setAttribute('aria-label','Slower');pl.setAttribute('aria-label','Faster');
+ const put=v=>{v=Math.round(Math.max(.5,Math.min(1.5,v))*100)/100;o.dataset.v=v;o.innerHTML=v.toFixed(2)+'<small>speed</small>';mi.disabled=v<=.5;pl.disabled=v>=1.5;o.classList.remove('bump');void o.offsetWidth;o.classList.add('bump')};
+ put(1);mi.onclick=()=>{put(+o.dataset.v-.05);if(W.speedPaid)Kit.toast('This film already has its voice. It must be spoken again to change.',{state:'need'})};pl.onclick=()=>put(+o.dataset.v+.05)})();
+/* ---------- rests ---------- */
+$$('.picker[data-rest]').forEach(p=>p.addEventListener('click',e=>{const b=e.target.closest('.btn');if(!b)return;p.querySelectorAll('.btn').forEach(x=>x.setAttribute('aria-pressed',x===b));Kit.press(b);rests[p.dataset.rest]=b.textContent;drawLine();
+ Kit.toast('Rests changed for the next films. No voice is bought again.',{ms:2200})}));
+/* ---------- voices ---------- */
+let list='ours',kept=new Set();
+const LISTS={ours:()=>W.making3||W.copying||!W.voice?[]:[sampleVoice,{name:'Calm teacher',list:'ours',sub:'Made from words'}],ready:()=>[],used:()=>[],kept:()=>[...kept].map(n=>({name:n,list:'kept',sub:'Kept'}))};
+const EMPTY={ours:'None made',ready:'Asleep',used:'None used',kept:'None kept'};
+function drawList(){const q=$('#find').value.trim().toLowerCase(),items=LISTS[list]().filter(v=>!q||v.name.toLowerCase().includes(q));
+ $('#filters').hidden=list!=='ready'||!W.key;
+ $('#vlist').innerHTML=items.length?items.map(v=>`<div class="row${W.voice&&W.voice.name===v.name?' on':''}" data-v="${v.name}"><span class="tile">${Art.emblem('tongue')}</span><button class="btn bare" style="justify-content:flex-start;padding:0;min-height:44px;text-align:left" data-pickv="${v.name}"><b class="name" data-d>${v.name}</b></button><button class="btn keep" data-keep="${v.name}" data-u="u20">${kept.has(v.name)?'Kept':'Keep'}</button></div>`).join(''):`<span class="pill dim">${EMPTY[list]}</span>`}
+$('#lists').addEventListener('click',e=>{const b=e.target.closest('.btn');if(!b)return;list=b.dataset.l;$$('#lists .btn').forEach(x=>x.setAttribute('aria-pressed',x===b));Kit.press(b);drawList()});
+$('#find').addEventListener('input',drawList);
+$('#filters').addEventListener('click',e=>{const b=e.target.closest('.btn');if(b){b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')!=='true');drawList()}});
+$('#vlist').addEventListener('click',e=>{const k=e.target.closest('[data-keep]');if(k){const n=k.dataset.keep;kept.has(n)?kept.delete(n):kept.add(n);drawList();return}
+ const p=e.target.closest('[data-pickv]');if(p){const all=[...LISTS.ours(),...LISTS.kept()];W.voice=all.find(v=>v.name===p.dataset.pickv)||W.voice;W.heard=false;W.done=false;paint();drawList();Kit.press(p.closest('.row'))}});
+/* ---------- new voice: describe, record, own file ---------- */
+$('#starts').addEventListener('click',e=>{const b=e.target.closest('.btn');if(!b)return;$$('#starts .btn').forEach(x=>x.setAttribute('aria-pressed',x===b));
+ $('#desc').value={'Old map maker':'An old man who has drawn maps all his life. Low, dry, unhurried, a smile under the words.','Calm teacher':'A calm teacher in her fifties. Clear, warm, never rushed.','Radio reporter':'A night radio reporter. Close to the microphone, even, sure of the facts.','Field scientist':'A field scientist back from a long trip. Plain, curious, quick on the numbers.','Night storyteller':'A storyteller by a fire at night. Deep, slow, leaves room after each turn.'}[b.textContent]});
+let slots=[];function drawSlots(){$('#slots').innerHTML=slots.map((s,i)=>`<button class="row${s.on?' on':''}" data-slot="${i}" ${s.st!=='ok'?'disabled':''}><span class="tile">${Art.pip({state:s.st==='ok'?'done':s.st==='wait'?'now':'failed'})}</span><span><b class="name">${['First','Second','Third'][i]}</b><span class="pill ${s.st==='ok'?'work':s.st==='wait'?'dim':'stop'}">${s.st==='ok'?'Ready':s.st==='wait'?'Coming':'Missing'}</span></span></button>`).join('');
+ $('#usenew').hidden=!slots.some(s=>s.on);$('#retry').hidden=!slots.some(s=>s.st==='miss');if(slots.length&&slots.every(s=>s.st!=='wait')&&slots.some(s=>s.st==='miss'))$('#m3say').textContent='Two of three came.'}
+$('#make3').onclick=()=>{if(!$('#desc').value.trim()){Kit.toast('Describe the voice first',{state:'need'});return}if(!W.key){Kit.toast('The Tongue is asleep. Wake it in the tank.',{state:'need'});return}
+ slots=[{st:'wait'},{st:'wait'},{st:'wait'}];drawSlots();$('#m3say').textContent='Making three';[0,1,2].forEach(i=>setTimeout(()=>{slots[i].st=i===2&&!W.retried?'miss':'ok';drawSlots()},reduce?0:700*(i+1)))};
+$('#retry').onclick=()=>{W.retried=true;slots.forEach(s=>{if(s.st==='miss')s.st='wait'});drawSlots();setTimeout(()=>{slots.forEach(s=>{if(s.st==='wait')s.st='ok'});drawSlots();$('#m3say').textContent='Three came.'},reduce?0:900)};
+$('#slots').addEventListener('click',e=>{const r=e.target.closest('[data-slot]');if(!r)return;slots.forEach((s,i)=>s.on=i===+r.dataset.slot);drawSlots()});
+$('#over').onclick=()=>{slots=[];$('#desc').value='';$$('#starts .btn').forEach(x=>x.setAttribute('aria-pressed','false'));$('#m3say').textContent='';drawSlots()};
+$('#usenew').onclick=()=>{const i=slots.findIndex(s=>s.on);W.voice={name:($$('#starts .btn').find(b=>b.getAttribute('aria-pressed')==='true')?.textContent||'New voice')+', '+['first','second','third'][i],list:'ours',sub:'Made from words'};Kit.sheet('newvoice').close();paint();drawList();Kit.toast('Picked. Play it on the line.')};
+/* record: hold, or tap to lock it on */
+let rt=null,secs=0,locked=false;const meter=$('#meter'),rec=$('#rec');
+function recOn(){meter.classList.add('on');rt=setInterval(()=>{secs++;$('#clock').textContent='0:'+String(secs).padStart(2,'0')+' / 1:00';meter.querySelectorAll('i').forEach(i=>i.style.height=(20+Math.random()*80)+'%');meter.classList.toggle('short',secs<3);if(secs>=60)recOff()},reduce?200:1000);rec.textContent='Recording'}
+function recOff(){clearInterval(rt);rt=null;meter.classList.remove('on');rec.textContent=secs?'Record again':'Hold to record';checkCopy()}
+let downAt=0;rec.addEventListener('pointerdown',()=>{downAt=Date.now();if(locked){locked=false;recOff();return}secs=0;recOn()});
+rec.addEventListener('pointerup',()=>{if(Date.now()-downAt<300){locked=true;rec.textContent='Recording, tap to stop'}else recOff()});
+$('#pick').onclick=()=>{$('#fname').textContent='my-voice.wav';secs=42;checkCopy()};
+let whose=false;$('#whose').addEventListener('click',e=>{const b=e.target.closest('.btn');if(!b)return;$$('#whose .btn').forEach(x=>x.setAttribute('aria-pressed',x===b));whose=true;checkCopy()});
+function checkCopy(){$('#copyv').disabled=!(whose&&secs>=3)}
+$('#copyv').onclick=()=>{if(!W.key){Kit.toast('The Tongue is asleep. Wake it in the tank.',{state:'need'});return}Kit.sheet('newvoice').close();W.copying=true;paint();
+ setTimeout(()=>{W.copying=false;W.voice={name:'Your voice',list:'ours',sub:'Copied from your recording'};paint();drawList();Kit.toast('Copied. Hear it beside the recording.')},reduce?0:1600)};
+$$('#consent .picker:last-child').forEach(p=>p.addEventListener('click',e=>{const b=e.target.closest('.btn');if(b)p.querySelectorAll('.btn').forEach(x=>x.setAttribute('aria-pressed',x===b))}));
+/* hold to delete: one second */
+(()=>{const b=$('#del');let t0=0,raf=0;const tick=t=>{const p=Math.min(1,(t-t0)/1000);b.style.setProperty('--p',p);if(p<1)raf=requestAnimationFrame(tick);else{b.style.setProperty('--p',0);W.voice=null;W.chanVoice=null;paint();drawList();Kit.toast('Deleted. Library of Tehuti now says No voice yet. Finished films keep their sound.',{state:'stop',ms:3600})}};
+ b.addEventListener('pointerdown',()=>{t0=performance.now();raf=requestAnimationFrame(tick)});['pointerup','pointerleave'].forEach(k=>b.addEventListener(k,()=>{cancelAnimationFrame(raf);b.style.setProperty('--p',0)}))})();
+document.querySelector('.right>.tabs').addEventListener('click',e=>{const t=e.target.closest('.tab');if(t)document.body.classList.toggle('tab-voices',t.dataset.panel==='p-voices')});
+document.querySelector('#newvoice .tabs').addEventListener('click',e=>{const t=e.target.closest('.tab');if(t)$('#consent').hidden=t.dataset.panel==='w-desc'});
+$('#add2').onclick=()=>{$('#second').hidden=false;paint()};
+$('#play2').onclick=()=>Kit.toast('Pick the second voice in Voices first',{state:'need'});$('#use2').onclick=()=>{$('#v2name').textContent='Calm teacher';Kit.toast('Calm teacher speaks the second side')};
+/* channel name opens the channel list */
+const chan=document.querySelector('.place .chan');if(chan){const b=document.createElement('button');b.className='chan chanbtn';b.innerHTML=chan.innerHTML;b.setAttribute('aria-label','Change channel');b.dataset.open='channels';b.dataset.u='u9';chan.replaceWith(b)}
+/* ---------- the primary ---------- */
+go.onclick=()=>{if(go.disabled)return;const u=go.dataset.u;
+ if(u==='u4'){W.chanVoice=W.voice;W.done=true;paint();Kit.finish(go,'From the next film. Past films keep theirs.');return}
+ if(u==='u5'){Kit.finish(go,'For this film only. Back to the receipt.');setTimeout(()=>location.href='pact.html',900);return}
+ if(u==='u6'){Kit.finish(go,'Named on the idea');setTimeout(()=>location.href='cauldron.html',900);return}
+ if(u==='u7'){Kit.finish(go,'The film carries on from Act III with this voice');setTimeout(()=>location.href='conjuring.html',900)}};
+$('#keepch').onclick=()=>location.href='pact.html';
+/* ---------- start ---------- */
+if(W.making3){Kit.sheet('newvoice').open();$('#desc').value='A storyteller by a fire at night. Deep, slow, leaves room after each turn.';slots=[{st:'ok'},{st:'wait'},{st:'wait'}];drawSlots();$('#m3say').textContent='Making three'}
+if(W.two)$('#second').hidden=false;
+drawLine();paint();drawList();
+const NOTE={'':['No voice heard yet. Wake the Tongue in the tank to hear one.','need'],'no-voice-on-this-channel':['No voice yet. Pick one in Voices, or make a new one.'],'changed-from-the-next-film':['From the next film. Past films keep theirs.'],
+ 'for-this-film-only':['For this film only. The channel keeps its voice.','need'],refused:['The voice service said: audio too short to copy. Send at least 3 seconds.','stop'],'spending-locked':['Spending is locked. Lines already heard still play.','stop'],
+ 'practice-mode':['Practice mode. A new line cannot be heard yet.','need'],'test-mode':['A new line costs under 1 cent and counts against the $0.75 test.'],'no-network':['No network. Heard lines still play; new lines wait.','need'],
+ done:['In use. From the next film. Past films keep theirs.'],'from-a-stopped-film':['The film stopped at its voice in Act III. It carries on with the voice you use.','need'],'silent-channel':['This channel has no voice, for good. Its way of speaking still shapes the words.'],
+ 'two-speakers':['Two sides: each line of the script shows who says it.'],'making-three':['Making three. Pick one as it lands.'],copying:['Copying the voice. Read other lines or pick rests meanwhile.']};
+const nt=NOTE[ST||''];if(nt&&ST)Kit.toast(nt[0],{state:nt[1]||'',ms:4200});
+if(W.autoplay)setTimeout(speak,200);
+});
+/* proof aid: ?do=<css>;<css> taps those controls in order so a still can show the result; a missing or dead control is a console error. Not part of the room. */
+document.addEventListener('DOMContentLoaded',()=>{(Kit.param('do')||'').split(';').filter(Boolean).forEach((q,i)=>setTimeout(()=>{const e=document.querySelector(q);const b=e&&e.getBoundingClientRect();if(!e)console.error('no control '+q);else if(e.disabled)console.error('control is off '+q);else if(e.closest('[hidden]')||!b.width||!b.height)console.error('control is hidden '+q);else e.click()},40+i*45))});
+</script>
+<style>.chanbtn{border:0;background:none;padding:0;cursor:pointer;min-height:44px;margin:-14px 0;text-align:left}.chanbtn:hover{color:var(--bone)}</style>
+</body></html>

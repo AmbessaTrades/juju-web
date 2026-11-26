@@ -1,0 +1,239 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Juju · The Canopy</title>
+<link rel="stylesheet" href="kit2.css"><script src="kit2.js"></script><script src="light.js"></script><script src="art.js"></script>
+<style>
+/* Room layout only. Parts this room adds because the kit has none (named in the report):
+   .spot       a tappable place on the tree drawing, set from the tree's own slot map (light.js meta)
+   .marks5     the phone's row of five bough marks under a zoomed tree
+   .longpress  a hold-to-confirm fill on any button (Lock this winner, Go back to version)
+   .figs       two hero figures side by side with their unit and source */
+body{--focus-x:36%;--focus-y:40%}
+.stage{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:26px;align-items:start}
+.treep{padding:14px 14px 16px}
+.treebox{position:relative;width:100%;aspect-ratio:1120/840;touch-action:pan-y;overflow:hidden}
+.phonetools{display:none}
+.treebox>.art.tree{position:absolute;inset:0;width:100%;height:100%;overflow:hidden}
+.spot{position:absolute;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:6px;min-width:64px;padding:0;border:0;background:none;cursor:pointer;color:var(--ash);font:600 13px/1 "Josefin Sans",sans-serif;letter-spacing:.12em;text-transform:uppercase}
+.spot i{width:58px;height:58px;border-radius:50%;box-shadow:inset 0 0 0 2px transparent;transition:box-shadow .15s}
+.spot span{padding:6px 10px 4px;background:color-mix(in oklab,var(--a-deep) 82%,transparent);box-shadow:inset 0 0 0 1px var(--line);white-space:nowrap}
+.spot:hover i{box-shadow:inset 0 0 0 2px var(--line-hi)} .spot:hover{color:var(--bone)}
+.spot.on{color:var(--need)} .spot.on span{box-shadow:inset 0 0 0 1px var(--need);color:var(--need)}
+.roots{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px;padding:12px 6px 0;border-top:1px solid var(--line)}
+.roots .lab{margin-right:4px}
+.roots .chip{height:44px;gap:8px} .roots .chip .num{color:var(--work)}
+.side{display:grid;gap:22px;grid-template-columns:minmax(0,1fr);min-width:0}
+.trunk .figs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+.trunk .fig small{font-size:13.5px}
+.trunk .when{margin-top:12px;font-size:13.5px;color:var(--smoke)}
+.trunk .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.trunkbtn{display:inline-flex;align-items:center;gap:8px;border:0;background:none;padding:0;min-height:44px;cursor:pointer;color:var(--smoke);font:600 12.5px/1 "Josefin Sans",sans-serif;letter-spacing:.16em;text-transform:uppercase}
+.trunkbtn:hover{color:var(--bone)} .trunkbtn .glyph{width:16px;height:16px}
+.bough .pill{margin-bottom:12px}
+.deck .status .emblem{width:22px;height:22px;color:var(--need)}
+.bough .rows{margin-top:14px}
+.bough .row .val{font-family:"JetBrains Mono",monospace;color:var(--work)}
+.bough .row.twig .val{color:var(--stop-hi)}
+.bough .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.marks5{display:none}
+.grove{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:14px}
+.grove button{display:grid;justify-items:center;gap:8px;padding:10px 6px 14px;border:0;background:linear-gradient(180deg,var(--lift),var(--card));box-shadow:inset 0 0 0 2px var(--line);cursor:pointer;color:var(--bone);font:inherit}
+.grove button:hover{box-shadow:inset 0 0 0 2px var(--line-hi)}
+.grove .art.tree{width:100%;height:auto}
+.grove b{font:600 17px/1.2 "Spectral SC",serif}
+.grove .num{font-size:13.5px;color:var(--ash)}
+.field{width:100%;min-height:48px;padding:10px 14px;border:0;background:var(--a-well);box-shadow:inset 0 0 0 2px var(--line);color:var(--bone);font:400 16px/1.4 "Lato",sans-serif}
+textarea.field{min-height:96px;resize:vertical}
+.boxes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.boxes label{display:grid;gap:6px;font-size:14px;color:var(--ash)}
+.readback{display:grid;gap:6px;margin-top:12px}
+.longpress{position:relative;overflow:hidden}
+.longpress .fillbar{position:absolute;left:0;bottom:0;height:5px;width:0;background:var(--need);pointer-events:none}
+.longpress.holding .fillbar{width:100%;transition:width 1s linear}
+.sheetrows{display:grid;gap:8px;margin-top:14px}
+.ten{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}
+.ten th,.ten td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left} .ten th{font:600 12.5px/1 "Josefin Sans",sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke)}
+.ten td.n{font-family:"JetBrains Mono",monospace;text-align:right} .ten th.n{text-align:right}
+@media (max-width:760px){
+  .stage{grid-template-columns:minmax(0,1fr);gap:16px}
+  .treep{padding:8px 8px 12px}
+  .spot{display:none}
+  .phonetools{display:flex;position:absolute;right:6px;top:4px;z-index:2}
+  .treep{position:relative}
+  .deck .aside .status.bn{display:none}
+  .marks5{display:flex;justify-content:space-between;gap:4px;margin-top:8px}
+  .marks5 button{flex:1;height:48px;border:0;background:none;color:var(--smoke);cursor:pointer;display:grid;place-items:center;position:relative}
+  .marks5 button .emblem{width:24px;height:24px}
+  .marks5 button[aria-current]{color:var(--need)} .marks5 button[aria-current]::after{content:"";position:absolute;bottom:2px;left:30%;right:30%;height:3px;background:var(--need)}
+  .roots{flex-wrap:nowrap;overflow-x:auto;margin:6px -8px 0;padding:12px 8px 2px}
+  .roots .chip{flex:none}
+  .grove{grid-template-columns:1fr 1fr}
+  .boxes{grid-template-columns:1fr}
+  .trunk .fig{font-size:24px}
+}
+</style></head>
+<body data-skin="nocturne" data-room="canopy" data-title="The Canopy" data-channel="Library of Tehuti" data-chan-state="" data-back="vessel.html" data-back-label="Vessel" data-tank="asleep" data-who="A">
+<main>
+ <div class="stage">
+  <section class="panel sunk treep" data-frame id="treep">
+   <div class="phonetools"><button class="btn bare" data-open="key">Key</button><button class="btn bare grovebtn">Grove</button></div>
+   <div class="treebox" id="treebox" role="group" aria-label="The tree: five boughs" data-a="a3"></div>
+   <div class="marks5" id="marks5" role="tablist" aria-label="Boughs"></div>
+   <div class="roots" id="roots" data-scroll data-u="u19"></div>
+  </section>
+  <section class="side">
+   <div class="panel focus bough" data-frame="crest" aria-live="polite"><div id="bough"></div></div>
+   <div class="panel trunk" data-frame><div id="trunk"></div></div>
+  </section>
+ </div>
+</main>
+<div data-tools><button class="chip only-desk" data-open="key" data-u="u21">Key</button><button class="chip only-desk grovebtn" data-u="u22">Grove</button></div>
+<footer class="deck"><div class="aside" id="aside"></div><button class="primary" id="go">Make a film</button></footer>
+
+<section class="sheet" id="key" hidden><h3>Key</h3><div class="rows" style="margin-top:14px" id="keyrows"></div></section>
+<section class="sheet" id="tensheet" hidden><h3>The last ten films</h3><p class="small" id="tenline"></p><div id="tenbody"></div><div class="acts"><button class="btn need" data-open="studio" data-u="u13">Add numbers from YouTube Studio</button></div></section>
+<section class="sheet" id="blossom" hidden><h3 id="bltitle">Blossom</h3><p class="small" id="blline"></p><div class="sheetrows" id="blrows"></div><div class="acts" id="blacts"></div></section>
+<section class="sheet" id="words" hidden><h3>The words its flops share</h3><p class="small" id="wline"></p><div class="sheetrows" id="wrows" data-u="u10"></div></section>
+<section class="sheet" id="root" hidden><h3 id="rtitle">Root</h3><p class="small" id="rline"></p><div class="sheetrows" id="rrows"></div><div class="acts"><a class="btn" href="vessel.html?from=canopy&amp;tab=roots" data-u="u28">Change the roots</a></div></section>
+<section class="sheet" id="layers" hidden><h3>Craft layers</h3><p class="small"><span class="pill sample">sample</span> One at a time</p><div class="sheetrows" id="lrows"></div></section>
+<section class="sheet" id="lesson" hidden><h3>A lesson Juju wrote</h3><p class="small"><span class="pill sample">sample</span> <span data-d>Tested on 3 unseen videos: passed</span></p><p style="margin-top:12px" data-d>Titles that name a single number beat titles that name a list, on this channel.</p><p class="small" style="margin-top:8px" data-d>From: The Pharaoh's Day, Hour by Hour; What Egypt Looks Like Without the Nile; and three more. It would deal number titles first.</p><div class="acts"><button class="btn need" id="keeplesson" data-u="u20">Keep this lesson</button><button class="btn bare" data-close>No</button></div></section>
+<section class="sheet" id="studio" hidden><h3>Numbers from YouTube Studio</h3><p class="small">Optional, any box</p>
+ <div class="boxes" id="boxes"></div>
+ <label class="small" style="display:grid;gap:6px;margin-top:14px">Paste what Studio shows<textarea class="field" id="paste" data-u="u14" placeholder="Paste the text or table copied from Studio"></textarea></label>
+ <div class="readback" id="readback"></div>
+ <div class="acts"><button class="btn need" id="looksright" data-u="u15" data-a="a11">Looks right</button><button class="btn" id="changeit" data-u="u16">Change it</button></div></section>
+
+<script>
+(()=>{
+const S=Kit.state||'today', B=document.body, $=id=>document.getElementById(id);
+const SAMPLE=!['today','asleep','offline','grove','failed','reading'].includes(S);
+const FROM={offering:['offering.html','Offering'],altar:['altar.html','Altar'],'publish-kit':['publish-kit.html','Kit'],pact:['pact.html','Receipt'],'mirror-bend':['mirror-bend.html','Mirror']}[Kit.param('from')||(S==='receipt'?'pact':'')];
+if(FROM){B.dataset.back=FROM[0];B.dataset.backLabel=FROM[1]}
+if(S==='asleep'){B.dataset.channel='Vessel two'}
+if(S==='failed')B.dataset.chanState='stop';
+if(S==='hit'||S==='growing'||S==='done')B.dataset.chanState='work';
+
+/* flow, shell parts: u24 back when opened from the offering, u25 the Altar door in the rail, u26 back to the vessel.
+   a5 (comment groups) shows in the crossroads, a10 (best scripts as examples) runs behind with nothing to show. */
+const FILM='The ENTIRE Journey After Death in 52 Minutes';
+const RUN=["The Pharaoh's Day, Hour by Hour",'What the Night Sky Looks Like Without Electric Light','What Egypt Looks Like Without the Nile','Secret Parallels Between Hospital Deathbeds & the Trojan War',"You're Not Lazy. You're Fighting the Noonday Demon."];
+/* five boughs: name on screen, emblem, where growing it goes */
+const BOUGHS=[['Titles','crossroads','crossroads.html?from=canopy&bough=titles','u2'],['Thumbnails','mirror-bend','mirror-bend.html?from=canopy','u3'],['Story','voice','crossroads.html?from=canopy&bough=story','u2'],['Layers','arcana','vessel.html?from=canopy&tab=layers','u4'],['Offering','offering','offering.html?from=canopy','u5']];
+/* the donor roots: real hits at 2x or more from the image library (outliers.json) */
+const ROOTS=[['Bygone Philosophy',[['The Highest State a Human Can Reach','17.08x','069-4_lsxy5fsac'],['The Art of Not Trying','8.41x','070-vvLRZOHdNqA'],['You Will Never Procrastinate Again After Watching This Video','7.45x','071-v90SZKGbMRo']]],['Jade Rabbit Hole',[['The ENTIRE Chinese Hell Walkthrough in 10 Minutes','6.40x','072-jP0D3gcqe5Q'],['The ENTIRE Japanese Hell Walkthrough in 11 Minutes','2.33x','073-WbSkqFdLOxo'],['The ENTIRE Hindu Afterlife Walkthrough in 12 Minutes','2.10x','074-uvNQGq4JEf4']]],['The Opening',[["What you'll see when you die",'8.19x','075-KJg1-FCweWI']]],['Jacopist',[['100 Ways To Kill Pagan Min, Part 2','8.49x','039-UOhcAV4GyRA'],['A Hyper Realistic Alien Invasion','4.48x','040-MVIwvywuQpQ'],['100 Ways To Kill Pagan Min, Part 1','2.59x','041-hV988q6aT9E']]]];
+
+/* each state: bough states, the pill on the picked bough, what the trunk says, the one action */
+const bare=[{},{},{},{},{}];
+const GROW=[{state:'bloom',flowers:['2.1x','1.6x']},{state:'bud'},{state:'bloom',flowers:['1.5x']},{state:'bud'},{}];
+const V={
+ today:{b:bare,pill:['dim','Waiting for film one'],go:['Make a film','cauldron.html?from=canopy','u23']},
+ asleep:{b:bare,pill:['dim','Asleep'],go:['Make a film','cauldron.html?from=canopy','u23'],trunk:'none'},
+ waiting:{b:[{state:'bud'},{state:'bud'},{state:'bud'},{},{}],pill:['','Holding'],go:['Make a film','cauldron.html?from=canopy','u23'],trunk:'due'},
+ reading:{b:bare,pill:['dim','Waiting for film one'],go:['Make a film','cauldron.html?from=canopy','u23'],trunk:'reading'},
+ growing:{b:GROW,pill:['work','Glowing'],go:['Grow this bough']},
+ done:{b:GROW,pill:['work','Glowing'],go:['See the dealt cards','crossroads.html?from=canopy']},
+ hit:{b:[{state:'bloom',flowers:['2.4x','1.6x']},{state:'bud'},{state:'bloom',flowers:['1.5x']},{state:'bud'},{}],pill:['need','A hit'],go:['Next in the chain','crossroads.html?from=canopy&chain=90','u12']},
+ rest:{b:GROW,pill:['dim','Resting'],go:['Grow this bough']},
+ flop:{b:[{state:'bloom',flowers:['2.1x']},{state:'prune'},{state:'bud'},{state:'bud'},{}],pill:['stop','Under 0.7x'],go:['Grow this bough'],focus:1},
+ studio:{b:GROW,pill:['work','Glowing'],go:['Grow this bough'],trunk:'studio'},
+ due:{b:[{state:'bud'},{},{state:'bud'},{},{}],pill:['','Holding'],go:['Make a film','cauldron.html?from=canopy','u23'],trunk:'filmN'},
+ failed:{b:bare,pill:['dim','Waiting for film one'],go:['Make a film','cauldron.html?from=canopy','u23'],trunk:'failed'},
+ offline:{b:bare,pill:['dim','Waiting for film one'],go:['Make a film','cauldron.html?from=canopy','u23'],trunk:'offline'},
+ grove:{b:bare,go:['Make a film','cauldron.html?from=canopy','u23'],grove:1},
+ receipt:{b:[{state:'bud'},{},{},{},{}],pill:['','Holding'],go:['Read again'],trunk:'receipt'}
+};
+const v=V[S]||V.today;let focus=v.focus||0;
+const phone=()=>matchMedia('(max-width:760px)').matches;
+
+/* tree, spots and marks */
+const T=(window.JujuLight&&JujuLight.meta.tree)||{slots:[[[165,316]],[[336,175]],[[564,120]],[[792,185]],[[950,327]]]};
+function drawTree(){const box=$('treebox');if(v.grove){drawGrove();return}
+ const z=phone();box.innerHTML=Art.tree({boughs:v.b,focus,zoom:z})+(z?'':BOUGHS.map(([n],i)=>{const[x,y]=T.slots[i][0];return `<button class="spot ${i===focus?'on':''}" style="left:${x/11.2}%;top:${(y+18)/8.4}%" data-i="${i}" data-u="u1" aria-label="${n} bough"><i></i><span>${n}</span></button>`}).join(''));
+ $('marks5').innerHTML=BOUGHS.map(([n,e],i)=>`<button role="tab" data-i="${i}" ${i===focus?'aria-current="true" aria-selected="true"':'aria-selected="false"'} aria-label="${n}">${Art.emblem(e)}</button>`).join('')}
+function drawGrove(){const box=$('treebox');box.style.aspectRatio='auto';
+ box.innerHTML=`<input class="field" id="find" placeholder="Find a channel" aria-label="Find a channel" data-u="u22"><div class="grove" id="grove">${[['Library of Tehuti','277,000 subscribers','canopy.html'],['Vessel two','0 uploads','canopy.html?state=asleep'],['Vessel three','0 uploads','canopy.html?state=asleep']].map(([n,l,h])=>`<button data-h="${h}" data-n="${n.toLowerCase()}">${Art.tree({boughs:bare})}<b data-d>${n}</b><span class="num" data-d>${l}</span></button>`).join('')}</div>`;
+ $('grove').onclick=e=>{const b=e.target.closest('button');if(b)location.href=b.dataset.h};
+ $('find').oninput=e=>{const q=e.target.value.toLowerCase();$('grove').querySelectorAll('button').forEach(b=>b.hidden=!b.dataset.n.includes(q))};$('marks5').hidden=true}
+const pick=i=>{focus=(i+5)%5;drawTree();drawBough();setGo();Kit.press($('bough'))};
+$('treebox').addEventListener('click',e=>{const s=e.target.closest('.spot');if(s)pick(+s.dataset.i)});
+$('marks5').addEventListener('click',e=>{const s=e.target.closest('button');if(s)pick(+s.dataset.i)});
+let sx=null;$('treebox').addEventListener('pointerdown',e=>{sx=e.clientX});$('treebox').addEventListener('pointerup',e=>{if(sx==null||v.grove)return;const dx=e.clientX-sx;sx=null;if(Math.abs(dx)>40)pick(focus+(dx<0?1:-1))});
+addEventListener('resize',()=>{clearTimeout(window.__rt);window.__rt=setTimeout(drawTree,120)});
+
+/* roots */
+$('roots').innerHTML=`<span class="lab">Roots</span>`+ROOTS.map(([n,h],i)=>`<button class="chip" data-r="${i}" data-u="u19"><span data-d>${n}</span><span class="num" data-d>${h.length}</span></button>`).join('');
+$('roots').addEventListener('click',e=>{const b=e.target.closest('[data-r]');if(!b)return;const [n,h]=ROOTS[+b.dataset.r];$('rtitle').textContent=n;
+ $('rline').innerHTML=`Hits at 2x or more <span class="status" data-a="a8">${Art.pip({state:'done'})}Read 24 Nov from the image library</span>`;
+ $('rrows').innerHTML=h.map(([t,m,f])=>`<a class="row" href="mirror-bend.html?from=canopy&amp;outlier=${f.split('-').slice(1).join('-')}"><span class="tile" style="overflow:hidden"><img src="../../../../context-repo/09-assets/library/${f}-outlier.jpg" alt="" style="width:100%;height:100%;object-fit:cover"></span><span><b class="name" style="font-size:16px">${t}</b></span><span class="val num">${m}</span></a>`).join('');Kit.sheet('root').open()});
+
+/* the picked bough */
+function drawBough(){const el=$('bough'),bs=v.b[focus]||{},[n]=BOUGHS[focus];let h='';
+ if(v.grove){el.innerHTML=`<span class="pill dim">3 channels</span><h2 class="h2">The grove</h2>`;return}
+ const st=bs.state||'bare';
+ const pill=st==='bare'?(v.pill&&v.pill[1]==='Asleep'?['dim','Asleep']:SAMPLE?['dim','Next to open']:v.pill):st==='bud'?['','Holding']:st==='prune'?['stop','Under 0.7x']:st==='gold'?['need','Locked']:v.pill;
+ h+=`${SAMPLE?'<span class="pill sample" style="float:right;margin:0">sample</span>':''}<span class="pill ${pill[0]}">${pill[1]}</span><h2 class="h2">${n}</h2>`;
+ if(st==='bloom'){const fl=(bs.flowers||[]);h+=`<div class="rows" data-u="u6">${fl.map((m,j)=>`<button class="row" data-bl="${j}"><span class="tile"><span class="emblem">${Art.emblem(BOUGHS[focus][1])}</span></span><b class="name" style="font-size:16px" data-d>${[FILM,RUN[0],RUN[2]][j]||FILM}</b><span class="val" data-d>${m}</span></button>`).join('')}</div>`}
+ if(st==='bud'&&S==='waiting')h+=`<div class="rows"><div class="row" style="cursor:default"><span class="tile">${Art.pip({state:'next'})}</span><b class="name" style="font-size:16px" data-d>${FILM}</b><span class="val num" data-d data-a="a1">Tue 14:00</span></div></div>`;
+ if(st==='prune')h+=`<div class="rows"><div class="row twig" style="cursor:default"><span class="tile">${Art.pip({state:'failed'})}</span><b class="name" style="font-size:16px" data-d>${RUN[3]}</b><span class="val" data-d>0.6x</span></div></div><div class="acts"><button class="btn stop" id="prune" data-u="u9">Prune</button><button class="btn" data-open="words" data-u="u10">Flop words</button></div>`;
+ if(focus===3&&SAMPLE)h+=`<div class="acts"><button class="btn" data-open="layers">Versions</button></div>`;
+ if(focus===0&&(S==='growing'||S==='done'))h+=`<div class="acts"><button class="btn need" data-open="lesson" data-u="u20" data-a="a6">Lesson</button></div>`;
+ if(S==='hit'&&focus===0)h+=`<div class="acts"><span class="status" data-a="a2">${Art.pip({state:'next'})}<span data-d>2.4x</span></span></div>`;
+ if(S==='rest'&&focus===0)h+=`<div class="acts"><span class="status">${Art.pip({state:'none'})}<span data-d>12 uploads</span></span></div>`;
+ el.innerHTML=h}
+
+/* the trunk: real numbers, each with its source and date */
+function drawTrunk(){const el=$('trunk'),t=v.trunk;let h=`<button class="trunkbtn" data-open="tensheet" data-u="u17">Trunk${Art.glyph('go')}</button>`;
+ if(t==='none')h+=`<div class="figs"><div class="fig" data-d>0<small>uploads</small></div><div class="fig" data-d>0<small>subscribers</small></div></div>`;
+ else if(t==='receipt')h+=`<div class="rows" style="margin-top:10px"><div class="row" style="cursor:default"><span class="tile">${Art.pip({state:'now'})}</span><b class="name" style="font-size:16px" data-d>${FILM}</b><span class="val num" data-d data-a="a9">film 1</span></div></div><label style="display:grid;gap:6px;margin-top:12px"><input class="field" id="views" inputmode="numeric" placeholder="Views" aria-label="Views of film 1, typed"></label>`;
+ else h+=`<div class="figs"><div class="fig" data-d>277,000<small>subscribers</small></div><div class="fig" data-d>3,700<small>median views</small></div></div><p class="when" data-d>${t==='failed'?'Last read 24 Nov, 09:40':t==='offline'?'Last read 24 Nov, 09:40':'24 Nov, from the brief'}</p>`;
+ const act=[];
+ if(t==='reading')act.push(`<span class="status" data-a="a1">${Art.pip({state:'now'})}Reading</span>`);
+ else if(t==='failed')act.push(`<span class="pill stop">Not read</span>`,`<button class="btn" id="readagain" data-u="u18">${Art.glyph('retry')}Read again</button>`);
+ else if(t==='offline')act.push(`<span class="pill dim">No network</span>`,`<button class="btn" data-open="studio" data-u="u13">Studio</button>`);
+ else if(t==='studio')act.push(`<button class="btn need" data-open="studio" data-u="u13">Add from Studio</button>`);
+ else if(t==='filmN')act.push(`<span class="status" data-a="a9">${Art.pip({state:'now'})}Reading film 1</span>`);
+ else if(t==='receipt')act.push(`<a class="btn" id="backrcpt" href="pact.html?from=canopy" data-u="u27" aria-disabled="true">Back to the receipt</a>`);
+ else if(t!=='none')act.push(`<button class="btn" id="readagain" data-u="u18">${Art.glyph('retry')}Read again</button>`);
+ if(act.length)h+=`<div class="acts">${act.join('')}</div>`;
+ el.innerHTML=h;
+ const ra=$('readagain');if(ra)ra.onclick=()=>{ra.disabled=true;ra.innerHTML=Art.pip({state:'now'})+'Reading';setTimeout(()=>{ra.disabled=false;ra.innerHTML=Art.glyph('retry')+'Read again';if(t==='failed')Kit.toast('The channel page did not answer. Type the numbers instead',{state:'stop'});else Kit.toast('Read now: 3,700 median views')},1200)};
+ if(t==='receipt'){const bk=$('backrcpt');bk.style.opacity=.5;bk.addEventListener('click',e=>{if(bk.getAttribute('aria-disabled')==='true'){e.preventDefault();Kit.toast('Read film 1 first, or type its views')}})}}
+
+/* the one action follows the picked bough */
+function setGo(){const go=$('go');let [t,href,u]=v.go;
+ if(t==='Grow this bough'){href=BOUGHS[focus][2];u=BOUGHS[focus][3];if((v.b[focus]||{}).state===undefined&&focus===4&&S!=='growing'){}}
+ go.textContent=t;go.dataset.u=u||'u2';go.onclick=null;
+ if(S==='receipt'){go.onclick=()=>{go.classList.add('busy');go.textContent='Reading film 1';setTimeout(()=>{go.classList.remove('busy');go.textContent='Back to the receipt';const bk=$('backrcpt');bk.setAttribute('aria-disabled','false');bk.style.opacity=1;bk.classList.add('need');Kit.finish(go,'Film 1 read: 4,100 views on day 30 (sample)');go.onclick=()=>location.href='pact.html?from=canopy'},1300)};return}
+ go.onclick=()=>{Kit.finish(go);setTimeout(()=>{location.href=href},S==='growing'||S==='done'?260:0)};
+ const aside=$('aside');aside.innerHTML=S==='today'?`<span class="status">${Art.pip({state:'none'})}<span data-d>0 films of ours</span></span>`:S==='growing'||S==='rest'||S==='studio'||S==='flop'||S==='done'?`<span class="status bn">${Art.emblem(BOUGHS[focus][1])}<span data-d>${BOUGHS[focus][0]}</span></span>`:''}
+
+/* sheets */
+$('keyrows').innerHTML=[['dim','Asleep','No film of ours has been measured. Old uploads only give the middle number.'],['need','Next to open','The bud the next film will test.'],['','Holding','Between 0.7x and 1.5x of this channel\'s middle at the same age.'],['work','Glowing','1.5x or more at day 30. The number is the real multiple.'],['need','Locked','Five wins of 1.5x or more, locked by you. Dealt first.'],['stop','Under 0.7x','A twig to prune. Its kind stops being dealt.']].map(([c,n,m])=>`<div class="row" style="cursor:default"><span class="tile"><span class="pill ${c}" style="padding:0 6px;min-height:22px"></span></span><span><b class="name">${n}</b><span class="sub">${m}</span></span><span></span></div>`).join('');
+$('tenline').innerHTML=SAMPLE?'<span class="pill sample">sample</span>':'Old uploads: middle number only';
+$('tenbody').innerHTML=SAMPLE?`<table class="ten"><tr><th>Film</th><th class="n">Day 1</th><th class="n">Day 7</th><th class="n">Day 30</th></tr>${[FILM,...RUN.slice(0,3)].map((f,i)=>`<tr><td>${f}</td><td class="n">${[1900,1100,800,650][i]}</td><td class="n">${i<3?[5200,3900,2400][i]:'Not read yet'}</td><td class="n">${i<2?[7800,5900][i]:'Not read yet'}</td></tr>`).join('')}</table>`:`<div class="plate empty" style="aspect-ratio:auto;min-height:120px;margin-top:12px"><span data-art="plate" data-state="empty"></span><span class="says"><b>Waiting for film one</b></span></div>`;
+$('bough').addEventListener('click',e=>{const r=e.target.closest('[data-bl]');if(!r)return;const j=+r.dataset.bl,m=(v.b[focus].flowers||[])[j],t=[FILM,RUN[0],RUN[2]][j]||FILM;
+ $('bltitle').textContent=BOUGHS[focus][0]+', '+m;$('blline').innerHTML='<span class="pill sample">sample</span> Against the middle';
+ $('blrows').innerHTML=`<a class="row" href="publish-kit.html?from=canopy" data-u="u7"><span class="tile">${Art.pip({state:'done'})}</span><span><b class="name" style="font-size:16px">${t}</b><span class="sub">${m==='2.4x'?'8,900':'7,800'} views at day 30, middle 3,700</span></span><span class="val num">${m}</span></a>`;
+ $('blacts').innerHTML=`<p class="small">Locks at 5 wins <b data-d>3 so far</b></p><button class="btn longpress" id="lockw" data-u="u8" disabled><i class="fillbar"></i>Lock this winner</button>`;Kit.sheet('blossom').open()});
+$('wline').innerHTML='<span class="pill sample">sample</span> Ticked words stay out';
+$('wrows').innerHTML=[['Secret','2 films'],['Parallels','2 films'],['&amp;','3 films']].map(([w,c])=>`<button class="switch" data-a="a4">${w} <span class="small">${c}</span></button>`).join('');
+$('wrows').querySelectorAll('.switch').forEach(s=>{s.insertAdjacentHTML('afterbegin','<span class="slot"><span class="bolt"></span></span>');s.setAttribute('role','switch');s.setAttribute('aria-checked','false');s.onclick=()=>{s.setAttribute('aria-checked',s.getAttribute('aria-checked')!=='true');Kit.press(s)}});
+$('lrows').innerHTML=[['Pacing','version 2','version 1'],['Motion','version 1',''],['Colour','version 1','']].map(([n,a,b])=>`<div class="row" style="cursor:default"><span class="tile">${Art.emblem('arcana')}</span><span><b class="name">${n}</b><span class="sub" data-a="a7">Now ${a}${b?'. Waiting for five films on version 2: 3 so far':''}</span></span><span class="val">${b?`<button class="btn longpress" data-back="${b}" data-u="u11"><i class="fillbar"></i>Go back to ${b}</button>`:''}</span></div>`).join('');
+const boxes=[['Click rate','%'],['Still watching at 1:00','%'],['Part of film watched','%'],['Engaged views',''],['Watch hours of 4,000','h'],['Earned per 1,000 views','$']];
+$('boxes').innerHTML=boxes.map(([n,u],i)=>`<label>${n}<input class="field" inputmode="decimal" data-b="${i}" placeholder="Not added"></label>`).join('');
+$('paste').addEventListener('input',e=>{const t=e.target.value,found=[];boxes.forEach(([n],i)=>{const m=t.match(new RegExp(n.split(' ')[0]+'[^0-9]*([0-9][0-9.,]*)','i'));if(m){found.push([n,m[1]]);$('boxes').querySelector(`[data-b="${i}"]`).value=m[1]}});
+ $('readback').innerHTML=found.length?found.map(([n,x])=>`<span class="status">${Art.pip({state:'done'})}${n}: <b class="num">${x}</b></span>`).join(''):`<span class="status">${Art.pip({state:'none'})}Nothing read. An unread number stays empty.</span>`});
+$('looksright').onclick=()=>{const c=$('boxes').querySelector('[data-b="0"]');if(c.value&&+c.value>40){Kit.toast('Did you mean '+(+c.value/10)+'%?',{state:'need'});return}Kit.sheet('studio').close();Kit.toast('Saved, added by hand, 24 Nov',{art:Art.seal({state:'pressed'})})};
+$('changeit').onclick=()=>{const f=$('boxes').querySelector('input');f.focus();Kit.toast('The old number stays in the history')};
+
+/* holds and one-tap actions */
+function hold(btn,done){if(!btn)return;let t=null;const start=e=>{if(btn.disabled)return;if(e.type==='keydown'&&e.key!=='Enter'&&e.key!==' ')return;if(e.repeat)return;e.preventDefault();btn.classList.add('holding');t=setTimeout(()=>{btn.classList.remove('holding');done()},1000)},stop=()=>{if(t){clearTimeout(t);t=null}btn.classList.remove('holding')};
+ btn.addEventListener('pointerdown',start);btn.addEventListener('keydown',start);['pointerup','pointerleave','pointercancel','keyup'].forEach(x=>btn.addEventListener(x,stop))}
+document.addEventListener('click',e=>{const p=e.target.closest('#prune');if(p){p.disabled=true;Kit.toast('Pruned. Its kind is no longer dealt. Put it back within 7 s',{state:'stop',ms:7000});const t=document.querySelector('.toast:last-child');if(t){t.style.pointerEvents='auto';t.insertAdjacentHTML('beforeend','<button class="btn bare" id="putback">Put it back</button>');t.querySelector('#putback').onclick=()=>{p.disabled=false;t.remove();Kit.toast('Back on the tree, dealt again')}}}
+ const k=e.target.closest('#keeplesson');if(k){Kit.sheet('lesson').close();Kit.toast('Kept. It is a rule now',{art:Art.seal({state:'pressed'})})}});
+document.addEventListener('DOMContentLoaded',()=>{drawTree();$('lrows').querySelectorAll('.longpress').forEach(b=>hold(b,()=>{Kit.toast('From the next film it uses '+b.dataset.back+'. The others do not move')}));
+ new MutationObserver(()=>{const l=$('lockw');if(l&&!l.__h){l.__h=1;hold(l,()=>Kit.toast('Locked'))}}).observe($('blacts'),{childList:true});
+ if(Kit.param('sheet'))setTimeout(()=>Kit.sheet(Kit.param('sheet')).open(),50)});
+document.querySelectorAll('.grovebtn').forEach(g=>{g.onclick=()=>{location.search=S==='grove'?'':'?state=grove'};if(S==='grove')g.setAttribute('aria-pressed','true')});
+drawBough();drawTrunk();setGo();
+})();
+</script>
+</body></html>
