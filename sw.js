@@ -4,7 +4,7 @@
    Until juju-core runs here as WASM (lane A), a film is not made in the browser: Make says so. */
 const BASE = new URL('./', self.location).pathname;
 /* the version of the unit this worker belongs to: stamped by web/build.py, so a tab knows when the site has moved on */
-const ABOUT = {"version": "0.3.1", "core": null, "commit": "2739ed1f"};            // /juju-web/ on GitHub Pages
+const ABOUT = {"version": "0.3.2", "core": null, "commit": "3a5e0c25"};            // /juju-web/ on GitHub Pages
 const STORE = 'juju-state-v1';
 let CFG = null;
 self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));

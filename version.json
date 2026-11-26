@@ -1,11 +1,12 @@
 {
- "version": "0.3.1",
- "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.3.1/juju-0.3.1.apk",
- "apk_sha256": "c5bfd716d1c2cdb4d344702e0c181847c3b457c0d62434a6f9ac8af775060c62",
+ "version": "0.3.2",
+ "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.3.2/juju-0.3.2.apk",
+ "apk_sha256": "6fd2fc118b2570bf156e90aed4b6f3b604a168db74151affc9cd69022e60078c",
  "notes": [
-  "Signing in works: the setup code box takes letters, stops at 8, and your PIN goes to the keypad."
+  "Signing in is one step: type the setup code, then your 4 numbers once.",
+  "A wrong setup code now says so."
  ],
- "min_core": "0.3.1",
+ "min_core": "0.3.2",
  "engine": "f256bed9",
- "commit": "2739ed1f"
+ "commit": "3a5e0c25"
 }
