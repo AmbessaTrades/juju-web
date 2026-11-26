@@ -1,12 +1,12 @@
 {
- "version": "0.3.2",
- "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.3.2/juju-0.3.2.apk",
- "apk_sha256": "6fd2fc118b2570bf156e90aed4b6f3b604a168db74151affc9cd69022e60078c",
+ "version": "0.3.3",
+ "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.3.3/juju-0.3.3.apk",
+ "apk_sha256": "8a7720efb5c9ed27619dbc7465b21c1cad425bcf6d944bbfc1272079f48a9f34",
  "notes": [
-  "Signing in is one step: type the setup code, then your 4 numbers once.",
-  "A wrong setup code now says so."
+  "Money films on the phone now follow the group you name (G7, G20, the biggest economies, a continent).",
+  "Colour shows the value, a legend says what height means, and every country carries its name."
  ],
- "min_core": "0.3.2",
- "engine": "f256bed9",
- "commit": "3a5e0c25"
+ "min_core": "0.3.3",
+ "engine": "214c4752",
+ "commit": "5bb5fc79"
 }
