@@ -4,7 +4,7 @@
    Until juju-core runs here as WASM (lane A), a film is not made in the browser: Make says so. */
 const BASE = new URL('./', self.location).pathname;
 /* the version of the unit this worker belongs to: stamped by web/build.py, so a tab knows when the site has moved on */
-const ABOUT = {"version": "0.3.9", "core": null, "commit": "c3d06d3f"};            // /juju-web/ on GitHub Pages
+const ABOUT = {"version": "0.4.0", "core": null, "commit": "8df562ec"};            // /juju-web/ on GitHub Pages
 const STORE = 'juju-state-v1';
 let CFG = null;
 self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
@@ -90,7 +90,7 @@ async function card(c, fl, sys) {
   const thumb = ((await ideasOf(c)).find(i => i.thumb) || {}).thumb || null;
   return { slug: c.slug, name: c.name, handle: c.handle, link: c.link, avatar: null, thumb, still: null, niche: c.niche, look, system: s ? s.id : null, locked: !!(s && s.locked),
     minutes: c.minutes, export: c.export, kinds: c.kinds || [], ready: mine.filter(f => f.state === 'done').length, making: 0,
-    owner: c.owner || null, describe: c.describe || null, niche_line: c.niche_line || null, niche_name: c.niche_name || null, niche_words: c.niche_words || null, route: c.route || null, refs: c.refs || [],
+    owner: c.owner || null, describe: c.describe || null, niche_line: c.niche_line || null, niche_name: c.niche_name || null, niche_words: c.niche_words || null, route: c.route || null, refs: c.refs || [], lesson: c.lesson || null,
     palette: c.palette || null, swatches: s ? (s.swatches || []) : [], films_week: c.films_week || null, door: c.door || null, look_from: c.look_from || null };
 }
 
@@ -176,7 +176,22 @@ async function answer(req, url) {
     return json(200, { slug, new: true, handle: v.handle || null, name: v.name || null });
   }
   if (is('POST', 'tap', 'channels', '*', 'park')) { await change('channels', l => { const c = l.find(x => x.slug === seg[2]); if (!c) return 'Not here'; c.parked = true; }); return json(200, { slug: seg[2], parked: true }); }
-  if (is('POST', 'tap', 'channels', '*', 'refs')) return notYet('Learning from a film is not built on the web yet');
+  // Learn from a film: the Door has Gemini watch it (rea-video's questions + Juju's grammar); the lesson is kept on the channel,
+  // its rules reach every film of the channel, and its "topics like this" become the channel's ideas
+  if (is('POST', 'tap', 'channels', '*', 'refs')) {
+    const slug = seg[2]; if (!chans.some(c => c.slug === slug)) return no(404, 'gone', 'Not here');
+    let a; try { a = await door('POST', '/v1/learn', { link: body.link }); } catch (e) { return e instanceof Fail ? json(e.status, e.body) : no(503, 'offline_door', 'No connection'); }
+    const ref = Object.assign({}, a.video, { added: new Date().toISOString(), lesson: a.lesson, usd: a.usd });
+    let kind = null;
+    await change('channels', l => { const c = l.find(x => x.slug === slug); if (!c) return 'Not here'; kind = (c.kinds || [])[0] || null;
+      c.refs = [ref].concat((c.refs || []).filter(r => r.id !== ref.id)).slice(0, 12);
+      const rules = []; for (const r of c.refs) for (const x of ((r.lesson || {}).rules || [])) if (rules.length < 12 && !rules.includes(x)) rules.push(x);
+      c.lesson = { rules, from: c.refs.filter(r => r.lesson).map(r => r.id), at: ref.added }; });
+    const tl = (a.lesson.topics_like_this || []).filter(t => typeof t === 'string' && t.length > 8).slice(0, 6);
+    if (kind && tl.length) await change('ideas', d => { if (!d || typeof d !== 'object' || Array.isArray(d)) return 'Not ideas'; const mine = d[slug] || [];
+      d[slug] = tl.map((t, i) => ({ id: 'learn-' + ref.id + '-' + i, title: t.replace(/[.?!]+$/, ''), sentence: t.replace(/[.?!]+$/, ''), kind, theme: null, from: 'learned from ' + (ref.title || ref.id) })).concat(mine.filter(x => !String(x.id || '').startsWith('learn-' + ref.id))).slice(0, 24); }).catch(() => {});
+    return json(200, ref);
+  }
   if (is('GET', 'tap', 'channels', '*', 'ideas') || is('POST', 'tap', 'channels', '*', 'ideas')) {
     const c = chans.find(x => x.slug === seg[2]); if (!c) return no(404, 'gone', 'Not here');
     return json(200, { slug: c.slug, running: false, failed: false, ideas: await ideasOf(c), niche: c.niche_name || null, usd: null, titles: null });

@@ -25,7 +25,7 @@
 | `/api/tap/channels/*/avatar` | POST | Not built yet | Not built yet |  |
 | `/api/tap/channels/*/ideas` | POST | Not built yet | Not built yet |  |
 | `/api/tap/channels/*/park` | POST | works | works |  |
-| `/api/tap/channels/*/refs` | POST | Not built yet | Not built yet |  |
+| `/api/tap/channels/*/refs` | POST | works | works |  |
 | `/api/tap/films/*/again` | POST | works | Not built yet |  |
 | `/api/tap/films/*/drop` | POST | works | Not built yet |  |
 | `/api/tap/films/*/export` | POST | Not built yet | Not built yet |  |

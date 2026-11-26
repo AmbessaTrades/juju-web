@@ -1,14 +1,13 @@
 {
- "version": "0.3.9",
- "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.3.9/juju-0.3.9.apk",
- "apk_sha256": "15b3758635612d002f6f3c2886eb126c63300b589e60e644926c165bdf1498fc",
+ "version": "0.4.0",
+ "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.4.0/juju-0.4.0.apk",
+ "apk_sha256": "9e892a9a8a3b0820320d8ac21d47bafe7f769830efef420b42be698e3977fdbe",
  "notes": [
-  "The length you pick now sets the film's length, on the phone and on the Mac.",
-  "Your steer line now shapes the film on the phone too.",
-  "On the web, Make sends the film to your phone; it starts the next time Juju is open there.",
-  "Idea titles keep their apostrophes."
+  "Learn from a film works on the phone and the web: paste a YouTube link and Juju watches it, about a minute and about 20 cents.",
+  "Juju keeps what it learned on the channel: every film of that channel follows those rules.",
+  "The film's 'topics like this' become new ideas in Crossroads."
  ],
- "min_core": "0.3.9",
- "engine": "c1f4591c",
- "commit": "c3d06d3f"
+ "min_core": "0.4.0",
+ "engine": "d019fe24",
+ "commit": "8df562ec"
 }
