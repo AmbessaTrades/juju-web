@@ -157,14 +157,23 @@ document.addEventListener('DOMContentLoaded',()=>{
  J.money();J.mode();
 });
 /* one question before a long job (Ambi, 26 Nov: a tap on an idea started a whole film by itself). J.confirm({title, lines, go, stay}) -> true or false */
-J.confirm=({title,lines=[],go='Go',stay='Not now'})=>new Promise(res=>{let s=document.getElementById('jconfirm');
- if(!s){document.body.insertAdjacentHTML('beforeend',`<section class="sheet" id="jconfirm" hidden aria-labelledby="jcT"><h3 id="jcT"></h3><button class="x btn bare" data-close aria-label="Close">×</button><div class="jcl"></div><div class="sheetfoot jcf"><button class="btn bare" id="jcStay"></button><button class="btn need" id="jcGo"></button></div></section>`);s=document.getElementById('jconfirm');
-  const st=document.createElement('style');st.textContent='#jconfirm .jcl p{margin:8px 0;color:var(--bone);font:400 16px/1.45 "Josefin Sans",sans-serif}#jconfirm .jcl p.warn{color:var(--need)}#jconfirm .jcl p.t{font-weight:600}#jconfirm .jcf{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}';document.head.append(st)}
+J.confirm=({title,lines=[],go='Go',stay='Not now',type=null,danger=false})=>new Promise(res=>{let s=document.getElementById('jconfirm');
+ if(!s){document.body.insertAdjacentHTML('beforeend',`<section class="sheet" id="jconfirm" hidden aria-labelledby="jcT"><h3 id="jcT"></h3><button class="x btn bare" data-close aria-label="Close">×</button><div class="jcl"></div><label class="jct" hidden><span></span><input class="field" id="jcIn" autocomplete="off" autocapitalize="characters" spellcheck="false"></label><div class="sheetfoot jcf"><button class="btn bare" id="jcStay"></button><button class="btn need" id="jcGo"></button></div></section>`);s=document.getElementById('jconfirm');
+  const st=document.createElement('style');st.textContent='#jconfirm .jcl p{margin:8px 0;color:var(--bone);font:400 16px/1.45 "Josefin Sans",sans-serif}#jconfirm .jcl p.warn{color:var(--need)}#jconfirm .jcl p.t{font-weight:600}#jconfirm .jcf{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}#jconfirm .jct{display:grid;gap:8px;margin-top:10px;color:var(--ash);font:600 13px/1.3 "Josefin Sans",sans-serif;letter-spacing:.06em;text-transform:uppercase}#jconfirm .jct input{text-transform:uppercase;letter-spacing:.12em}#jconfirm #jcGo[aria-disabled=true]{opacity:.4}#jconfirm.danger #jcGo{color:var(--need);border-color:var(--need)}';document.head.append(st)}
  s.querySelector('#jcT').textContent=title;s.querySelector('.jcl').innerHTML=lines.filter(Boolean).map(l=>typeof l==='string'?`<p>${J.esc(l)}</p>`:`<p class="${l.cls||''}">${J.esc(l.text)}</p>`).join('');
- const g=s.querySelector('#jcGo'),n=s.querySelector('#jcStay');g.textContent=go;n.textContent=stay;let done=false;
+ const g=s.querySelector('#jcGo'),n=s.querySelector('#jcStay'),tl=s.querySelector('.jct'),ti=s.querySelector('#jcIn');g.textContent=go;n.textContent=stay;let done=false;
+ s.classList.toggle('danger',!!danger);tl.hidden=!type;ti.value='';tl.querySelector('span').textContent=type?`Type ${type} to confirm`:'';
+ const okTyped=()=>!type||ti.value.trim().toUpperCase()===String(type).toUpperCase();g.setAttribute('aria-disabled',String(!okTyped()));ti.oninput=()=>g.setAttribute('aria-disabled',String(!okTyped()));
+ ti.onkeydown=e=>{if(e.key==='Enter'&&okTyped()){e.preventDefault();end(true)}};
  const end=v=>{if(done)return;done=true;ob.disconnect();Kit.sheet('jconfirm').close();res(v)};
  const ob=new MutationObserver(()=>{if(s.hidden)end(false)});ob.observe(s,{attributes:true,attributeFilter:['hidden']});
- g.onclick=()=>end(true);n.onclick=()=>end(false);Kit.sheet('jconfirm').open();setTimeout(()=>g.focus(),50)});
+ g.onclick=()=>{if(!okTyped()){ti.focus();J.say(g,`Type ${type} first`,'need');return}end(true)};n.onclick=()=>end(false);Kit.sheet('jconfirm').open();setTimeout(()=>(type?ti:g).focus(),50)});
+/* delete a channel: one sheet that names what goes, and the word typed (Ambi 26 Nov) */
+J.deleteChannel=async(c)=>{const name=c.handle||c.name||'this channel';
+ const ok=await J.confirm({title:`Delete ${name}?`,go:'Delete',stay:'Keep it',type:'DELETE',danger:true,lines:[
+  {text:'This removes the channel, its look and colours, its ideas, what Juju learned for it, and films waiting to start.',cls:'t'},
+  'Films already made stay in the Cauldron. This cannot be undone here.']});
+ if(!ok)return false;await call('DELETE','/api/tap/channels/'+encodeURIComponent(c.slug)+'?confirm=DELETE',undefined,20000);Kit.toast(`${name} is deleted`);return true};
 /* how long a film takes to make here: measured 26 Nov on the phone, a 3.6 min film in 11.4 min, about 3.2 times its length */
 J.makeMinutes=m=>Math.max(5,Math.round(m*3.2/5)*5);
 /* Gris-gris and High Juju (Ambi, 26 Nov 2026): a chip in the head, a sheet behind it. No model is named here. */

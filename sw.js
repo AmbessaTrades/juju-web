@@ -4,7 +4,7 @@
    Until juju-core runs here as WASM (lane A), a film is not made in the browser: Make says so. */
 const BASE = new URL('./', self.location).pathname;
 /* the version of the unit this worker belongs to: stamped by web/build.py, so a tab knows when the site has moved on */
-const ABOUT = {"version": "0.4.0", "core": null, "commit": "8df562ec"};            // /juju-web/ on GitHub Pages
+const ABOUT = {"version": "0.4.1", "core": null, "commit": "3b30036e"};            // /juju-web/ on GitHub Pages
 const STORE = 'juju-state-v1';
 let CFG = null;
 self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
@@ -88,7 +88,7 @@ async function card(c, fl, sys) {
   const mine = fl.filter(f => f.channel === c.slug), s = sys.find(x => x.id === c.system) || sys.find(x => (c.kinds || []).includes(x.kind));
   const look = c.theme && s && (s.themes || []).length > 1 ? themeName(c.theme) : s ? s.name : null;
   const thumb = ((await ideasOf(c)).find(i => i.thumb) || {}).thumb || null;
-  return { slug: c.slug, name: c.name, handle: c.handle, link: c.link, avatar: null, thumb, still: null, niche: c.niche, look, system: s ? s.id : null, locked: !!(s && s.locked),
+  return { slug: c.slug, name: c.name, handle: c.handle, link: c.link, avatar: c.avatar || null, thumb, still: null, niche: c.niche, look, system: s ? s.id : null, locked: !!(s && s.locked),
     minutes: c.minutes, export: c.export, kinds: c.kinds || [], ready: mine.filter(f => f.state === 'done').length, making: 0,
     owner: c.owner || null, describe: c.describe || null, niche_line: c.niche_line || null, niche_name: c.niche_name || null, niche_words: c.niche_words || null, route: c.route || null, refs: c.refs || [], lesson: c.lesson || null,
     palette: c.palette || null, swatches: s ? (s.swatches || []) : [], films_week: c.films_week || null, door: c.door || null, look_from: c.look_from || null };
@@ -139,6 +139,8 @@ async function answer(req, url) {
   }
   if (m === 'POST' && seg[1] === 'films' && seg[2] && seg[2].startsWith('web-') && ['stop', 'drop'].includes(seg[3])) { await change('orders', l => { const i = l.findIndex(o => o.id === seg[2]); if (i >= 0) l.splice(i, 1); }); return json(200, { ok: true }); }
   if (is('GET', 'tap', 'films')) { let l = (await films()).concat(((await list('orders')).data || []).map(o => ({ id: o.id, kind: o.kind, sentence: o.sentence, title: o.sentence, channel: o.channel, state: 'running', pct: 0, say: 'Waiting for your phone to open Juju', here: false }))); const ch = url.searchParams.get('channel'); if (ch) l = l.filter(f => f.channel === ch); return json(200, { films: l, money: await money() }); }
+  if (is('GET', 'tap', 'films', '*', 'kit')) { const f = (await films()).find(x => x.id === seg[2]); if (!f) return no(404, 'gone', 'Not here');
+    return json(200, { id: f.id, title: f.title || f.sentence || null, description: f.sentence && f.sentence !== f.title ? f.sentence : null, thumb: f.thumb || null, thumb_label: null, film: f.film || null, seconds: f.seconds || null }); }
   if (is('GET', 'tap', 'films', '*')) { const f = (await films()).find(x => x.id === seg[2]); return f ? json(200, f) : no(404, 'gone', 'Not here'); }
   if (m === 'POST' && seg[1] === 'films') return no(409, 'on_phone', 'This film is on your phone: open Juju there to do this');
   const chans = (await list('channels')).data || [];
@@ -164,8 +166,15 @@ async function answer(req, url) {
   if (is('POST', 'tap', 'channels')) {
     const v = { kinds: [], order: 50, added: new Date().toISOString(), owner: s.who, name: null, named: false };
     if (typeof body.link === 'string') { const L = body.link.trim(), h = (L.match(/@([A-Za-z0-9._-]{2,40})/) || [])[1];
+      if (/[?&]v=|youtu\.be\/|\/shorts\//.test(L)) return no(422, 'link', 'That is a video: paste it under Learn from a film. Here, paste a channel link, like youtube.com/@name');
       if (!/(youtube\.com|youtu\.be)/i.test(L) || (!h && !/\/channel\/[A-Za-z0-9_-]+/.test(L))) return no(422, 'link', 'Paste a YouTube channel link, like youtube.com/@name');
-      Object.assign(v, { link: L, handle: h ? '@' + h : null, name: h || null, named: !!h, door: 'absorb', niche_words: h || '', route: { say: 'Now pick a look for this channel' } }); }
+      // the same channel twice is one channel (Ambi 26 Nov: a pasted link made two)
+      const had = h && ((await list('channels', true)).data || []).find(c => !c.parked && String(c.handle || '').toLowerCase() === '@' + h.toLowerCase());
+      if (had) return json(200, { slug: had.slug, existing: true, handle: had.handle, name: had.name, say: 'You already have this channel' });
+      // its real name, picture and best recent film, from YouTube through the Door; Juju then learns from that film
+      let yc = null; if (h) { try { yc = await door('GET', '/v1/youtube/channel?handle=' + encodeURIComponent('@' + h)); } catch (e) { yc = null; } }
+      Object.assign(v, { link: L, handle: h ? '@' + h : null, name: (yc && yc.name) || h || null, named: !!h, avatar: yc && yc.avatar || null, door: 'absorb', niche_words: h || '',
+        titles: yc ? yc.uploads.slice(0, 8).map(u => u.title) : [], best: yc && yc.best || null, route: { say: 'Now pick a look for this channel' } }); }
     else if (typeof body.look === 'string') { const l = sys.find(x => x.id === body.look); if (!l || !l.kind) return no(422, 'look', 'Not a look'); if (l.locked) return no(423, 'locked', 'Opens in High Juju');
       Object.assign(v, { system: l.id, kinds: [l.kind], theme: (l.themes || [])[0] || null, look_from: l.id, door: 'ready-made' }); }
     else if (typeof body.describe === 'string') { const d = body.describe.split(/\s+/).join(' ').trim(); if (d.length < 3 || d.length > 200) return no(422, 'describe', 'One line, please');
@@ -173,8 +182,15 @@ async function answer(req, url) {
     else return no(422, 'door', 'A link, a line or a look');
     let slug = null;
     await change('channels', l => { const base = 'vessel-' + String(Date.now() % 1000000); slug = base; for (let i = 1; l.some(x => x.slug === slug); i++) slug = base + '-' + i; v.slug = slug; l.push(v); });
-    return json(200, { slug, new: true, handle: v.handle || null, name: v.name || null });
+    return json(200, { slug, new: true, handle: v.handle || null, name: v.name || null, avatar: v.avatar || null, best: v.best || null });
   }
+  // Delete a channel and what belongs to it: its row, its ideas, its waiting orders. Films already made stay (Ambi 26 Nov)
+  if (is('DELETE', 'tap', 'channels', '*')) { const slug = seg[2];
+    if (String(url.searchParams.get('confirm') || '').toUpperCase() !== 'DELETE') return no(422, 'confirm', 'Type DELETE to confirm');
+    await change('channels', l => { const i = l.findIndex(x => x.slug === slug); if (i < 0) return 'Not here'; l.splice(i, 1); });
+    await change('ideas', d => { if (d && typeof d === 'object' && !Array.isArray(d)) delete d[slug]; }).catch(() => {});
+    await change('orders', l => { if (Array.isArray(l)) for (let i = l.length - 1; i >= 0; i--) if (l[i].channel === slug) l.splice(i, 1); }).catch(() => {});
+    return json(200, { slug, deleted: true }); }
   if (is('POST', 'tap', 'channels', '*', 'park')) { await change('channels', l => { const c = l.find(x => x.slug === seg[2]); if (!c) return 'Not here'; c.parked = true; }); return json(200, { slug: seg[2], parked: true }); }
   // Learn from a film: the Door has Gemini watch it (rea-video's questions + Juju's grammar); the lesson is kept on the channel,
   // its rules reach every film of the channel, and its "topics like this" become the channel's ideas
@@ -194,7 +210,7 @@ async function answer(req, url) {
   }
   if (is('GET', 'tap', 'channels', '*', 'ideas') || is('POST', 'tap', 'channels', '*', 'ideas')) {
     const c = chans.find(x => x.slug === seg[2]); if (!c) return no(404, 'gone', 'Not here');
-    return json(200, { slug: c.slug, running: false, failed: false, ideas: await ideasOf(c), niche: c.niche_name || null, usd: null, titles: null });
+    return json(200, { slug: c.slug, running: false, failed: false, ideas: await ideasOf(c), niche: c.niche_name || null, usd: null, titles: (c.titles && c.titles.length) ? c.titles : null, best: c.best || null });
   }
   return notYet();
 }

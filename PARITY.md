@@ -1,5 +1,6 @@
 | Mac app | | Phone | Web | Note |
 |---|---|---|---|---|
+| `/api/tap/channels/*` | DELETE | works | works |  |
 | `/api/tap` | GET | works | works |  |
 | `/api/tap/channels` | GET | works | works |  |
 | `/api/tap/channels/*` | GET | works | works |  |
@@ -7,9 +8,9 @@
 | `/api/tap/channels/*/ideas` | GET | works | works |  |
 | `/api/tap/films` | GET | works | works |  |
 | `/api/tap/films/*` | GET | works | works |  |
-| `/api/tap/films/*/*` | GET | works | Not built yet |  |
+| `/api/tap/films/*/*` | GET | works | works |  |
 | `/api/tap/films/*/film.mp4` | GET | works | Not built yet |  |
-| `/api/tap/films/*/kit` | GET | Not built yet | Not built yet |  |
+| `/api/tap/films/*/kit` | GET | works | works |  |
 | `/api/tap/films/*/mend` | GET | Not built yet | Not built yet |  |
 | `/api/tap/films/*/mends/*/a.mp4` | GET | Not built yet | Not built yet |  |
 | `/api/tap/films/*/still.jpg` | GET | Not built yet | Not built yet |  |

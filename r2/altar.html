@@ -50,6 +50,7 @@ body{--focus-x:36%;--focus-y:36%}
  .ch .brief{padding:0 12px 12px 64px;font-size:13px}
  .got{grid-template-columns:56px minmax(0,1fr) auto} .got .av{width:56px;height:56px}
 }
+.ch .pic{position:relative}.ch .del{position:absolute;top:8px;right:8px;z-index:2;width:36px;height:36px;display:grid;place-items:center;border-radius:50%;background:color-mix(in srgb,var(--ink,#07090c) 72%,transparent);color:var(--ash);border:1px solid var(--line);cursor:pointer}.ch .del svg{width:18px;height:18px}.ch .del:hover,.ch .del:focus-visible{color:var(--need);border-color:var(--need)}
 </style></head>
 <body data-skin="nocturne" data-room="altar" data-title="The Altar">
 <main>
@@ -66,7 +67,7 @@ const CAT=()=>`<span class="cat">${window.JujuCat||''}</span>`;
 function face(c){return c.thumb?`<img src="${esc(c.thumb)}" alt="">`:c.avatar?`<img class="face" src="${esc(c.avatar)}" alt="">`:c.still?`<video data-src="${esc(c.still)}#t=25" muted playsinline preload="none" tabindex="-1" aria-hidden="true"></video>`:CAT()}
 function card(c){let brief=[c.describe||c.niche,c.look,c.minutes?c.minutes+' min':''].filter(Boolean);if(!c.kinds.length&&!c.locked)brief=[c.describe||(c.handle?c.name:''),'Pick a look'].filter(Boolean);if(!c.name&&!c.handle)brief.unshift('Not named yet');
  return `<a class="ch${c.locked?' locked':''}" role="listitem" href="crossroads.html?ch=${esc(c.slug)}" data-ch="${esc(c.slug)}">
-  <span class="pic">${face(c)}<span class="pill${c.ready?' need':' dim'}" data-shelf="${esc(c.slug)}" data-d>${c.ready} ${c.ready===1?'film':'films'}</span></span>
+  <span class="pic">${face(c)}<span class="del" role="button" tabindex="0" data-del="${esc(c.slug)}" aria-label="Delete ${esc(c.handle||c.name||'this channel')}" title="Delete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13M10 11v6M14 11v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="pill${c.ready?' need':' dim'}" data-shelf="${esc(c.slug)}" data-d>${c.ready} ${c.ready===1?'film':'films'}</span></span>
   <span class="who"><span class="av">${c.avatar?`<img src="${esc(c.avatar)}" alt="">`:Art.emblem('altar')}</span><span class="h" data-d>${esc(c.handle||c.name||'New vessel')}</span>${c.handle?'':`<span class="btn link" role="button" data-link="${esc(c.slug)}">${c.name?'Link':'Finish'}</span>`}</span>
   <span class="brief">${c.locked?Flow.lock:''}<span data-d>${esc(brief.join(' · '))}</span></span></a>`}
 /* the first time, the Altar is empty: one jar marked +, and nothing chosen for anyone (Ambi, 26 Nov) */
@@ -76,6 +77,7 @@ async function load(){const a=await JUJU.get('/api/tap/channels'+(mine?'?mine=1'
  $('chans').innerHTML=chans.length?chans.map(card).join(''):FIRST();$('new').textContent=chans.length?'New vessel':'Open your first vessel';
  $('chans').classList.remove('wait');Flow.lazy($('chans'))}
 $('chans').addEventListener('click',e=>{
+ const d=e.target.closest('[data-del]');if(d){e.preventDefault();e.stopPropagation();const c=chans.find(x=>x.slug===d.dataset.del);if(c)JUJU.deleteChannel(c).then(ok=>{if(ok)load()}).catch(x=>JUJU.say($('new'),x.say||'Not deleted'));return}
  const s=e.target.closest('[data-shelf]');if(s){e.preventDefault();JUJU.go('shelf.html?ch='+s.dataset.shelf);return}
  const l=e.target.closest('[data-link]');if(l){e.preventDefault();JUJU.go('new-vessel.html?v='+l.dataset.link)}});
 $('new').addEventListener('click',()=>JUJU.go('new-vessel.html'));

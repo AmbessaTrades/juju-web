@@ -1,13 +1,16 @@
 {
- "version": "0.4.0",
- "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.4.0/juju-0.4.0.apk",
- "apk_sha256": "9e892a9a8a3b0820320d8ac21d47bafe7f769830efef420b42be698e3977fdbe",
+ "version": "0.4.1",
+ "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.4.1/juju-0.4.1.apk",
+ "apk_sha256": "4b1df49d320ecdcc6af56a1011b839462e682869476edeebd6a0d557a12f73fe",
  "notes": [
-  "Learn from a film works on the phone and the web: paste a YouTube link and Juju watches it, about a minute and about 20 cents.",
-  "Juju keeps what it learned on the channel: every film of that channel follows those rules.",
-  "The film's 'topics like this' become new ideas in Crossroads."
+  "Delete a channel: the bin on each channel, or at the bottom of New Vessel; type DELETE to confirm.",
+  "Pasting a channel you already have opens it instead of making a second one.",
+  "A pasted channel gets its real name and picture, and Juju watches its best recent film to learn from it.",
+  "A video link pasted where a channel goes says where it belongs.",
+  "The upload kit (title, description, thumbnail) opens on the phone and the web.",
+  "The Mac app signs in to the Door by itself and is on the same version."
  ],
- "min_core": "0.4.0",
+ "min_core": "0.4.1",
  "engine": "d019fe24",
- "commit": "8df562ec"
+ "commit": "3b30036e"
 }
