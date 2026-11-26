@@ -1,13 +1,12 @@
 {
- "version": "0.3.6",
- "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.3.6/juju-0.3.6.apk",
- "apk_sha256": "ee6e47eae156f47247383d7b4c54963ca0a7004249862e022b5c719ac1ef3c60",
+ "version": "0.3.7",
+ "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.3.7/juju-0.3.7.apk",
+ "apk_sha256": "bb322ec7101d8708ba34dc23b4ab228dfc1e72bb1af9c41d577dddb524873d5f",
  "notes": [
-  "Pasting a channel link on the web now adds the channel.",
-  "Looks with no film yet show their own colours, not black boxes.",
-  "On the web, Install app puts the Juju cat on your home screen as its own app."
+  "High Juju runs on the Claude API, with no Mac needed: ideas, titles and storyboards go to Claude when you switch it on.",
+  "The Mojo Bag shows what Google, Inworld and Claude cost this week."
  ],
- "min_core": "0.3.6",
- "engine": "214c4752",
- "commit": "0916da56"
+ "min_core": "0.3.7",
+ "engine": "eca22dec",
+ "commit": "a4d536ab"
 }
