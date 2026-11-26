@@ -1,0 +1,13 @@
+{
+ "version": "0.3.0",
+ "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.3.0/juju-0.3.0.apk",
+ "apk_sha256": "6647dc3b0303db0d765e6ab4113b52ee389d7750c1cb91806655f5f30b4ac8fb",
+ "notes": [
+  "Juju makes a wealth film on your phone, with no Mac: plan, map, sound and export, all on the phone.",
+  "Sign in once with your PIN; channels, ideas and money are shared between your phone, Mumu's and the web.",
+  "The first film downloads about 600 MB of maps once: use Wi-Fi."
+ ],
+ "min_core": "0.3.0",
+ "engine": "f256bed9",
+ "commit": "f3a8511a"
+}

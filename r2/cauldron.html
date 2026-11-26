@@ -29,6 +29,7 @@ body{--focus-x:40%;--focus-y:30%}
 #first .meta{display:grid;grid-template-columns:minmax(0,1fr) 200px;gap:16px;align-items:center;margin-top:14px}
 #first .meta b{font:600 20px/1.25 "Spectral SC",serif}
 #first .thumb{aspect-ratio:16/9;background:#000;overflow:hidden} #first .thumb img{width:100%;height:100%;object-fit:cover} #first .thumb[hidden]{display:none}
+.heldsay{margin:12px 0 0;color:var(--need);font:400 15px/1.4 "Josefin Sans",sans-serif}
 .sheetfoot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:16px}
 @media (max-width:760px){
  .r{grid-template-columns:96px minmax(0,1fr);gap:12px;padding:8px}
@@ -46,6 +47,7 @@ body{--focus-x:40%;--focus-y:30%}
 <section class="sheet" id="first" hidden aria-label="First look">
  <div class="screen"><video id="v" controls playsinline preload="metadata"></video></div>
  <div class="meta"><b id="ft" data-d></b><span class="thumb" id="fthumb" hidden></span></div>
+ <p class="heldsay" id="heldsay" hidden></p>
  <div class="sheetfoot"><button class="btn bare" id="fdrop">Drop</button><button class="btn need" id="keep">Keep</button></div>
 </section>
 <script>
@@ -56,24 +58,25 @@ const slug=JUJU.param('all')?'':Flow.ch(),films_url='/api/tap/films'+(slug?'?cha
 $('shelf').href=slug?'shelf.html?ch='+slug:'shelf.html';document.body.dataset.back=slug?'crossroads.html?ch='+slug:'altar.html';
 let films=[],lit=JUJU.param('f'),open=null,poll=null;
 /* the cauldron holds what is being made, what failed, and finished takes not yet kept, from the last two days */
-const here=f=>!f.gold&&(f.state==='running'||['failed','stopped','refused'].includes(f.state)||(f.state==='done'&&!f.kept&&Date.now()/1000-(f.updated||0)<172800));
-function row(f){const run=f.state==='running',bad=['failed','stopped','refused'].includes(f.state),done=f.state==='done';
+/* a held film stays here, watchable, with its reason, until Juju fixes it */
+const here=f=>!f.gold&&(f.state==='running'||['failed','stopped','refused','held'].includes(f.state)||(f.state==='done'&&!f.kept&&Date.now()/1000-(f.updated||0)<172800));
+function row(f){const run=f.state==='running',held=f.state==='held',bad=['failed','stopped','refused','held'].includes(f.state),done=f.state==='done'||held;
  const pct=done?100:Math.max(4,Math.min(100,+f.pct||0));
  return `<div class="r${done?' look':''}${f.id===lit?' on':''}" role="listitem" data-f="${esc(f.id)}"${done?' tabindex="0"':''}>
   <span class="pic">${Flow.pic(f)}</span>
   <span class="mid"><span class="t" data-d>${esc(f.title||f.sentence||'')}</span>${f.steer?`<span class="st" data-d>${esc(f.steer)}</span>`:''}${bad&&f.error?`<span class="why" data-d>${esc(f.error)}</span>`:`<span class="bar${run?' run':''}"><i style="width:${pct}%"></i></span>`}</span>
-  <span class="end"><span class="say${done?' done':bad?' bad':''}" data-d>${esc(done?'First look':f.say||'')}</span>${run?'<button class="btn stop" data-act="stop">Stop</button>':bad?'<span class="two"><button class="btn need" data-act="again">Again</button><button class="btn bare" data-act="drop">Drop</button></span>':''}</span></div>`}
+  <span class="end"><span class="say${held?' bad':done?' done':bad?' bad':''}" data-d>${esc(held?'Held back':done?'First look':f.say||'')}</span>${run?'<button class="btn stop" data-act="stop">Stop</button>':bad?'<span class="two"><button class="btn need" data-act="again">Again</button><button class="btn bare" data-act="drop">Drop</button></span>':''}</span></div>`}
 function draw(){const l=films.filter(here);
  $('rows').innerHTML=l.length?l.map(row).join(''):`<div class="empty">${Art.emblem('cauldron')}<b>Nothing in the pot</b></div>`;
  $('rows').classList.remove('wait');Flow.lazy($('rows'))}
 async function load(){const a=await JUJU.get(films_url);films=a.films;draw();return a}
 function watch(){if(poll)poll.stop();poll=JUJU.poll(films_url,a=>{const was=films.filter(f=>f.state==='running').map(f=>f.id);films=a.films;draw();
  films.filter(f=>was.includes(f.id)&&f.state==='done').forEach(f=>Kit.toast(f.title||'Ready'));return true},{every:()=>films.some(f=>f.state==='running')?2500:9000,fail:()=>{}})}
-function first(f){open=f;$('ft').textContent=f.title||f.sentence||'';$('v').src=f.film;$('fthumb').hidden=!f.thumb;$('fthumb').innerHTML=f.thumb?`<img src="${esc(f.thumb)}" alt="">`:'';
+function first(f){open=f;$('ft').textContent=f.title||f.sentence||'';const held=f.state==='held';$('keep').hidden=held;$('heldsay').hidden=!held;$('heldsay').textContent=held?(f.error||'Held back')+'. It can\'t be kept until Juju fixes this.':'';$('v').src=f.film;$('fthumb').hidden=!f.thumb;$('fthumb').innerHTML=f.thumb?`<img src="${esc(f.thumb)}" alt="">`:'';
  Kit.sheet('first').open();Flow.tell('first',f);$('v').play().catch(()=>{})}
 $('rows').addEventListener('click',e=>{const b=e.target.closest('[data-act]'),r=e.target.closest('[data-f]');if(!r)return;const f=films.find(x=>x.id===r.dataset.f);if(!f)return;
  if(b){const a=b.dataset.act;return JUJU.once(b,async()=>{const x=await JUJU.post('/api/tap/films/'+encodeURIComponent(f.id)+'/'+a);await load();return x})}
- if(f.state==='done')first(f)});
+ if(f.state==='done'||f.state==='held')first(f)});
 $('rows').addEventListener('keydown',e=>{if(e.key==='Enter'){const r=e.target.closest('.r.look');if(r)r.click()}});
 $('keep').addEventListener('click',()=>{if(!open)return;JUJU.once($('keep'),async()=>{const x=await JUJU.post('/api/tap/films/'+encodeURIComponent(open.id)+'/keep');$('v').pause();Kit.sheet('first').close();Kit.finish($('go'),'On the shelf');await load();return x})});
 $('fdrop').addEventListener('click',()=>{if(!open)return;JUJU.once($('fdrop'),async()=>{const x=await JUJU.post('/api/tap/films/'+encodeURIComponent(open.id)+'/drop');$('v').pause();Kit.sheet('first').close();await load();return x})});

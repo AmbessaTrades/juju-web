@@ -35,11 +35,12 @@ body{--focus-x:50%;--focus-y:40%}
 .lk small{display:flex;align-items:center;gap:6px;margin-top:4px;color:var(--ash);font:400 13px/1.2 "Lato",sans-serif} .lk small .lock{width:13px;height:13px}
 #brand .sheetfoot{position:sticky;bottom:calc(-24px - env(safe-area-inset-bottom));margin:16px -28px calc(-24px - env(safe-area-inset-bottom));padding:12px 28px calc(14px + env(safe-area-inset-bottom));background:var(--panel-b);z-index:2}
 @media (max-width:760px){#brand .sheetfoot{margin-left:-18px;margin-right:-18px;padding-left:18px;padding-right:18px}}
-.lensay{min-height:20px;margin-top:8px;color:var(--ash);font:400 14px/1.3 "Josefin Sans",sans-serif}
 .sizes{display:flex;gap:8px;margin-top:18px} .sizes .btn{flex:1} .sizes .btn.on{color:var(--act);box-shadow:inset 0 0 0 2px var(--act)}
 .say{width:100%;min-height:96px;resize:vertical;padding:14px 16px;background:var(--a-well);color:var(--bone);border:2px solid var(--line-hi);font:400 20px/1.4 "Spectral",serif}
 .say:focus{outline:none;border-color:var(--act)}
 .sheetfoot{display:flex;justify-content:flex-end;margin-top:16px}
+.idea.nopic{min-height:0} .idea.nopic .ti{font-size:24px}
+.empty .hint{color:var(--ash);font:400 14px/1.3 "Josefin Sans",sans-serif}
 .steer{width:100%;min-height:48px;margin-top:12px;padding:0 14px;background:var(--a-well);color:var(--bone);border:0;border-bottom:2px solid var(--line);font:italic 400 17px/1 "Spectral",serif}
 .steer:focus{outline:none;border-color:var(--act)} .steer::placeholder{color:var(--smoke);opacity:1}
 .idea .tw{position:absolute;right:10px;top:10px;min-height:44px;padding:0 10px;font-size:13px;color:var(--smoke)} .idea .tw:hover{color:var(--bone)}
@@ -64,14 +65,14 @@ body{--focus-x:50%;--focus-y:40%}
  <h2 class="h2">Look</h2>
  <div class="looks" id="looks" role="radiogroup" aria-label="Look"></div>
  <div class="sizes" id="sizes" role="radiogroup" aria-label="Size"></div>
- <div class="sizes lens" id="lens" role="radiogroup" aria-label="Length"></div>
- <p class="lensay" id="lensay" data-d></p>
+ <div id="lens"></div>
  <div class="sheetfoot"><button class="btn need" data-close>Done</button></div>
 </section>
 <section class="sheet" id="mine" hidden aria-label="Your own">
  <h2 class="h2">Your own</h2>
  <textarea class="say" id="say" rows="3" maxlength="1600" aria-label="Your sentence" placeholder="One sentence"></textarea>
  <input class="steer" id="ownsteer" maxlength="200" autocomplete="off" aria-label="Steer" placeholder="told as the Tamil tradition tells it">
+ <div id="lens2"></div>
  <div class="sheetfoot"><button class="btn need" id="makeown">Make</button></div>
 </section>
 <section class="sheet" id="steerer" hidden aria-label="Steer">
@@ -88,15 +89,18 @@ const kindName=k=>(ch.systems.find(s=>s.kind===k)||{}).name||'';
 const shown=()=>ch.ideas.slice(page*3,page*3+3);
 /* an idea card: its thumbnail when the Channels lane drew one; a locked one is greyed and says where it opens */
 const fallback=()=>ch.thumb||ch.avatar||'';
-const pic=x=>{const f=fallback(),alt=f?`this.onerror=null;this.src='${esc(f)}'`:`this.remove()`;
- return x.thumb?`<img src="${esc(x.thumb)}" alt="">`:x.theme?`<img src="/api/tap/themes/${esc(x.theme)}.jpg" alt="" onerror="${alt}">`:f?`<img src="${esc(f)}" alt="">`:''};
-const card=(x,i)=>{const n=page*3+i,lk=x.locked||ch.locked;return `<button class="card idea${lk?' shut':''}" role="listitem" data-i="${n}" style="--n:${i}"${lk?' disabled aria-disabled="true"':''}><span class="pic">${pic(x)}</span><span class="kind" data-d>${esc(kindName(x.kind))}</span><span class="ti" data-d>${esc(x.title)}</span><span class="foot">${lk?`<span class="go dim">${Flow.lock}Opens in High Juju</span>`:`<span class="go">${Art.glyph('go')}Make</span><span class="btn bare tw" role="button" data-steer="${n}">Steer</span>`}</span></button>`};
+/* only Juju's own thumbnail for this idea, else the channel's own picture; never one stand-in frame repeated on every card (Ambi, 26 Nov) */
+const pic=x=>x.thumb?`<img src="${esc(x.thumb)}" alt="">`:fallback()?`<img src="${esc(fallback())}" alt="">`:'';
+const card=(x,i)=>{const n=page*3+i,lk=x.locked||ch.locked,pc=pic(x);return `<button class="card idea${lk?' shut':''}${pc?'':' nopic'}" role="listitem" data-i="${n}" style="--n:${i}"${lk?' disabled aria-disabled="true"':''}>${pc?`<span class="pic">${pc}</span>`:''}<span class="kind" data-d>${esc(kindName(x.kind))}</span><span class="ti" data-d>${esc(x.title)}</span><span class="foot">${lk?`<span class="go dim">${Flow.lock}Opens in High Juju</span>`:`<span class="go">${Art.glyph('go')}Make</span><span class="btn bare tw" role="button" data-steer="${n}">Steer</span>`}</span></button>`};
 function draw(){
  Flow.head(ch);if(!document.querySelector('.head .chan.pick'))Flow.switcher('crossroads',slug);const l=shown(),h=$('hand');
  if(ch.locked&&!l.length){h.innerHTML=`<div class="empty">${Flow.lock}<b data-d>${esc(ch.look||'')}</b><span>Opens in High Juju</span></div>`;$('go').textContent='Shelf';$('own').hidden=true}
  else if(ch.locked){h.innerHTML=l.map(card).join('');$('go').textContent='Shelf';$('own').hidden=true}
- else if(!ch.kinds.length){h.innerHTML=`<div class="empty">${Art.emblem('crossroads')}<b>Pick a look</b></div>`;$('go').textContent='Pick a look';$('own').hidden=true}
- else if(!l.length){h.innerHTML=`<div class="empty">${Art.emblem('crossroads')}<b>No ideas left</b></div>`;$('go').textContent='Your own'}
+ /* a vessel with no look yet still shows the ideas Juju found for it: each idea carries its own look; with none, Find ideas or a look */
+ else if(!ch.kinds.length&&!l.length){h.innerHTML=`<div class="empty">${Art.emblem('crossroads')}<b>${finding?'Juju is finding ideas for this channel':'No ideas yet'}</b>${finding?'<span class="hint">About a minute</span>':'<button class="btn need" id="find" type="button">Find ideas</button>'}</div>`;$('go').textContent='Pick a look';$('own').hidden=true}
+ else if(!ch.kinds.length){h.innerHTML=l.map(card).join('');$('go').textContent='Make';$('own').hidden=true}
+ /* no ideas yet: Juju looks for them on a tap (ju ideas, about a minute and a tenth of a cent), or the person writes their own */
+ else if(!l.length){h.innerHTML=`<div class="empty">${Art.emblem('crossroads')}<b>${finding?'Juju is finding ideas for this channel':'No ideas yet'}</b>${finding?'<span class="hint">About a minute</span>':'<button class="btn need" id="find" type="button">Find ideas</button>'}</div>`;$('go').textContent='Your own'}
  else{h.innerHTML=l.map(card).join('');$('go').textContent='Make';$('own').hidden=false}
  $('more').hidden=ch.ideas.length<=3||ch.locked;
  h.classList.remove('wait');Kit.deal&&Kit.deal(h);drawBrand()}
@@ -104,11 +108,14 @@ function drawBrand(){
  $('looks').innerHTML=ch.systems.map(s=>`<button class="lk${s.id===ch.system?' on':''}" role="radio" aria-checked="${s.id===ch.system}" data-s="${esc(s.id)}"${s.locked?' disabled aria-disabled="true"':''}>${s.themes&&s.themes[0]?`<img src="/api/tap/themes/${esc(s.themes[0])}.jpg" alt="" onerror="this.outerHTML='<span class=ph></span>'">`:`<span class="ph">${s.locked?Flow.lock:''}</span>`}<span><span data-d>${esc(s.name)}</span>${s.locked?`<small>${Flow.lock}Opens in High Juju</small>`:''}</span></button>`).join('');
  $('sizes').innerHTML=ch.sizes.map(h=>`<button class="btn${h===ch.export?' on':''}" role="radio" aria-checked="${h===ch.export}" data-h="${h}">${Flow.size(h)}</button>`).join('');
  /* the length sent to the film program as --minutes; with none set it makes 2 (lead, 26 Nov). 20 and 28 are long films, slower. */
- const m=ch.minutes||2;$('lens').innerHTML=LENS.map(x=>`<button class="btn${x===m?' on':''}" role="radio" aria-checked="${x===m}" data-m="${x}">${x} min</button>`).join('');
- $('lensay').textContent=m>=20?'Long film, slower':m===2?'First look':''}
-const LENS=[2,10,20,28];
-async function load(){ch=await JUJU.get('/api/tap/channels/'+slug);draw()}
-async function make(body,at){const r=await JUJU.post('/api/tap',Object.assign({channel:slug},body));Kit.finish($('go'),'Making it');JUJU.go('cauldron.html?ch='+slug+'&f='+encodeURIComponent(r.film));return r}
+ /* the channel's length, on its Look sheet and on the make sheet; every make sends it */
+ const pick=x=>JUJU.patch('/api/tap/channels/'+slug,{minutes:x}).then(()=>{ch.minutes=x;drawBrand()}).catch(e=>JUJU.say($('lens'),e.say));
+ Flow.lenpick($('lens'),ch.minutes,pick);Flow.lenpick($('lens2'),ch.minutes,pick)}
+let finding=false;
+async function load(){ch=await JUJU.get('/api/tap/channels/'+slug);try{const I=await JUJU.get('/api/tap/channels/'+slug+'/ideas');if(I.running&&!finding){finding=true;watchIdeas()}}catch(e){}draw()}
+function watchIdeas(){JUJU.poll('/api/tap/channels/'+slug+'/ideas',I=>{if(!I.running){finding=false;load();return false}return true},{every:5000,fail:()=>{}})}
+document.addEventListener('click',e=>{const f=e.target.closest('#find');if(!f)return;JUJU.once(f,async()=>{await JUJU.post('/api/tap/channels/'+slug+'/ideas');finding=true;draw();watchIdeas()})});
+async function make(body,at){const r=await JUJU.post('/api/tap',Object.assign({channel:slug,minutes:Flow.minutes(ch.minutes),test:Flow.TEST||undefined},body));Kit.finish($('go'),'Making it');JUJU.go('cauldron.html?ch='+slug+'&f='+encodeURIComponent(r.film));return r}
 let steering=null;
 function makeIdea(i,btn,steer){const x=ch.ideas[i];if(!x)return;btn&&btn.classList.add('going');
  return JUJU.once(btn||$('go'),()=>make({kind:x.kind,sentence:x.sentence,theme:x.theme,steer:steer||undefined}),{at:$('go'),done:()=>{btn&&btn.classList.remove('going')}})}
@@ -124,8 +131,6 @@ $('go').addEventListener('click',()=>{
 $('more').addEventListener('click',()=>{page=(page+1)%Math.ceil(ch.ideas.length/3);draw()});
 $('looks').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(!b||b.disabled)return;Kit.press(b);
  JUJU.once(b,async()=>{await JUJU.patch('/api/tap/channels/'+slug,{system:b.dataset.s});page=0;await load()})});
-$('lens').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b)return;Kit.press(b);
- JUJU.once(b,async()=>{await JUJU.patch('/api/tap/channels/'+slug,{minutes:+b.dataset.m});await load()})});
 $('sizes').addEventListener('click',e=>{const b=e.target.closest('[data-h]');if(!b)return;Kit.press(b);
  JUJU.once(b,async()=>{await JUJU.patch('/api/tap/channels/'+slug,{export:+b.dataset.h});await load()})});
 $('makeown').addEventListener('click',()=>{const s=$('say').value.trim();if(s.length<3){JUJU.say($('makeown'),'One sentence');$('say').focus();return}

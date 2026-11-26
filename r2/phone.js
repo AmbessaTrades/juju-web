@@ -41,3 +41,46 @@ HTMLAnchorElement.prototype.click=function(){if(this.download&&this.href.startsW
 /* a slow press on a button is a press, not a selection of its word */
 document.addEventListener('DOMContentLoaded',()=>document.head.insertAdjacentHTML('beforeend','<style>button,.btn,a,nav,summary{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}</style>'));
 })();
+/* One unit, one version (lead, 26 Nov): rooms, this shim, the engine and the Door contract ship together. On open and every 6 hours
+   the room asks /api/update. A newer version slides up a sheet; closed, it comes back on the next open and stays as a row in the Mojo Bag.
+   The phone downloads the APK, checks it and opens Android's installer; the web takes the new files and reloads. A film being made holds it. */
+(()=>{
+if(/\/gate\.html$/.test(location.pathname))return;
+const P=window.JujuPhone,esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let U=null,shown=false,timer=null;
+const css=document.createElement('style');css.textContent=`
+#jujuUpdate .lines{margin:8px 0 16px;color:var(--bone);font:400 15px/1.45 "Lato",sans-serif}#jujuUpdate .lines p{margin:0 0 6px}
+#jujuUpdate .say{min-height:20px;margin-top:10px;color:var(--need);font:600 14px/1.35 "Josefin Sans",sans-serif}
+#jujuUpdate .bar{height:6px;margin-top:10px;background:var(--line,#333)}#jujuUpdate .bar i{display:block;height:100%;width:0;background:var(--act,#4fd1a5)}
+.juju-ver{margin:14px 0 0;color:var(--ash,#8a8f98);font:400 12px/1.3 "JetBrains Mono",monospace;text-align:center}
+.juju-ver.ready{color:var(--need)} #mojo .row.juju-upd{width:100%;margin-top:10px}`;
+document.head.append(css);
+async function check(){try{const r=await fetch('/api/update',{cache:'no-store'});if(!r.ok)return;U=await r.json()}catch(e){return}
+ foot();if(U.newer&&!shown&&!(sessionStorage.getItem('juju.upd.closed')===U.latest.version)){shown=true;sheet()}}
+function foot(){const m=document.getElementById('mojo');if(!m||!U)return;let f=m.querySelector('.juju-ver');if(!f){f=document.createElement('p');f.className='juju-ver';m.append(f)}
+ const core=U.core?' · engine '+String(U.core).slice(0,7):'';f.textContent='Juju '+U.version+core+(U.newer||U.core_old?' · update ready':'');f.classList.toggle('ready',!!(U.newer||U.core_old));
+ let b=m.querySelector('.juju-upd');if(U.newer&&!b){b=document.createElement('button');b.className='btn row juju-upd';b.textContent='Update to '+U.latest.version;b.addEventListener('click',()=>{if(window.Kit)Kit.sheet('mojo').close();sheet()});f.before(b)}}
+function sheet(){
+ let s=document.getElementById('jujuUpdate');
+ if(!s){document.body.insertAdjacentHTML('beforeend',`<section class="sheet" id="jujuUpdate" hidden aria-labelledby="jujuUpdT"><h3 id="jujuUpdT"></h3><button class="x btn bare" data-close aria-label="Close">×</button><div class="lines"></div><button class="btn primary" id="jujuUpdGo">Update</button><div class="bar" hidden><i></i></div><p class="say" aria-live="polite"></p></section>`);
+  s=document.getElementById('jujuUpdate');
+  s.querySelector('[data-close]').addEventListener('click',()=>{try{sessionStorage.setItem('juju.upd.closed',U.latest.version)}catch(e){}});
+  document.getElementById('jujuUpdGo').addEventListener('click',go)}
+ s.querySelector('h3').textContent='Juju '+U.latest.version+' is ready';
+ s.querySelector('.lines').innerHTML=(U.latest.notes||[]).slice(0,3).map(l=>'<p>'+esc(l)+'</p>').join('');
+ if(window.Kit&&Kit.sheet)Kit.sheet('jujuUpdate').open();else s.hidden=false}
+async function go(){
+ const s=document.getElementById('jujuUpdate'),say=t=>{s.querySelector('.say').textContent=t},btn=document.getElementById('jujuUpdGo');
+ if(!P){btn.disabled=true;say('Updating…');try{const r=await navigator.serviceWorker.getRegistration();if(r)await r.update()}catch(e){}setTimeout(()=>location.reload(),600);return}
+ // the phone: never while a film is being made
+ try{const v=await (await fetch('/api/update',{cache:'no-store'})).json();if(v.making){say('Juju updates when the film being made is done');setTimeout(go,20000);return}}catch(e){}
+ btn.disabled=true;s.querySelector('.bar').hidden=false;P.update(U.latest.apk_url,U.latest.apk_sha256);
+ clearInterval(timer);timer=setInterval(()=>{let st={};try{st=JSON.parse(P.updateState()||'{}')}catch(e){}
+  s.querySelector('.bar i').style.width=(st.pct||0)+'%';
+  if(st.state==='downloading')say('Downloading '+(st.pct||0)+'%');
+  else if(st.state==='installing'){say('Android asks you to install it');clearInterval(timer);btn.disabled=false}
+  else if(st.state==='allow'){say('Allow Juju to install updates: Settings › Apps › Juju › Install unknown apps › Allow. Then tap Update again.');clearInterval(timer);btn.disabled=false}
+  else if(st.state==='failed'){say(st.say||'The download failed. Try again on Wi-Fi.');clearInterval(timer);btn.disabled=false}},500)}
+document.addEventListener('DOMContentLoaded',()=>{check();setInterval(check,6*3600e3);
+ new MutationObserver(()=>{const m=document.getElementById('mojo');if(m&&!m.querySelector('.juju-ver'))foot()}).observe(document.body,{childList:true,subtree:true})});
+})();

@@ -2,7 +2,9 @@
    juju-serve and the APK (apps/juju-shell/android/rust/src/tap.rs): the Gate, the lists and the Purse come from the Door; the
    design systems, kinds and theme frames from the seed this site was built with. Nothing reaches the Mac.
    Until juju-core runs here as WASM (lane A), a film is not made in the browser: Make says so. */
-const BASE = new URL('./', self.location).pathname;            // /juju-web/ on GitHub Pages
+const BASE = new URL('./', self.location).pathname;
+/* the version of the unit this worker belongs to: stamped by web/build.py, so a tab knows when the site has moved on */
+const ABOUT = {"version": "0.3.0", "core": null, "commit": "f3a8511a"};            // /juju-web/ on GitHub Pages
 const STORE = 'juju-state-v1';
 let CFG = null;
 self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
@@ -91,6 +93,12 @@ async function answer(req, url) {
   const body = m === 'GET' || m === 'DELETE' ? {} : await req.json().catch(() => ({}));
   const is = (mm, ...p) => m === mm && p.length === seg.length && p.every((x, i) => x === '*' || x === seg[i]);
   if (is('GET', '__space')) { const t = url.searchParams.get('name') || ''; if (t === 'off') { await drop('space'); } else if (/^[a-z0-9]{4,20}$/.test(t)) { await put('space', t); } else return no(422, 'space', 'Not a test space'); await drop('session'); await drop('people'); return json(200, { space: t }); }
+  if (is('GET', 'update')) {
+    const about = ABOUT;
+    const latest = await (await fetch(BASE + 'version.json', { cache: 'no-store' })).json().catch(() => null);
+    const n = v => String(v || '0.0.0').replace(/^v/, '').split('.').map(x => +x || 0), gt = (a, b) => { a = n(a); b = n(b); for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] > b[i]; return false };
+    return json(200, { version: about.version || '0.0.0', core: about.core || null, here: 'web', latest, newer: !!(latest && gt(latest.version, about.version)), core_old: false, making: false });
+  }
   if (is('GET', 'health')) return json(200, { ok: true, here: 'web' });
   if (is('GET', 'session')) { const s = await get('session'), pp = await people(); return json(200, { who: s ? s.who : null, people: pp, here: pp.some(p => p.pin === 'none') ? 'mac' : 'phone' }); }
   if (is('POST', 'session') || is('POST', 'session', 'pin')) {

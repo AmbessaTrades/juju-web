@@ -95,6 +95,24 @@ F.tell.draw=v=>{const box=document.querySelector('.tell'),l=box.querySelector('.
  box.classList.toggle('wide',!!(pair||takes));l.scrollTop=l.scrollHeight};
 F.tell.watch=()=>{if(F.tell.poll)F.tell.poll.stop();const f=F.tell.film;if(!f)return;
  F.tell.poll=JUJU.poll('/api/tap/films/'+encodeURIComponent(f.id)+'/mend',v=>{if(F.tell.film!==f)return false;F.tell.draw(v);return v.state==='running'},{every:3000,fail:()=>{}})};
+/* A film's length (Ambi, 26 Nov: "the maximum should be like 11 or 10 minutes ... maybe a slider"): one slider from 10 to 30 minutes,
+   the minutes in big type above it, "Long film, slower" from 20. 2 minutes is for tests only: a page opened with ?test=1 shows a 2 min tap. */
+F.TEST=JUJU.param('test')==='1';
+{const st=document.createElement('style');st.textContent=`.lenpick{display:grid;gap:6px;margin-top:16px}
+.lenpick .big{font:600 34px/1 "Spectral SC",serif;color:var(--bone)} .lenpick .big small{font:400 15px/1 "Josefin Sans",sans-serif;color:var(--ash);margin-left:6px}
+.lenpick input[type=range]{width:100%;accent-color:var(--act);height:32px;cursor:pointer}
+.lenpick .ends{display:flex;justify-content:space-between;color:var(--smoke);font:400 12px/1 "Josefin Sans",sans-serif}
+.lenpick .slow{min-height:18px;color:var(--ash);font:400 14px/1.3 "Josefin Sans",sans-serif} .lenpick .test{justify-self:start;min-height:32px;font-size:12px}`;document.head.append(st)}
+F.minutes=m=>F.TEST&&m===2?2:Math.min(30,Math.max(10,Math.round(m||11)));
+F.lenpick=(el,m,pick)=>{let v=F.minutes(m);
+ el.innerHTML=`<div class="lenpick"><div class="big" aria-live="polite"><span data-d>${v}</span><small>minutes</small></div>
+  <input type="range" min="10" max="30" step="1" value="${Math.max(10,v)}" aria-label="Length in minutes"><div class="ends"><span>10</span><span>30</span></div>
+  <div class="slow">${v>=20?'Long film, slower':''}</div>${F.TEST?`<button class="btn bare test" type="button">2 min (test)</button>`:''}</div>`;
+ const r=el.querySelector('input'),big=el.querySelector('.big span'),slow=el.querySelector('.slow');
+ const show=x=>{big.textContent=x;slow.textContent=x>=20?'Long film, slower':''};
+ r.addEventListener('input',()=>show(+r.value));
+ r.addEventListener('change',()=>pick(+r.value));
+ const t=el.querySelector('.test');if(t)t.addEventListener('click',()=>{show(2);pick(2)})};
 F.head=c=>{if(!c)return;JUJU.chan(F.who(c));document.title='Juju · '+(document.body.dataset.title||'')};
 /* the film player sheet: one film plays; its picture, its title and one action */
 F.ago=t=>{if(!t)return'';const d=Date.now()/1000-t;return d<3600?Math.max(1,Math.round(d/60))+' min ago':d<86400?Math.round(d/3600)+' h ago':Math.round(d/86400)+' d ago'};

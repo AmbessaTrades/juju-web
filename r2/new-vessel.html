@@ -24,6 +24,7 @@ body{--focus-x:38%;--focus-y:46%}
 .rc .row>span:first-child{color:var(--ash);font:600 12px/1.2 "Josefin Sans",sans-serif;letter-spacing:.06em;text-transform:uppercase}
 .rc .row.tap{cursor:pointer} .rc .row.tap:hover{border-color:var(--line-hi)}
 .rc .row .nb{color:var(--smoke);font-style:italic}
+.rc .row #lenrow{display:block;min-width:0} .rc .row .lenpick{margin-top:0} .rc .row .lenpick .big{font-size:26px}
 .rc .row input{width:100%;min-height:36px;padding:0 8px;background:var(--a-well);border:2px solid var(--line-hi);color:var(--bone);font:600 17px/1 "Spectral SC",serif}
 .rc .chips{display:flex;gap:6px;flex-wrap:wrap} .rc .chips .btn{min-height:36px;padding:0 10px;font-size:13px} .rc .chips .btn.on{color:var(--act);box-shadow:inset 0 0 0 2px var(--act)}
 .rc .thumbs{display:flex;gap:4px} .rc .thumbs img{width:64px;aspect-ratio:16/9;object-fit:cover}
@@ -86,7 +87,7 @@ const lookCard=l=>`<button class="look${V&&V.look_from===l.id?' on':''}" role="r
 function drawLooks(){$('looks').innerHTML=looks.map(lookCard).join('');$('looks2').innerHTML=looks.map(lookCard).join('')}
 /* the receipt: what was chosen, what Juju read, and plain "Not built yet" where no program stands behind a line */
 function receipt(I){const v=V;if(!v){$('rc').innerHTML='';$('jar').innerHTML=Art.jar({state:'new'});$('go').disabled=true;return}
- const L=looks.find(l=>l.id===v.look_from),m=v.minutes||2,w=v.films_week||0;
+ const L=looks.find(l=>l.id===v.look_from),w=v.films_week||0;
  const rt=v.route||{},niche=v.niche_line?esc(v.niche_line):v.describe?esc(v.describe)+(rt.say?`<br><span class="nb">${esc(rt.say)}</span>`:rt.locked?'<br><span class="nb">Opens in High Juju</span>':''):I&&I.niche?esc(I.niche):I&&I.running?'<span class="nb">Juju is reading the channel</span>':v.door==='absorb'?'<span class="nb">Juju reads it next</span>':NB;
  const titles=I&&I.titles&&I.titles.length?`<span class="titles">${I.titles.slice(0,3).map(t=>`<span data-d>${esc(t)}</span>`).join('')}</span>`:I&&I.running?'<span class="nb">Reading its titles</span>':NB;
  const thumbs=L&&L.examples.some(x=>x.thumb)?`<span><span class="thumbs">${L.examples.filter(x=>x.thumb).slice(0,3).map(x=>`<img src="${esc(x.thumb)}" alt="">`).join('')}</span><span class="nb">Examples of this look</span></span>`:NB;
@@ -98,9 +99,10 @@ function receipt(I){const v=V;if(!v){$('rc').innerHTML='';$('jar').innerHTML=Art
   <div class="row"><span>Learn from</span>${v.refs&&v.refs.length?`<span data-d>${v.refs.length} film${v.refs.length>1?'s':''}; used when Bend is built</span>`:'<span class="nb">Paste a film on the left</span>'}</div>
   <div class="row"><span>Thumbnails</span>${thumbs}</div>
   <div class="row"><span>Sound</span>${NB}</div>
-  <div class="row"><span>Length</span><span class="chips" id="lens">${[2,10,20,28].map(x=>`<button class="btn${x===m?' on':''}" data-m="${x}" aria-pressed="${x===m}">${x} min</button>`).join('')}</span></div>
+  <div class="row"><span>Length</span><span id="lenrow"></span></div>
   <div class="row"><span>A week</span><span class="chips" id="pace">${[1,3,5,7].map(x=>`<button class="btn${x===w?' on':''}" data-w="${x}" aria-pressed="${x===w}">${x} film${x>1?'s':''}</button>`).join('')}</span></div>`;
  $('jar').innerHTML=Art.jar({state:v.name&&v.kinds.length?'needs':'new',label:(v.name||'').slice(0,2).toUpperCase()||undefined});
+ Flow.lenpick($('lenrow'),v.minutes,x=>JUJU.patch('/api/tap/channels/'+slug,{minutes:x}).then(load).catch(e=>JUJU.say($('lenrow'),e.say)));
  $('go').disabled=!(v.name&&v.kinds.length);
  JUJU.say($('go'),!v.kinds.length?'Pick a look':!v.name?'Name it':'', 'need');if(v.name&&v.kinds.length)JUJU.unsay($('go'))}
 async function load(){if(!slug){receipt();return}
@@ -133,7 +135,7 @@ $('absorb').addEventListener('submit',e=>{e.preventDefault();const link=$('url')
 /* describe: one line in the person's words */
 $('describe').addEventListener('submit',e=>{e.preventDefault();const d=$('line').value.trim();if(!d){JUJU.say($('say'),'One line, please');return}
  JUJU.once($('say'),async()=>{if(slug)await JUJU.patch('/api/tap/channels/'+slug,{describe:d});else setSlug((await JUJU.post('/api/tap/channels',{describe:d})).slug);await load();Kit.toast('Kept')})});
-$('rc').addEventListener('click',e=>{const m=e.target.closest('[data-m]'),w=e.target.closest('[data-w]');if(!(m||w)||!slug)return;const b=m||w;
+$('rc').addEventListener('click',e=>{const m=null,w=e.target.closest('[data-w]');if(!w||!slug)return;const b=w;
  JUJU.once(b,async()=>{await JUJU.patch('/api/tap/channels/'+slug,m?{minutes:+m.dataset.m}:{films_week:+w.dataset.w});await load()})});
 $('rc').addEventListener('change',e=>{if(e.target.id!=='name'||!slug)return;const n=e.target.value.trim();if(!n)return;
  JUJU.patch('/api/tap/channels/'+slug,{name:n}).then(load).catch(x=>JUJU.say(e.target,x.say))});

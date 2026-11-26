@@ -62,7 +62,7 @@ $('kitgo').addEventListener('click',async()=>{if(!open)return;$('v').pause();con
   const part=(lab,body,copy)=>`<div class="part"><div class="lab"><span>${lab}</span>${copy?`<button class="btn bare" data-copy="${lab}">Copy</button>`:''}</div>${body}</div>`,txt={};
   let h='';if(k.title){txt.Title=k.title;h+=part('Title',`<div class="txt t">${esc(k.title)}</div>`,1)}
   if(k.description){txt.Description=k.description;h+=part('Description',`<div class="txt">${esc(k.description)}</div>`,1)}
-  if(k.thumb)h+=part('Thumbnail',`<img src="${esc(k.thumb)}" alt=""><div><a class="btn bare" href="${esc(k.thumb)}" download>Save thumbnail</a></div>`);
+  if(k.thumb)h+=part(k.thumb_label||'Thumbnail',`<img src="${esc(k.thumb)}" alt=""><div><a class="btn bare" href="${esc(k.thumb)}" download>Save thumbnail</a></div>`);
   if(k.film)h+=part('Film',`<div><a class="btn bare" href="${esc(k.film)}" download>Save film</a></div>`);
   at.innerHTML=h;at.onclick=e=>{const b=e.target.closest('[data-copy]');if(!b)return;JUJU.copy(txt[b.dataset.copy]).then(ok=>{b.textContent=ok?'Copied':'Copy';if(ok)Kit.toast('Copied')})}}
  catch(e){at.innerHTML='';JUJU.say($('kitParts'),e.say)}});
