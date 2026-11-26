@@ -115,7 +115,16 @@ let finding=false;
 async function load(){ch=await JUJU.get('/api/tap/channels/'+slug);try{const I=await JUJU.get('/api/tap/channels/'+slug+'/ideas');if(I.running&&!finding){finding=true;watchIdeas()}}catch(e){}draw()}
 function watchIdeas(){JUJU.poll('/api/tap/channels/'+slug+'/ideas',I=>{if(!I.running){finding=false;load();return false}return true},{every:5000,fail:()=>{}})}
 document.addEventListener('click',e=>{const f=e.target.closest('#find');if(!f)return;JUJU.once(f,async()=>{await JUJU.post('/api/tap/channels/'+slug+'/ideas');finding=true;draw();watchIdeas()})});
-async function make(body,at){const r=await JUJU.post('/api/tap',Object.assign({channel:slug,minutes:Flow.minutes(ch.minutes),test:Flow.TEST||undefined},body));Kit.finish($('go'),'Making it');JUJU.go('cauldron.html?ch='+slug+'&f='+encodeURIComponent(r.film));return r}
+async function make(body,at){
+ /* Ambi 26 Nov: say it starts a whole film, and that another one is already cooking, before anything starts */
+ const fl=(await JUJU.get('/api/tap/films').catch(()=>({films:[]}))).films||[],mins=Flow.minutes(ch.minutes),busy=fl.filter(f=>f.state==='running').length,first=!fl.some(f=>f.state==='done'&&f.here);
+ const ok=await JUJU.confirm({title:'Make this film?',go:'Make it',stay:'Not now',lines:[{text:body.sentence||'',cls:'t'},
+  `About ${mins} minutes long. Juju writes it, voices it, draws the maps and cuts it, by itself.`,
+  `It takes about ${JUJU.makeMinutes(mins)} minutes and spends from the money set aside.`,
+  first?'The first film on this phone downloads about 600 MB of maps once. Use Wi-Fi.':null,
+  busy?{text:`${busy===1?'A film is':busy+' films are'} already being made. Two at once makes both slower.`,cls:'warn'}:null]});
+ if(!ok)return;
+ const r=await JUJU.post('/api/tap',Object.assign({channel:slug,minutes:Flow.minutes(ch.minutes),test:Flow.TEST||undefined},body));Kit.finish($('go'),'Making it');JUJU.go('cauldron.html?ch='+slug+'&f='+encodeURIComponent(r.film));return r}
 let steering=null;
 function makeIdea(i,btn,steer){const x=ch.ideas[i];if(!x)return;btn&&btn.classList.add('going');
  return JUJU.once(btn||$('go'),()=>make({kind:x.kind,sentence:x.sentence,theme:x.theme,steer:steer||undefined}),{at:$('go'),done:()=>{btn&&btn.classList.remove('going')}})}

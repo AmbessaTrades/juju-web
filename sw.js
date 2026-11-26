@@ -4,7 +4,7 @@
    Until juju-core runs here as WASM (lane A), a film is not made in the browser: Make says so. */
 const BASE = new URL('./', self.location).pathname;
 /* the version of the unit this worker belongs to: stamped by web/build.py, so a tab knows when the site has moved on */
-const ABOUT = {"version": "0.3.7", "core": null, "commit": "a4d536ab"};            // /juju-web/ on GitHub Pages
+const ABOUT = {"version": "0.3.8", "core": null, "commit": "a56863ab"};            // /juju-web/ on GitHub Pages
 const STORE = 'juju-state-v1';
 let CFG = null;
 self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
@@ -118,6 +118,7 @@ async function answer(req, url) {
   const s = await get('session'); if (!s) return no(401, 'no_session', 'Sign in first');
   if (is('DELETE', 'session')) { await drop('session'); return json(200, { who: null }); }
   if (is('GET', 'money')) return json(200, await money());
+  if (is('POST', 'purse', 'refresh')) { try { const v = await door('GET', '/v1/purse'); await put('purse', v); return json(200, fullPurse(v)); } catch (e) { return no(503, 'offline_door', 'No connection'); } }
   if (is('GET', 'purse')) { const p = fullPurse(await purse()); return p ? json(200, p) : no(503, 'offline_door', 'No connection'); }
   if (is('GET', 'mode')) { try { return json(200, await door('GET', '/v1/mode')); } catch (e) { return json(200, await localMode()); } }
   if (is('POST', 'mode') || is('POST', 'mode', 'check')) { try { return json(200, await door('POST', seg.length === 2 ? '/v1/mode/check' : '/v1/mode', body)); } catch (e) { const m = await localMode(); if (body && body.mode === 'high-juju') return json(409, Object.assign(m, { error: 'closed', say: API_SAY })); return json(200, m); } }

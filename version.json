@@ -1,12 +1,15 @@
 {
- "version": "0.3.7",
- "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.3.7/juju-0.3.7.apk",
- "apk_sha256": "bb322ec7101d8708ba34dc23b4ab228dfc1e72bb1af9c41d577dddb524873d5f",
+ "version": "0.3.8",
+ "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.3.8/juju-0.3.8.apk",
+ "apk_sha256": "a5b3fcb444f1dada14877e22dcae72793f94768d379f86ffb9a2c33fa8bf728b",
  "notes": [
-  "High Juju runs on the Claude API, with no Mac needed: ideas, titles and storyboards go to Claude when you switch it on.",
-  "The Mojo Bag shows what Google, Inworld and Claude cost this week."
+  "Films no longer fail on data/timesets.json: the phone now gets Juju's private maps from the Door.",
+  "Tapping an idea asks first, says how long it takes, and warns when another film is cooking.",
+  "Open the vessel waits until you tick the box under your settings.",
+  "The Cauldron says about how long is left.",
+  "Read again in the Mojo Bag reads every service fresh."
  ],
- "min_core": "0.3.7",
+ "min_core": "0.3.8",
  "engine": "eca22dec",
- "commit": "a4d536ab"
+ "commit": "a56863ab"
 }

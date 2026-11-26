@@ -37,6 +37,7 @@ body{--focus-x:40%;--focus-y:30%}
  .r .t{font-size:16px}
  #first .meta{grid-template-columns:minmax(0,1fr) 112px}
 }
+.r .end .left{display:block;color:var(--ash);font:400 13px/1.3 "Josefin Sans",sans-serif;margin-top:4px}
 </style></head>
 <body data-skin="nocturne" data-room="cauldron" data-title="Cauldron" data-back="crossroads.html" data-back-label="Ideas">
 <main>
@@ -60,12 +61,14 @@ let films=[],lit=JUJU.param('f'),open=null,poll=null;
 /* the cauldron holds what is being made, what failed, and finished takes not yet kept, from the last two days */
 /* a held film stays here, watchable, with its reason, until Juju fixes it */
 const here=f=>!f.gold&&(f.state==='running'||['failed','stopped','refused','held'].includes(f.state)||(f.state==='done'&&!f.kept&&Date.now()/1000-(f.updated||0)<172800));
+/* about how long is left, from how far it got and how long that took on this device (Ambi 26 Nov) */
+function left(f){const p=+f.pct||0,t=f.started?Date.now()/1000-f.started:0;if(!t||p<6||p>=100)return f.started&&p<6?'Working out the time':'';const m=Math.max(1,Math.round(t*(100-p)/p/60));return m>=60?`About ${Math.floor(m/60)} h ${m%60} min left`:`About ${m} min left`}
 function row(f){const run=f.state==='running',held=f.state==='held',bad=['failed','stopped','refused','held'].includes(f.state),done=f.state==='done'||held;
  const pct=done?100:Math.max(4,Math.min(100,+f.pct||0));
  return `<div class="r${done?' look':''}${f.id===lit?' on':''}" role="listitem" data-f="${esc(f.id)}"${done?' tabindex="0"':''}>
   <span class="pic">${Flow.pic(f)}</span>
   <span class="mid"><span class="t" data-d>${esc(f.title||f.sentence||'')}</span>${f.steer?`<span class="st" data-d>${esc(f.steer)}</span>`:''}${bad&&f.error?`<span class="why" data-d>${esc(f.error)}</span>`:`<span class="bar${run?' run':''}"><i style="width:${pct}%"></i></span>`}</span>
-  <span class="end"><span class="say${held?' bad':done?' done':bad?' bad':''}" data-d>${esc(held?'Held back':done?'First look':f.say||'')}</span>${run?'<button class="btn stop" data-act="stop">Stop</button>':bad?'<span class="two"><button class="btn need" data-act="again">Again</button><button class="btn bare" data-act="drop">Drop</button></span>':''}</span></div>`}
+  <span class="end"><span class="say${held?' bad':done?' done':bad?' bad':''}" data-d>${esc(held?'Held back':done?'First look':f.say||'')}</span>${run&&left(f)?`<span class="left" data-d>${left(f)}</span>`:''}${run?'<button class="btn stop" data-act="stop">Stop</button>':bad?'<span class="two"><button class="btn need" data-act="again">Again</button><button class="btn bare" data-act="drop">Drop</button></span>':''}</span></div>`}
 function draw(){const l=films.filter(here);
  $('rows').innerHTML=l.length?l.map(row).join(''):`<div class="empty">${Art.emblem('cauldron')}<b>Nothing in the pot</b></div>`;
  $('rows').classList.remove('wait');Flow.lazy($('rows'))}

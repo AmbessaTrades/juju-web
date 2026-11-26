@@ -12,6 +12,8 @@ body{--focus-x:38%;--focus-y:46%}
 .field::placeholder{color:var(--smoke)} .field:focus{outline:none;box-shadow:inset 0 0 0 2px var(--act)}
 .inrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap} .inrow .field{flex:1 1 240px}
 .hint{color:var(--ash);font:400 15px/1.4 "Lato",sans-serif}
+#go[aria-disabled=true]{opacity:.45}
+.rc .row.okrow{grid-template-columns:24px minmax(0,1fr);cursor:pointer;font:600 15px/1.3 "Josefin Sans",sans-serif}.okrow input{width:22px;height:22px;accent-color:var(--act);flex:none}.rc .row.okrow.nudge{border-color:var(--need)}
 .looks{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
 .look{display:grid;gap:10px;padding:10px;border:2px solid var(--line);background:var(--lift);color:var(--bone);text-align:left;cursor:pointer;font:inherit}
 .look.on{border-color:var(--act)} .look:disabled{opacity:.45;cursor:not-allowed}
@@ -103,13 +105,18 @@ function receipt(I){const v=V;if(!v){$('rc').innerHTML='';$('jar').innerHTML=Art
   <div class="row"><span>Titles like</span>${titles}</div>
   <div class="row"><span>Learn from</span>${v.refs&&v.refs.length?`<span data-d>${v.refs.length} film${v.refs.length>1?'s':''}; used when Bend is built</span>`:'<span class="nb">Paste a film on the left</span>'}</div>
   <div class="row"><span>Thumbnails</span>${thumbs}</div>
-  <div class="row"><span>Sound</span>${NB}</div>
+  <div class="row"><span>Sound</span><span data-d>Juju picks a music bed for each film's mood</span></div>
   <div class="row"><span>Length</span><span id="lenrow"></span></div>
-  <div class="row"><span>A week</span><span class="chips" id="pace">${[1,3,5,7].map(x=>`<button class="btn${x===w?' on':''}" data-w="${x}" aria-pressed="${x===w}">${x} film${x>1?'s':''}</button>`).join('')}</span></div>`;
+  <div class="row"><span>A week</span><span class="chips" id="pace">${[1,3,5,7].map(x=>`<button class="btn${x===w?' on':''}" data-w="${x}" aria-pressed="${x===w}">${x} film${x>1?'s':''}</button>`).join('')}</span></div>
+  <label class="row okrow"><input type="checkbox" id="okset"${okset?' checked':''}><span>I checked the name, niche, look, length and pace above</span></label>`;
  $('jar').innerHTML=Art.jar({state:v.name&&v.kinds.length?'needs':'new',label:(v.name||'').slice(0,2).toUpperCase()||undefined});
  Flow.lenpick($('lenrow'),v.minutes,x=>JUJU.patch('/api/tap/channels/'+slug,{minutes:x}).then(load).catch(e=>JUJU.say($('lenrow'),e.say)));
- $('go').disabled=!(v.name&&v.kinds.length);
+ /* Ambi 26 Nov: Open the vessel only after the box at the bottom is ticked; the grey button still answers a tap and says why */
+ $('go').disabled=false;$('go').setAttribute('aria-disabled',String(!ready()));
  JUJU.say($('go'),!v.kinds.length?'Pick a look':!v.name?'Name it':'', 'need');if(v.name&&v.kinds.length)JUJU.unsay($('go'))}
+let okset=false;
+const ready=()=>!!(V&&V.name&&V.kinds.length&&okset);
+document.addEventListener('change',e=>{if(e.target.id!=='okset')return;okset=e.target.checked;$('go').setAttribute('aria-disabled',String(!ready()));if(ready())JUJU.unsay($('go'))});
 async function load(){if(!slug){receipt();return}
  V=await JUJU.get('/api/tap/channels/'+slug);let I=null;try{I=await JUJU.get('/api/tap/channels/'+slug+'/ideas')}catch(e){}
  receipt(I);drawLooks();drawRefs();if(I&&I.running)watch()}
@@ -146,7 +153,11 @@ $('rc').addEventListener('change',e=>{if(e.target.id!=='name'||!slug)return;cons
  JUJU.patch('/api/tap/channels/'+slug,{name:n}).then(load).catch(x=>JUJU.say(e.target,x.say))});
 $('rc').addEventListener('keydown',e=>{if(e.target.id==='name'&&e.key==='Enter'){e.preventDefault();e.target.blur()}});
 document.querySelector('.tabs').addEventListener('click',()=>{$('d-none').hidden=true});
-$('go').addEventListener('click',()=>{if(slug)JUJU.go('crossroads.html?ch='+slug)});
+$('go').addEventListener('click',()=>{if(!slug||!V)return;
+ if(!V.kinds.length){JUJU.say($('go'),'Pick a look first','need');return}
+ if(!V.name){JUJU.say($('go'),'Name it first','need');$('name')&&$('name').focus();return}
+ if(!okset){JUJU.say($('go'),'Tick the box at the bottom to confirm your settings','need');const b=$('okset');if(b){b.closest('.row').scrollIntoView({behavior:'smooth',block:'center'});b.closest('.row').classList.add('nudge');setTimeout(()=>b.closest('.row').classList.remove('nudge'),1600)}return}
+ JUJU.go('crossroads.html?ch='+slug)});
 JUJU.ready(async()=>{try{looks=(await JUJU.get('/api/tap/looks')).looks;drawLooks();await load()}catch(e){JUJU.say($('go'),e.say)}
  if(V){const t=document.querySelector(`.tab[data-panel="d-${V.door==='ready-made'?'ready':V.door||'ready'}"]`);if(t)t.click()}});
 })();

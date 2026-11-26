@@ -156,6 +156,17 @@ document.addEventListener('DOMContentLoaded',()=>{
   who.textContent=p.name[0];who.setAttribute('aria-label',p.name);document.getElementById('personName').textContent=p.name}).catch(()=>{});
  J.money();J.mode();
 });
+/* one question before a long job (Ambi, 26 Nov: a tap on an idea started a whole film by itself). J.confirm({title, lines, go, stay}) -> true or false */
+J.confirm=({title,lines=[],go='Go',stay='Not now'})=>new Promise(res=>{let s=document.getElementById('jconfirm');
+ if(!s){document.body.insertAdjacentHTML('beforeend',`<section class="sheet" id="jconfirm" hidden aria-labelledby="jcT"><h3 id="jcT"></h3><button class="x btn bare" data-close aria-label="Close">×</button><div class="jcl"></div><div class="sheetfoot jcf"><button class="btn bare" id="jcStay"></button><button class="btn need" id="jcGo"></button></div></section>`);s=document.getElementById('jconfirm');
+  const st=document.createElement('style');st.textContent='#jconfirm .jcl p{margin:8px 0;color:var(--bone);font:400 16px/1.45 "Josefin Sans",sans-serif}#jconfirm .jcl p.warn{color:var(--need)}#jconfirm .jcl p.t{font-weight:600}#jconfirm .jcf{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}';document.head.append(st)}
+ s.querySelector('#jcT').textContent=title;s.querySelector('.jcl').innerHTML=lines.filter(Boolean).map(l=>typeof l==='string'?`<p>${J.esc(l)}</p>`:`<p class="${l.cls||''}">${J.esc(l.text)}</p>`).join('');
+ const g=s.querySelector('#jcGo'),n=s.querySelector('#jcStay');g.textContent=go;n.textContent=stay;let done=false;
+ const end=v=>{if(done)return;done=true;ob.disconnect();Kit.sheet('jconfirm').close();res(v)};
+ const ob=new MutationObserver(()=>{if(s.hidden)end(false)});ob.observe(s,{attributes:true,attributeFilter:['hidden']});
+ g.onclick=()=>end(true);n.onclick=()=>end(false);Kit.sheet('jconfirm').open();setTimeout(()=>g.focus(),50)});
+/* how long a film takes to make here: measured 26 Nov on the phone, a 3.6 min film in 11.4 min, about 3.2 times its length */
+J.makeMinutes=m=>Math.max(5,Math.round(m*3.2/5)*5);
 /* Gris-gris and High Juju (Ambi, 26 Nov 2026): a chip in the head, a sheet behind it. No model is named here. */
 const MCSS=document.createElement('style');MCSS.textContent=`.chip.mode{gap:8px}.chip.mode .tag{color:var(--ash);font-weight:400}.chip.mode.high{color:var(--need);border-color:var(--need)}
 #mode .rows .row{display:grid;grid-template-columns:minmax(0,1fr) auto;-webkit-mask:none;mask:none;padding:8px 12px;min-height:56px;align-items:center;border:2px solid var(--line);background:var(--lift);color:var(--bone);text-align:left;font:600 16px/1.2 "Josefin Sans",sans-serif;cursor:pointer}
