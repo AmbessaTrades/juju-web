@@ -20,7 +20,7 @@
 | `/api/tap/pic` | GET | works | works |  |
 | `/api/tap/themes/*` | GET | works | works |  |
 | `/api/tap/channels/*` | PATCH | works | works |  |
-| `/api/tap` | POST | works | Not built yet |  |
+| `/api/tap` | POST | works | works |  |
 | `/api/tap/channels` | POST | works | works |  |
 | `/api/tap/channels/*/avatar` | POST | Not built yet | Not built yet |  |
 | `/api/tap/channels/*/ideas` | POST | Not built yet | Not built yet |  |
@@ -33,7 +33,7 @@
 | `/api/tap/films/*/mend` | POST | Not built yet | Not built yet |  |
 | `/api/tap/films/*/stop` | POST | works | Not built yet |  |
 | `/api/tap/films/*/title` | POST | works | Not built yet |  |
-| `ju make` |  | works | Not built yet | wealth films (juju-core); kingdoms and states say "not ported yet" |
+| `ju make` |  | works | works | wealth films (juju-core); kingdoms and states say "not ported yet" |
 | `ju stop` |  | works | Not built yet |  |
 | `ju export` |  | Not built yet | Not built yet |  |
 | `ju ideas` |  | Not built yet | Not built yet | the ideas Juju already has; finding new ones needs the Mac |

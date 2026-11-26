@@ -4,7 +4,7 @@
    Until juju-core runs here as WASM (lane A), a film is not made in the browser: Make says so. */
 const BASE = new URL('./', self.location).pathname;
 /* the version of the unit this worker belongs to: stamped by web/build.py, so a tab knows when the site has moved on */
-const ABOUT = {"version": "0.3.8", "core": null, "commit": "a56863ab"};            // /juju-web/ on GitHub Pages
+const ABOUT = {"version": "0.3.9", "core": null, "commit": "c3d06d3f"};            // /juju-web/ on GitHub Pages
 const STORE = 'juju-state-v1';
 let CFG = null;
 self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
@@ -126,10 +126,21 @@ async function answer(req, url) {
   const sys = await seed('systems'), kinds = await seed('kinds');
   if (is('GET', 'tap', 'looks')) return json(200, { looks: sys.map(x => ({ id: x.id, name: x.name, kind: x.kind, themes: x.themes, locked: x.locked, examples: (x.examples || []).map((e) => ({ title: e.title, seconds: e.seconds, thumb: BASE + e.file })), swatches: x.swatches || [], inks: x.inks || [] })) });
   if (is('GET', 'tap')) return json(200, { kinds: kinds.map(k => ({ id: k.id, name: k.name, themes: (k.themes || []).length > 1, allowed: k.themes })), sizes: SIZES, size_first: 1080, export_built: false, money: await money(), making: [] });
-  if (is('POST', 'tap')) return no(501, 'web_no_make', 'Films are made in the phone app for now');
-  if (is('GET', 'tap', 'films')) { let l = await films(); const ch = url.searchParams.get('channel'); if (ch) l = l.filter(f => f.channel === ch); return json(200, { films: l, money: await money() }); }
+  // the web has no film engine: it writes the order to the Door, and the next phone with Juju open makes it (Ambi 26 Nov: no "for now")
+  if (is('POST', 'tap')) {
+    const sent = String(body.sentence || '').split(/\s+/).join(' ').trim();
+    if (sent.length < 3 || sent.length > 300) return no(422, 'sentence', 'One sentence');
+    const chs = (await list('channels')).data || [], ch = body.channel ? chs.find(c => c.slug === body.channel) : null;
+    if (body.channel && !ch) return no(404, 'gone', 'Not here');
+    const kind = body.kind || (ch && (ch.kinds || [])[0]); if (!kind) return no(422, 'kind', 'Pick a look first');
+    const id = 'web-' + kind + '-' + Date.now().toString(36);
+    await change('orders', l => { if (!Array.isArray(l)) return 'Not a list'; if (l.some(o => o.sentence === sent)) return 'Already asked for'; l.push({ id, kind, sentence: sent, theme: body.theme || (ch && ch.theme) || null, minutes: Number(body.minutes) || (ch && ch.minutes) || 11, steer: body.steer || null, channel: ch ? ch.slug : null, by: s.who, at: new Date().toISOString() }); });
+    return json(200, { film: id, run: id, say: 'Sent to your phone: it makes it the next time Juju is open on it' });
+  }
+  if (m === 'POST' && seg[1] === 'films' && seg[2] && seg[2].startsWith('web-') && ['stop', 'drop'].includes(seg[3])) { await change('orders', l => { const i = l.findIndex(o => o.id === seg[2]); if (i >= 0) l.splice(i, 1); }); return json(200, { ok: true }); }
+  if (is('GET', 'tap', 'films')) { let l = (await films()).concat(((await list('orders')).data || []).map(o => ({ id: o.id, kind: o.kind, sentence: o.sentence, title: o.sentence, channel: o.channel, state: 'running', pct: 0, say: 'Waiting for your phone to open Juju', here: false }))); const ch = url.searchParams.get('channel'); if (ch) l = l.filter(f => f.channel === ch); return json(200, { films: l, money: await money() }); }
   if (is('GET', 'tap', 'films', '*')) { const f = (await films()).find(x => x.id === seg[2]); return f ? json(200, f) : no(404, 'gone', 'Not here'); }
-  if (m === 'POST' && seg[1] === 'films') return no(501, 'web_no_make', 'Films are made in the phone app for now');
+  if (m === 'POST' && seg[1] === 'films') return no(409, 'on_phone', 'This film is on your phone: open Juju there to do this');
   const chans = (await list('channels')).data || [];
   if (is('GET', 'tap', 'channels')) { const fl = await films(), mine = url.searchParams.get('mine') === '1'; const l = chans.filter(c => !c.parked && (!mine || !c.owner || c.owner === s.who)); return json(200, { channels: await Promise.all(l.map(c => card(c, fl, sys))), systems: sys, looks: [], sizes: SIZES, money: await money() }); }
   if (is('GET', 'tap', 'channels', '*')) { const c = chans.find(x => x.slug === seg[2]); if (!c) return no(404, 'gone', 'Not here'); const r = await card(c, await films(), sys); return json(200, Object.assign(r, { ideas: await ideasOf(c), systems: sys, sizes: SIZES })); }

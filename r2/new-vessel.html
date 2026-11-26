@@ -95,15 +95,15 @@ function drawLooks(){$('looks').innerHTML=looks.map(lookCard).join('');$('looks2
 document.addEventListener('click',e=>{if(!V&&e.target.closest&&e.target.closest('#jar')){const t=document.querySelector('[data-panel="d-absorb"]');if(t)t.click();setTimeout(()=>{const i=document.querySelector('#d-absorb input');if(i)i.focus()},60)}});
 function receipt(I){const v=V;if(!v){$('rc').innerHTML='';$('jar').innerHTML=Art.jar({state:'new'});$('go').disabled=true;return}
  const L=looks.find(l=>l.id===v.look_from),w=v.films_week||0;
- const rt=v.route||{},niche=v.niche_line?esc(v.niche_line):v.describe?esc(v.describe)+(rt.say?`<br><span class="nb">${esc(rt.say)}</span>`:rt.locked?'<br><span class="nb">Opens in High Juju</span>':''):I&&I.niche?esc(I.niche):I&&I.running?'<span class="nb">Juju is reading the channel</span>':v.door==='absorb'?'<span class="nb">Juju reads it next</span>':NB;
- const titles=I&&I.titles&&I.titles.length?`<span class="titles">${I.titles.slice(0,3).map(t=>`<span data-d>${esc(t)}</span>`).join('')}</span>`:I&&I.running?'<span class="nb">Reading its titles</span>':NB;
- const thumbs=L&&L.examples.some(x=>x.thumb)?`<span><span class="thumbs">${L.examples.filter(x=>x.thumb).slice(0,3).map(x=>`<img src="${esc(x.thumb)}" alt="">`).join('')}</span><span class="nb">Examples of this look</span></span>`:NB;
+ const rt=v.route||{},niche=v.niche_line?esc(v.niche_line):v.describe?esc(v.describe)+(rt.say?`<br><span class="nb">${esc(rt.say)}</span>`:rt.locked?'<br><span class="nb">Opens in High Juju</span>':''):I&&I.niche?esc(I.niche):I&&I.running?'<span class="nb">Juju is reading the channel</span>':v.door==='absorb'?'<span class="nb">Juju reads it next</span>':L?`<span data-d>Set by the ${esc(L.name)} look</span>`:'<span class="nb">Pick a look</span>';
+ const titles=I&&I.titles&&I.titles.length?`<span class="titles">${I.titles.slice(0,3).map(t=>`<span data-d>${esc(t)}</span>`).join('')}</span>`:I&&I.running?'<span class="nb">Reading its titles</span>':'<span data-d>Juju writes a title with each idea</span>';
+ const thumbs=L&&L.examples.some(x=>x.thumb)?`<span><span class="thumbs">${L.examples.filter(x=>x.thumb).slice(0,3).map(x=>`<img src="${esc(x.thumb)}" alt="">`).join('')}</span><span class="nb">Examples of this look</span></span>`:'<span data-d>Juju makes one for each film</span>';
  $('rc').innerHTML=`<div class="row"><span>Name</span><input id="name" maxlength="60" placeholder="Name it" value="${esc(v.name||'')}" aria-label="Name"></div>
   <div class="row"><span>Niche</span><span data-d>${niche}</span></div>
   <button class="row tap" data-open="lookpick"><span>Look</span><span data-d>${L?esc(L.name):'<span class="nb">Pick a look</span>'}</span></button>
   <div class="row" id="colrow"><span>Colours</span>${v.swatches&&v.swatches.length?`<span class="sw">${v.swatches.map(x=>{const pv=(v.palette||{})[x.role],h=x.i!=null?(Array.isArray(pv)&&pv[x.i])||x.hex:(typeof pv==='string'?pv:x.hex);return `<button type="button" data-role="${x.role}"${x.i!=null?` data-i="${x.i}"`:''} title="${esc(x.name)}" aria-label="${esc(x.name)}" style="background:${esc(h)}"${(v.palette||{})[x.role]?' class="changed"':''}></button>`}).join('')}</span>`:'<span class="nb">Pick a look</span>'}</div>
   <div class="row"><span>Titles like</span>${titles}</div>
-  <div class="row"><span>Learn from</span>${v.refs&&v.refs.length?`<span data-d>${v.refs.length} film${v.refs.length>1?'s':''}; used when Bend is built</span>`:'<span class="nb">Paste a film on the left</span>'}</div>
+  <div class="row"><span>Learn from</span>${v.refs&&v.refs.length?`<span data-d>${v.refs.length} film${v.refs.length>1?'s':''} kept to learn from</span>`:'<span class="nb">Paste a film on the left</span>'}</div>
   <div class="row"><span>Thumbnails</span>${thumbs}</div>
   <div class="row"><span>Sound</span><span data-d>Juju picks a music bed for each film's mood</span></div>
   <div class="row"><span>Length</span><span id="lenrow"></span></div>
