@@ -1,12 +1,13 @@
 {
- "version": "0.3.5",
- "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.3.5/juju-0.3.5.apk",
- "apk_sha256": "240dee449ae684398e05be0a01b7611478f1f3d6676cec7b53f0f512bd0fa8a2",
+ "version": "0.3.6",
+ "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.3.6/juju-0.3.6.apk",
+ "apk_sha256": "ee6e47eae156f47247383d7b4c54963ca0a7004249862e022b5c719ac1ef3c60",
  "notes": [
-  "The looks show pictures from real Juju films.",
-  "Paste your YouTube channel link to add it; the + opens the box."
+  "Pasting a channel link on the web now adds the channel.",
+  "Looks with no film yet show their own colours, not black boxes.",
+  "On the web, Install app puts the Juju cat on your home screen as its own app."
  ],
- "min_core": "0.3.5",
+ "min_core": "0.3.6",
  "engine": "214c4752",
- "commit": "7a201e25"
+ "commit": "0916da56"
 }
