@@ -187,7 +187,7 @@ J.mode=async()=>{const head=document.querySelector('.head');if(!head||GATE)retur
 /* The Mojo Bag (Ambi, 26 Nov 2026): the money left in every pot, opened from the head's money chip in every room, phone and web.
    Each pot has a Juju name that says its job, then its real service in small brackets. High Juju's row is the week's room. */
 const PCSS=document.createElement('style');PCSS.textContent=`button.chip.tank{cursor:pointer}
-#mojo .total{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap;margin:2px 0 14px}#mojo .total .cap{flex-basis:100%}#mojo .total .fig{font:600 34px/1 "Spectral SC",serif;color:var(--bone)}#mojo .total span{color:var(--ash);font:400 15px/1.2 "Josefin Sans",sans-serif}
+#mojo .total{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap;margin:2px 0 14px}#mojo .total .cap{flex-basis:100%} #mojo #mojoAgain{margin-left:auto;min-height:36px;font-size:13px} #mojo .pot .nr{color:var(--ash);font:400 14px/1.2 "Josefin Sans",sans-serif;white-space:normal} #mojo .pot.stale .m i{color:var(--need)}#mojo .total .fig{font:600 34px/1 "Spectral SC",serif;color:var(--bone)}#mojo .total span{color:var(--ash);font:400 15px/1.2 "Josefin Sans",sans-serif}
 #mojo .pots{display:grid;gap:8px}
 #mojo .pot{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;min-height:56px;padding:8px 14px;border:2px solid var(--line);background:var(--lift);color:var(--bone)}
 #mojo .pot b{font:600 17px/1.2 "Spectral SC",serif}#mojo .pot small{color:var(--smoke);font:400 11px/1 "Josefin Sans",sans-serif;margin-left:6px;white-space:nowrap}
@@ -195,12 +195,18 @@ const PCSS=document.createElement('style');PCSS.textContent=`button.chip.tank{cu
 #mojo .pot .m i{display:block;font:400 12px/1.3 "Josefin Sans",sans-serif;font-style:normal;color:var(--ash);margin-top:3px}`;document.head.append(PCSS);
 const usd=n=>'$'+(+n).toFixed(2),day=s=>{const d=new Date(s+'T12:00:00');return isNaN(d)?'':d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})};
 /* one call: /api/purse here, the Door's GET /v1/purse on the phone (docs/PHONE-CORE.md section 3); the same rows either way */
-J.mojo=async()=>{const body=document.getElementById('mojoPots'),top=document.getElementById('mojoTotal');if(!body)return;
- let p;try{p=await J.get('/api/purse')}catch(e){top.innerHTML=`<span>${J.esc(e.say||'Not read yet')}</span>`;return}
- const fig=r=>r.left==null?'not read yet':r.unit==='week'?Math.round(r.left*100)+'% of the week':(r.about?'about ':'')+usd(r.left),
-  under=r=>r.unit==='week'?(r.on?'on':'resting'):r.runs_out?'lasts to '+day(r.runs_out):'';
- top.innerHTML=`<b class="fig">${usd(p.total)}</b><span>in the pots</span>${p.spend_left!=null?`<span class="cap">${usd(p.spend_left)} left of the money set aside</span>`:''}`;
- body.innerHTML=p.rows.map(r=>`<div class="pot${r.low?' low':''}"><span><b>${J.esc(r.name)}</b><small>(${J.esc(r.service)})</small></span><span class="m">${fig(r)}${under(r)?`<i>${under(r)}</i>`:''}</span></div>`).join('')};
+/* only a balance read from the service is money, each with the time it was read; a service with no balance to read says so.
+   A tap reads them all again; the bag does it by itself when it opens with a figure older than 10 minutes. */
+const ago=t=>{if(!t)return'';const d=Math.max(0,Date.now()/1000-t);return d<90?'just now':d<3600?Math.round(d/60)+' min ago':d<86400?Math.round(d/3600)+' h ago':new Date(t*1000).toLocaleDateString('en-GB',{day:'numeric',month:'short'})};
+let mojoBusy=false;
+J.mojo=async(again)=>{const body=document.getElementById('mojoPots'),top=document.getElementById('mojoTotal');if(!body)return;
+ let p;try{p=again?await call('POST','/api/purse/refresh',{},20000):await J.get('/api/purse')}catch(e){top.innerHTML=`<span>${J.esc(e.say||'Not read yet')}</span>`;return}
+ const fig=r=>r.left==null?`<span class="nr">${J.esc(r.say||'Not reported')}</span>`:r.unit==='week'?Math.round(r.left*100)+'% of the week':usd(r.left),
+  under=r=>r.left==null?'':[r.as_of?'as of '+ago(r.as_of):'',r.unit==='week'?(r.on?'on':'resting'):r.runs_out?'lasts to '+day(r.runs_out):''].filter(Boolean).join(' · ');
+ top.innerHTML=`<b class="fig">${usd(p.total)}</b><span>read from the services</span><button class="btn bare" id="mojoAgain" type="button">${mojoBusy?'Reading':'Read again'}</button>${p.spend_left!=null?`<span class="cap">${usd(p.spend_left)} left of the money set aside</span>`:''}`;
+ body.innerHTML=p.rows.map(r=>`<div class="pot${r.low?' low':''}${r.stale?' stale':''}"><span><b>${J.esc(r.name)}</b><small>(${J.esc(r.service)})</small></span><span class="m">${fig(r)}${under(r)?`<i>${under(r)}</i>`:''}</span></div>`).join('');
+ const b2=document.getElementById('mojoAgain');b2.onclick=()=>{if(mojoBusy)return;mojoBusy=true;b2.textContent='Reading';J.mojo(true).finally(()=>{mojoBusy=false;const x=document.getElementById('mojoAgain');if(x)x.textContent='Read again'})};
+ if(!again&&p.stale&&!mojoBusy){mojoBusy=true;b2.textContent='Reading';J.mojo(true).finally(()=>{mojoBusy=false})}};
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!leaving)J.money()});
 /* a page brought back by the browser's Back holds old answers: read everything again */
 addEventListener('pageshow',e=>{if(e.persisted)location.reload()});

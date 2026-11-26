@@ -11,6 +11,101 @@
    "fever-ward",
    "green-ledger",
    "long-ice"
+  ],
+  "swatches": [
+   {
+    "role": "bg",
+    "name": "Background",
+    "hex": "#03060f"
+   },
+   {
+    "role": "ground",
+    "name": "Land",
+    "hex": "#403f3f"
+   },
+   {
+    "role": "sea",
+    "name": "Sea",
+    "hex": "#0d2c48"
+   },
+   {
+    "role": "text",
+    "name": "Titles",
+    "hex": "#ffffff"
+   },
+   {
+    "role": "body",
+    "name": "Lines",
+    "hex": "#dfe4ec"
+   },
+   {
+    "role": "accent",
+    "name": "Highlight",
+    "hex": "#ffb54a"
+   },
+   {
+    "role": "lands",
+    "i": 0,
+    "name": "Its states",
+    "hex": "#fcd069"
+   },
+   {
+    "role": "lands",
+    "i": 1,
+    "name": "Its states",
+    "hex": "#55cccc"
+   },
+   {
+    "role": "lands",
+    "i": 2,
+    "name": "Its states",
+    "hex": "#978f1f"
+   },
+   {
+    "role": "lands",
+    "i": 3,
+    "name": "Its states",
+    "hex": "#3d69b2"
+   },
+   {
+    "role": "outside",
+    "i": 0,
+    "name": "From outside",
+    "hex": "#a21d06"
+   },
+   {
+    "role": "outside",
+    "i": 1,
+    "name": "From outside",
+    "hex": "#d67e90"
+   }
+  ],
+  "inks": [
+   "#03060f",
+   "#403f3f",
+   "#0d2c48",
+   "#ffffff",
+   "#dfe4ec",
+   "#ffb54a",
+   "#fcd069",
+   "#55cccc",
+   "#978f1f",
+   "#3d69b2",
+   "#a21d06",
+   "#d67e90",
+   "#be8efb",
+   "#80a5b8",
+   "#d3bf8a",
+   "#2ca273",
+   "#7682ae",
+   "#e9e2d8",
+   "#9a4e52",
+   "#ff964d",
+   "#9aa5b5",
+   "#ff7350",
+   "#02040a",
+   "#03060c",
+   "#0d1118"
   ]
  },
  {
@@ -25,6 +120,101 @@
    "fever-ward",
    "green-ledger",
    "long-ice"
+  ],
+  "swatches": [
+   {
+    "role": "bg",
+    "name": "Background",
+    "hex": "#03060f"
+   },
+   {
+    "role": "ground",
+    "name": "Land",
+    "hex": "#403f3f"
+   },
+   {
+    "role": "sea",
+    "name": "Sea",
+    "hex": "#0d2c48"
+   },
+   {
+    "role": "text",
+    "name": "Titles",
+    "hex": "#ffffff"
+   },
+   {
+    "role": "body",
+    "name": "Lines",
+    "hex": "#dfe4ec"
+   },
+   {
+    "role": "accent",
+    "name": "Highlight",
+    "hex": "#ffb54a"
+   },
+   {
+    "role": "lands",
+    "i": 0,
+    "name": "Its states",
+    "hex": "#fcd069"
+   },
+   {
+    "role": "lands",
+    "i": 1,
+    "name": "Its states",
+    "hex": "#55cccc"
+   },
+   {
+    "role": "lands",
+    "i": 2,
+    "name": "Its states",
+    "hex": "#978f1f"
+   },
+   {
+    "role": "lands",
+    "i": 3,
+    "name": "Its states",
+    "hex": "#3d69b2"
+   },
+   {
+    "role": "outside",
+    "i": 0,
+    "name": "From outside",
+    "hex": "#a21d06"
+   },
+   {
+    "role": "outside",
+    "i": 1,
+    "name": "From outside",
+    "hex": "#d67e90"
+   }
+  ],
+  "inks": [
+   "#03060f",
+   "#403f3f",
+   "#0d2c48",
+   "#ffffff",
+   "#dfe4ec",
+   "#ffb54a",
+   "#fcd069",
+   "#55cccc",
+   "#978f1f",
+   "#3d69b2",
+   "#a21d06",
+   "#d67e90",
+   "#be8efb",
+   "#80a5b8",
+   "#d3bf8a",
+   "#2ca273",
+   "#7682ae",
+   "#e9e2d8",
+   "#9a4e52",
+   "#ff964d",
+   "#9aa5b5",
+   "#ff7350",
+   "#02040a",
+   "#03060c",
+   "#0d1118"
   ]
  },
  {
@@ -34,6 +224,101 @@
   "locked": false,
   "themes": [
    "duppy-time-night"
+  ],
+  "swatches": [
+   {
+    "role": "bg",
+    "name": "Background",
+    "hex": "#03060f"
+   },
+   {
+    "role": "ground",
+    "name": "Land",
+    "hex": "#403f3f"
+   },
+   {
+    "role": "sea",
+    "name": "Sea",
+    "hex": "#0d2c48"
+   },
+   {
+    "role": "text",
+    "name": "Titles",
+    "hex": "#ffffff"
+   },
+   {
+    "role": "body",
+    "name": "Lines",
+    "hex": "#dfe4ec"
+   },
+   {
+    "role": "accent",
+    "name": "Highlight",
+    "hex": "#ffb54a"
+   },
+   {
+    "role": "lands",
+    "i": 0,
+    "name": "Its states",
+    "hex": "#fcd069"
+   },
+   {
+    "role": "lands",
+    "i": 1,
+    "name": "Its states",
+    "hex": "#55cccc"
+   },
+   {
+    "role": "lands",
+    "i": 2,
+    "name": "Its states",
+    "hex": "#978f1f"
+   },
+   {
+    "role": "lands",
+    "i": 3,
+    "name": "Its states",
+    "hex": "#3d69b2"
+   },
+   {
+    "role": "outside",
+    "i": 0,
+    "name": "From outside",
+    "hex": "#a21d06"
+   },
+   {
+    "role": "outside",
+    "i": 1,
+    "name": "From outside",
+    "hex": "#d67e90"
+   }
+  ],
+  "inks": [
+   "#03060f",
+   "#403f3f",
+   "#0d2c48",
+   "#ffffff",
+   "#dfe4ec",
+   "#ffb54a",
+   "#fcd069",
+   "#55cccc",
+   "#978f1f",
+   "#3d69b2",
+   "#a21d06",
+   "#d67e90",
+   "#be8efb",
+   "#80a5b8",
+   "#d3bf8a",
+   "#2ca273",
+   "#7682ae",
+   "#e9e2d8",
+   "#9a4e52",
+   "#ff964d",
+   "#9aa5b5",
+   "#ff7350",
+   "#02040a",
+   "#03060c",
+   "#0d1118"
   ]
  },
  {
@@ -41,14 +326,18 @@
   "name": "Duppy Night",
   "kind": "night",
   "locked": true,
-  "themes": []
+  "themes": [],
+  "swatches": [],
+  "inks": []
  },
  {
   "id": "duppy-day",
   "name": "Duppy Day",
   "kind": null,
   "locked": true,
-  "themes": []
+  "themes": [],
+  "swatches": [],
+  "inks": []
  },
  {
   "id": "worlds",
@@ -62,6 +351,101 @@
    "fever-ward",
    "green-ledger",
    "long-ice"
+  ],
+  "swatches": [
+   {
+    "role": "bg",
+    "name": "Background",
+    "hex": "#03060f"
+   },
+   {
+    "role": "ground",
+    "name": "Land",
+    "hex": "#403f3f"
+   },
+   {
+    "role": "sea",
+    "name": "Sea",
+    "hex": "#0d2c48"
+   },
+   {
+    "role": "text",
+    "name": "Titles",
+    "hex": "#ffffff"
+   },
+   {
+    "role": "body",
+    "name": "Lines",
+    "hex": "#dfe4ec"
+   },
+   {
+    "role": "accent",
+    "name": "Highlight",
+    "hex": "#ffb54a"
+   },
+   {
+    "role": "lands",
+    "i": 0,
+    "name": "Its states",
+    "hex": "#fcd069"
+   },
+   {
+    "role": "lands",
+    "i": 1,
+    "name": "Its states",
+    "hex": "#55cccc"
+   },
+   {
+    "role": "lands",
+    "i": 2,
+    "name": "Its states",
+    "hex": "#978f1f"
+   },
+   {
+    "role": "lands",
+    "i": 3,
+    "name": "Its states",
+    "hex": "#3d69b2"
+   },
+   {
+    "role": "outside",
+    "i": 0,
+    "name": "From outside",
+    "hex": "#a21d06"
+   },
+   {
+    "role": "outside",
+    "i": 1,
+    "name": "From outside",
+    "hex": "#d67e90"
+   }
+  ],
+  "inks": [
+   "#03060f",
+   "#403f3f",
+   "#0d2c48",
+   "#ffffff",
+   "#dfe4ec",
+   "#ffb54a",
+   "#fcd069",
+   "#55cccc",
+   "#978f1f",
+   "#3d69b2",
+   "#a21d06",
+   "#d67e90",
+   "#be8efb",
+   "#80a5b8",
+   "#d3bf8a",
+   "#2ca273",
+   "#7682ae",
+   "#e9e2d8",
+   "#9a4e52",
+   "#ff964d",
+   "#9aa5b5",
+   "#ff7350",
+   "#02040a",
+   "#03060c",
+   "#0d1118"
   ]
  },
  {
@@ -69,27 +453,35 @@
   "name": "City Towers",
   "kind": null,
   "locked": true,
-  "themes": []
+  "themes": [],
+  "swatches": [],
+  "inks": []
  },
  {
   "id": "contagion-pulse",
   "name": "Contagion Pulse",
   "kind": null,
   "locked": true,
-  "themes": []
+  "themes": [],
+  "swatches": [],
+  "inks": []
  },
  {
   "id": "crude-ledger",
   "name": "Crude Ledger",
   "kind": null,
   "locked": true,
-  "themes": []
+  "themes": [],
+  "swatches": [],
+  "inks": []
  },
  {
   "id": "engraved-atlas",
   "name": "Engraved Atlas",
   "kind": null,
   "locked": true,
-  "themes": []
+  "themes": [],
+  "swatches": [],
+  "inks": []
  }
 ]

@@ -25,6 +25,9 @@ body[data-room="gate"] .rail .door,body[data-room="gate"] .rail .who,body[data-r
 .keys .btn{min-height:56px;font:600 24px/1 "Spectral SC",serif;letter-spacing:0;padding:0 0 3px}
 .keys .btn.word{font:600 14px/1 "Josefin Sans",sans-serif;letter-spacing:.1em}
 .keys .btn[disabled]{opacity:.45}
+#say .hint{color:var(--ash)}
+.primary.off{opacity:.38;filter:grayscale(1);box-shadow:none;cursor:not-allowed}
+.primary.off::before,.primary.off::after{opacity:.3}
 .arch{grid-column:2;grid-row:2;display:grid;grid-template-rows:1fr auto;justify-items:center}
 .arch .niche{width:100%;--arch:200px;--cw:248px}
 .arch .ledge{width:calc(100% + 32px)}
@@ -43,6 +46,10 @@ body[data-room="gate"] .rail .door,body[data-room="gate"] .rail .who,body[data-r
   .arch .niche{width:144px;height:104px;--arch:72px;--cw:80px}
   .arch .ledge{width:176px;height:16px}
   .lock.panel{padding:24px 16px 16px}
+  /* all twelve keys and Enter on one 390x844 screen: the deck's height kept free below, the keypad tighter (lead, 26 Nov) */
+  body[data-room="gate"] .main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+  .floor{gap:12px} .arch .niche{width:120px;height:84px;--arch:60px;--cw:66px} .arch .ledge{width:150px;height:12px}
+  .lock.panel{padding:18px 14px 12px} .keys{gap:6px} .keys .btn{min-height:46px;font-size:22px}
 }
 </style></head>
 <body data-skin="nocturne" data-room="gate" data-mark="gate" data-title="The Gate">
@@ -73,7 +80,14 @@ const next=()=>{try{const u=new URL(JUJU.param('next')||'',location.href),m=u.pa
 const me=()=>sess&&(sess.people||[]).find(p=>p.id===who);
 const left=()=>Math.max(0,Math.ceil(((until[who]||0)-Date.now())/1000));
 /* off | mac | set | again | wait | enter */
-const mode=()=>{const p=me();if(!p)return 'off';if(p.pin==='none')return sess.here==='mac'?(first?'again':'set'):'mac';return left()?'wait':'enter'};
+/* the setup code field the web app and the APK add (phone.js) while a first PIN is set through the Door */
+const code=()=>document.getElementById('jujuCode');
+const mode=()=>{const p=me();if(!p)return 'off';if(p.pin==='none')return sess.here==='mac'||code()?(first?'again':'set'):'mac';return left()?'wait':'enter'};
+/* the next step in plain words, for every state (Ambi could not tell what the Gate wanted, 26 Nov) */
+const next_step=m=>m==='set'?(code()&&!code().value.trim()?'Type the setup code Ambi gave you':typed.length<4?'Tap 4 numbers for your new PIN':'')
+ :m==='again'?'Tap the same 4 again':m==='enter'?(typed.length<4?'Tap your 4 numbers':''):m==='mac'?'Set your PIN on the Mac first':'';
+/* a refusal in plain words */
+const plain=e=>/match|not the same/i.test(e.say||'')||e.error==='mismatch'?"Those didn't match, start again":/code/i.test(e.error||'')||/code/i.test(e.say||'')?'Wrong code':e.say||'Failed';
 const open=()=>['set','again','enter'].includes(mode())&&!busy;
 
 function draw(){
@@ -85,11 +99,13 @@ function draw(){
  document.querySelectorAll('#keys .btn').forEach(b=>b.disabled=!open());
  if(m==='wait')say.innerHTML=`<span class="say need">Wait</span> <b class="say need num" data-d>${left()}</b>`;
  else if(m==='mac')say.innerHTML='<span class="say need">Mac only</span>';
- else{say.innerHTML=dead||bad?'<span class="say stop"></span>':'';if(say.firstChild)say.firstChild.textContent=dead||bad}
+ else{const t=dead||bad||next_step(m);say.innerHTML=t?`<span class="say ${dead||bad?'stop':'hint'}"></span>`:'';if(say.firstChild)say.firstChild.textContent=t}
  const retry=m==='off'&&dead;
  enter.textContent=retry?'Try again':'Enter';
  /* while the digits are on their way Enter stays lit: the kit's busy light, and api.js takes no second press */
- enter.disabled=!(retry||typed.length===4&&(m==='enter'||m==='again')&&!pin.classList.contains('bad'));
+ /* Enter never looks pressable while it cannot go; a press then says the next step instead of doing nothing */
+ const can=retry||typed.length===4&&(m==='enter'||m==='again')&&!pin.classList.contains('bad');
+ enter.disabled=false;enter.classList.toggle('off',!can);enter.setAttribute('aria-disabled',String(!can));
 }
 /* the waits count down by themselves, whoever is picked; at nothing the keys come back */
 function tick(){clearInterval(clock);clock=setInterval(()=>{if(Object.values(until).every(t=>t<=Date.now()))clearInterval(clock);draw()},250)}
@@ -118,7 +134,8 @@ function welcome(){$('pin').classList.add('good');$('door').classList.add('work'
 function refused(e){
  /* no answer: the four digits stay and Enter sends them again */
  if(e.error==='offline'||e.error==='slow'){busy=false;bad=e.say;draw();return}
- const pin=$('pin');pin.classList.add('bad');bad=e.say;draw();
+ /* a refused first PIN starts again from the first four */
+ const pin=$('pin');pin.classList.add('bad');bad=plain(e);draw();
  setTimeout(async()=>{
   pin.classList.remove('bad');typed='';first='';busy=false;
   if(e.error==='wait'){until[who]=Date.now()+(e.wait_s||60)*1000;bad='';tick()}
@@ -131,7 +148,10 @@ JUJU.ready(()=>{
  $('keys').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;const k=b.dataset.k;k==='del'?back():k==='clear'?clear():digit(k)});
  document.querySelectorAll('.people .row').forEach(r=>r.addEventListener('click',()=>{if(busy)return;who=r.dataset.who;typed='';first='';bad='';Kit.press(r);draw()}));
  document.addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey||e.repeat)return;if(/^[0-9]$/.test(e.key))digit(e.key);else if(e.key==='Backspace')back();else if(e.key==='Enter'&&!e.target.closest('button'))send()});
- $('enter').addEventListener('click',()=>{if(!sess)JUJU.once($('enter'),load);else send()});
+ $('enter').addEventListener('click',()=>{if($('enter').classList.contains('off')){if(bad||dead)return;const m=mode(),t=next_step(m)||(m==='set'?'Tap 4 numbers for your new PIN':'');bad='';draw();const sy=$('say');if(t){sy.innerHTML='<span class="say need"></span>';sy.firstChild.textContent=t;sy.firstChild.animate([{opacity:.3},{opacity:1}],{duration:300})}return}
+  if(!sess)JUJU.once($('enter'),load);else send()});
+ /* the code field, when the web app or the APK adds it, moves the words on as it is typed */
+ document.addEventListener('input',e=>{if(e.target.id==='jujuCode')draw()});
  draw();load();
 });
 })();

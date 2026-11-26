@@ -41,7 +41,7 @@ body{--focus-x:36%;--focus-y:36%}
 .bar{width:60%;height:4px;background:var(--line);overflow:hidden} .bar i{display:block;height:100%;width:30%;background:var(--work);animation:go 1.4s linear infinite}
 @keyframes go{from{transform:translateX(-100%)}to{transform:translateX(340%)}}
 @media (prefers-reduced-motion: reduce){.bar i{animation:none;width:100%}}
-.ch.first .pic{background:var(--a-well)} .ch.first .jarbox{position:absolute;inset:0;display:grid;place-items:center} .ch.first .jarbox svg,.ch.first .jarbox .art{height:80%;width:auto;max-width:60%}
+.ch.first .pic{background:var(--a-well)} .ch.first .jarbox{position:absolute;inset:0;display:grid;place-items:center;--h:130px} @media (max-width:760px){.ch.first .jarbox{--h:120px}}
 .sheetfoot{display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:20px;flex-wrap:wrap}
 @media (max-width:760px){
  .chans{grid-template-columns:minmax(0,1fr);gap:16px}

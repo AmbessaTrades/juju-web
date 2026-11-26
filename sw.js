@@ -31,7 +31,8 @@ async function door(method, path, body) {
   if (r.status === 401) await drop('session');
   throw new Fail(r.status, v && v.say ? v : { error: 'door', say: 'Refused' });
 }
-const space = async who => { const c = await cfg(); return c.test_space ? `test-${c.test_space}${who}` : who; };
+/* a proof never touches Ambi's or Mumu's space: ?test=<name> on the first page signs in as the Door's throwaway test-<name><who> */
+const space = async who => { const c = await cfg(), t = (await get('space')) || c.test_space; return t ? `test-${t}${who}` : who; };
 const FRESH = 15000;
 /* a shared list: the Door's (kept 15 s), else the last copy, else the seed */
 async function list(name, fresh) {
@@ -78,7 +79,9 @@ async function card(c, fl, sys) {
   const look = c.theme && s && (s.themes || []).length > 1 ? themeName(c.theme) : s ? s.name : null;
   const thumb = ((await ideasOf(c)).find(i => i.thumb) || {}).thumb || null;
   return { slug: c.slug, name: c.name, handle: c.handle, link: c.link, avatar: null, thumb, still: null, niche: c.niche, look, system: s ? s.id : null, locked: !!(s && s.locked),
-    minutes: c.minutes, export: c.export, kinds: c.kinds || [], ready: mine.filter(f => f.state === 'done').length, making: 0 };
+    minutes: c.minutes, export: c.export, kinds: c.kinds || [], ready: mine.filter(f => f.state === 'done').length, making: 0,
+    owner: c.owner || null, describe: c.describe || null, niche_line: c.niche_line || null, niche_name: c.niche_name || null, niche_words: c.niche_words || null, route: c.route || null, refs: c.refs || [],
+    palette: c.palette || null, swatches: s ? (s.swatches || []) : [], films_week: c.films_week || null, door: c.door || null, look_from: c.look_from || null };
 }
 
 const json = (status, v) => new Response(JSON.stringify(v), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
@@ -87,6 +90,7 @@ async function answer(req, url) {
   const m = req.method === 'HEAD' ? 'GET' : req.method, seg = url.pathname.replace(/^\/api\/?/, '').split('/').filter(Boolean);
   const body = m === 'GET' || m === 'DELETE' ? {} : await req.json().catch(() => ({}));
   const is = (mm, ...p) => m === mm && p.length === seg.length && p.every((x, i) => x === '*' || x === seg[i]);
+  if (is('GET', '__space')) { const t = url.searchParams.get('name') || ''; if (t === 'off') { await drop('space'); } else if (/^[a-z0-9]{4,20}$/.test(t)) { await put('space', t); } else return no(422, 'space', 'Not a test space'); await drop('session'); await drop('people'); return json(200, { space: t }); }
   if (is('GET', 'health')) return json(200, { ok: true, here: 'web' });
   if (is('GET', 'session')) { const s = await get('session'), pp = await people(); return json(200, { who: s ? s.who : null, people: pp, here: pp.some(p => p.pin === 'none') ? 'mac' : 'phone' }); }
   if (is('POST', 'session') || is('POST', 'session', 'pin')) {
@@ -102,13 +106,14 @@ async function answer(req, url) {
   if (is('GET', 'mode')) return json(200, { mode: 'gris-gris', name: 'Gris-gris', tag: 'Recommended', lean: { plan: true, api: true }, ways: { plan: { open: false, say: 'not on the web yet' }, api: { open: false, say: 'not on the web yet' } }, room: 'room this week: unknown', why_not: 'High Juju is not on the web yet', opens: [] });
   if (seg[0] !== 'tap') return no(501, 'not_built', 'Not on the web yet');
   const sys = await seed('systems'), kinds = await seed('kinds');
+  if (is('GET', 'tap', 'looks')) return json(200, { looks: sys.map(x => ({ id: x.id, name: x.name, kind: x.kind, themes: x.themes, locked: x.locked, examples: [], swatches: x.swatches || [], inks: x.inks || [] })) });
   if (is('GET', 'tap')) return json(200, { kinds: kinds.map(k => ({ id: k.id, name: k.name, themes: (k.themes || []).length > 1, allowed: k.themes })), sizes: SIZES, size_first: 1080, export_built: false, money: await money(), making: [] });
   if (is('POST', 'tap')) return no(501, 'web_no_make', 'Films are made in the phone app for now');
   if (is('GET', 'tap', 'films')) { let l = await films(); const ch = url.searchParams.get('channel'); if (ch) l = l.filter(f => f.channel === ch); return json(200, { films: l, money: await money() }); }
   if (is('GET', 'tap', 'films', '*')) { const f = (await films()).find(x => x.id === seg[2]); return f ? json(200, f) : no(404, 'gone', 'Not here'); }
   if (m === 'POST' && seg[1] === 'films') return no(501, 'web_no_make', 'Films are made in the phone app for now');
   const chans = (await list('channels')).data || [];
-  if (is('GET', 'tap', 'channels')) { const fl = await films(); return json(200, { channels: await Promise.all(chans.map(c => card(c, fl, sys))), systems: sys, sizes: SIZES, money: await money() }); }
+  if (is('GET', 'tap', 'channels')) { const fl = await films(), mine = url.searchParams.get('mine') === '1'; const l = chans.filter(c => !c.parked && (!mine || !c.owner || c.owner === s.who)); return json(200, { channels: await Promise.all(l.map(c => card(c, fl, sys))), systems: sys, looks: [], sizes: SIZES, money: await money() }); }
   if (is('GET', 'tap', 'channels', '*')) { const c = chans.find(x => x.slug === seg[2]); if (!c) return no(404, 'gone', 'Not here'); const r = await card(c, await films(), sys); return json(200, Object.assign(r, { ideas: await ideasOf(c), systems: sys, sizes: SIZES })); }
   if (is('PATCH', 'tap', 'channels', '*')) {
     await change('channels', l => { const c = l.find(x => x.slug === seg[2]); if (!c) return 'Not here';
@@ -118,11 +123,34 @@ async function answer(req, url) {
       if (typeof body.export === 'number') { if (!SIZES.includes(body.export)) return 'Not that size'; c.export = body.export; }
       if (typeof body.minutes === 'number') { if (body.minutes < 1 || body.minutes > 40) return 'Not that long'; c.minutes = body.minutes; }
       if (typeof body.handle === 'string') c.handle = '@' + body.handle.trim().replace(/^@/, '');
+      if (typeof body.name === 'string') { const n = body.name.split(/\s+/).join(' ').trim(); if (!n || n.length > 60) return 'Not a name'; c.name = n; c.named = true; }
+      if (typeof body.look === 'string') { const x = sys.find(y => y.id === body.look); if (!x || !x.kind) return 'Not a look'; if (x.locked) return 'Opens in High Juju'; c.system = x.id; c.kinds = [x.kind]; c.theme = (x.themes || [])[0] || null; c.look_from = x.id; delete c.palette; }
+      if (typeof body.describe === 'string') { const d = body.describe.split(/\s+/).join(' ').trim(); if (d.length < 3 || d.length > 200) return 'One line, please'; c.describe = d; }
+      if (body.palette && typeof body.palette === 'object') { c.palette = Object.assign({}, c.palette || {}); for (const [k, v] of Object.entries(body.palette)) { if (v === null) delete c.palette[k]; else if (/^#[0-9a-fA-F]{6}$/.test(v)) c.palette[k] = v; else return 'Not a colour'; } }
+      if (typeof body.films_week === 'number') { if (body.films_week < 1 || body.films_week > 14) return 'One to fourteen a week'; c.films_week = body.films_week; }
     });
     return json(200, { slug: seg[2] });
   }
-  if (is('POST', 'tap', 'channels')) return no(501, 'not_built', 'Add a channel on the Mac for now');
-  return no(404, 'gone', 'Not here');
+  const notYet = say => json(501, { error: 'not_built', say: say || 'Not built yet', not_built: say || 'Not built yet' });
+  if (is('POST', 'tap', 'channels')) {
+    if (typeof body.link === 'string') return notYet('Absorbing a channel by its link is not built on the web yet');
+    const v = { kinds: [], order: 50, added: new Date().toISOString(), owner: s.who, name: null, named: false };
+    if (typeof body.look === 'string') { const l = sys.find(x => x.id === body.look); if (!l || !l.kind) return no(422, 'look', 'Not a look'); if (l.locked) return no(423, 'locked', 'Opens in High Juju');
+      Object.assign(v, { system: l.id, kinds: [l.kind], theme: (l.themes || [])[0] || null, look_from: l.id, door: 'ready-made' }); }
+    else if (typeof body.describe === 'string') { const d = body.describe.split(/\s+/).join(' ').trim(); if (d.length < 3 || d.length > 200) return no(422, 'describe', 'One line, please');
+      Object.assign(v, { describe: d, niche_words: d.split(' ').slice(0, 6).join(' ').toLowerCase(), door: 'describe', route: { say: 'Pick a look: Juju cannot read a line on the web yet' } }); }
+    else return no(422, 'door', 'A link, a line or a look');
+    let slug = null;
+    await change('channels', l => { const base = 'vessel-' + String(Date.now() % 1000000); slug = base; for (let i = 1; l.some(x => x.slug === slug); i++) slug = base + '-' + i; v.slug = slug; l.push(v); });
+    return json(200, { slug, new: true });
+  }
+  if (is('POST', 'tap', 'channels', '*', 'park')) { await change('channels', l => { const c = l.find(x => x.slug === seg[2]); if (!c) return 'Not here'; c.parked = true; }); return json(200, { slug: seg[2], parked: true }); }
+  if (is('POST', 'tap', 'channels', '*', 'refs')) return notYet('Learning from a film is not built on the web yet');
+  if (is('GET', 'tap', 'channels', '*', 'ideas') || is('POST', 'tap', 'channels', '*', 'ideas')) {
+    const c = chans.find(x => x.slug === seg[2]); if (!c) return no(404, 'gone', 'Not here');
+    return json(200, { slug: c.slug, running: false, failed: false, ideas: await ideasOf(c), niche: c.niche_name || null, usd: null, titles: null });
+  }
+  return notYet();
 }
 
 self.addEventListener('fetch', e => {
