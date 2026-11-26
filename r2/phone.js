@@ -6,8 +6,10 @@ const real0=window.fetch.bind(window);
 /* the Gate: a setup code field, only while someone's PIN is not set yet */
 if(/\/gate\.html$/.test(location.pathname))document.addEventListener('DOMContentLoaded',()=>real0('/api/session').then(r=>r.json()).then(s=>{
  if(!(s.people||[]).some(p=>p.pin==='none'))return;const pin=document.getElementById('pin');if(!pin)return;
- const i=document.createElement('input');i.id='jujuCode';i.type='password';i.inputMode='numeric';i.autocomplete='off';i.placeholder='Setup code';i.setAttribute('aria-label','Setup code');
+ const i=document.createElement('input');i.id='jujuCode';i.type='text';i.inputMode='text';i.autocomplete='off';i.autocapitalize='characters';i.spellcheck=false;i.maxLength=8;i.placeholder='Setup code';i.setAttribute('aria-label','Setup code');
  i.style.cssText='display:block;margin:12px auto 0;width:200px;height:44px;padding:0 12px;background:transparent;border:2px solid var(--line,#333);color:var(--bone,#eee);font:600 16px "Josefin Sans",sans-serif;text-align:center';
+ i.addEventListener('input',()=>{const v=i.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);if(v!==i.value)i.value=v;if(v.length===8)i.blur()});
+ i.addEventListener('keydown',e=>{if(/^[0-9]$/.test(e.key)&&i.value.length>=8){e.preventDefault();i.blur()}});
  pin.after(i)}).catch(()=>{}));
 /* the code rides with the first PIN, here and in the APK */
 if(!window.JujuPhone)window.fetch=(what,o={})=>{const u=new URL(typeof what==='string'?what:what.url,location.href);
