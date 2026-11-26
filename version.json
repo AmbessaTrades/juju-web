@@ -1,12 +1,12 @@
 {
- "version": "0.3.3",
- "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.3.3/juju-0.3.3.apk",
- "apk_sha256": "8a7720efb5c9ed27619dbc7465b21c1cad425bcf6d944bbfc1272079f48a9f34",
+ "version": "0.3.4",
+ "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.3.4/juju-0.3.4.apk",
+ "apk_sha256": "0e1b48b9e5d66ccfed0253ed6d08686b7e89166dd3f31c0b2984ac26deef5c65",
  "notes": [
-  "Money films on the phone now follow the group you name (G7, G20, the biggest economies, a continent).",
-  "Colour shows the value, a legend says what height means, and every country carries its name."
+  "The Mojo Bag shows every service, Inworld and Google included, and says what its total adds up.",
+  "Gris-gris and High Juju say what opens High Juju instead of 'not yet'."
  ],
- "min_core": "0.3.3",
+ "min_core": "0.3.4",
  "engine": "214c4752",
- "commit": "5bb5fc79"
+ "commit": "6f6404a7"
 }

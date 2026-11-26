@@ -4,7 +4,7 @@
    Until juju-core runs here as WASM (lane A), a film is not made in the browser: Make says so. */
 const BASE = new URL('./', self.location).pathname;
 /* the version of the unit this worker belongs to: stamped by web/build.py, so a tab knows when the site has moved on */
-const ABOUT = {"version": "0.3.3", "core": null, "commit": "5bb5fc79"};            // /juju-web/ on GitHub Pages
+const ABOUT = {"version": "0.3.4", "core": null, "commit": "6f6404a7"};            // /juju-web/ on GitHub Pages
 const STORE = 'juju-state-v1';
 let CFG = null;
 self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
@@ -56,6 +56,14 @@ async function people() {
   try { const v = await door('GET', '/v1/people'); const l = (v.people || []).map(p => ({ id: p.id, name: p.name, pin: p.pin_set ? 'set' : 'none', wait_s: 0 })); await put('people', l); return l; }
   catch (e) { return (await get('people')) || [{ id: 'ambi', name: 'Ambi', pin: 'set', wait_s: 0 }, { id: 'mumu', name: 'Mumu', pin: 'set', wait_s: 0 }]; }
 }
+const PLAN_SAY = 'Your Claude plan is read on the Mac; open Juju on the Mac once', API_SAY = 'Add a Claude API key: put ANTHROPIC_API_KEY in the key file and run door-keys';
+async function localMode() { const m = (await get('mode')) || 'gris-gris'; return { mode: 'gris-gris', name: 'Gris-gris', tag: 'Recommended', lean: 'api', ways: { plan: { open: false, say: PLAN_SAY }, api: { open: false, say: API_SAY } }, room: null, asked: m }; }
+const ALL_POTS = [['google', 'Choice of the Seer', 'Google'], ['deepseek', 'Pen of the Scribe', 'DeepSeek'], ['openrouter', 'Eye of the Judges', 'OpenRouter'], ['inworld', 'Voice of the Elders', 'Inworld'], ['wavespeed', 'Brush of the Painter', 'WaveSpeed']];
+function fullPurse(p) { if (!p) return p; const rows = p.rows || [], have = new Set(rows.map((r) => r.id));
+  for (const [id, name, service] of ALL_POTS) if (!have.has(id)) rows.push({ id, name, service, unit: 'usd', left: null, unread: true, say: 'Not reported' });
+  if (!have.has('claude')) rows.push({ id: 'claude', name: 'High Juju', service: 'Claude', unit: 'pct_week', left: null, unread: true, say: 'Read on the Mac' });
+  const counted = rows.filter((r) => r.unit === 'usd' && r.left != null).map((r) => r.service);
+  return Object.assign({}, p, { rows, total_from: counted, total_line: p.total_line || `${counted.join(' + ')}, read live` }); }
 async function purse() {
   if (await age('purse') < FRESH) { const v = await get('purse'); if (v) return v; }
   try { const v = await door('GET', '/v1/purse'); await put('purse', v); return v; } catch (e) { return get('purse'); }
@@ -110,8 +118,9 @@ async function answer(req, url) {
   const s = await get('session'); if (!s) return no(401, 'no_session', 'Sign in first');
   if (is('DELETE', 'session')) { await drop('session'); return json(200, { who: null }); }
   if (is('GET', 'money')) return json(200, await money());
-  if (is('GET', 'purse')) { const p = await purse(); return p ? json(200, p) : no(503, 'offline_door', 'No connection'); }
-  if (is('GET', 'mode')) return json(200, { mode: 'gris-gris', name: 'Gris-gris', tag: 'Recommended', lean: { plan: true, api: true }, ways: { plan: { open: false, say: 'not on the web yet' }, api: { open: false, say: 'not on the web yet' } }, room: 'room this week: unknown', why_not: 'High Juju is not on the web yet', opens: [] });
+  if (is('GET', 'purse')) { const p = fullPurse(await purse()); return p ? json(200, p) : no(503, 'offline_door', 'No connection'); }
+  if (is('GET', 'mode')) { try { return json(200, await door('GET', '/v1/mode')); } catch (e) { return json(200, await localMode()); } }
+  if (is('POST', 'mode') || is('POST', 'mode', 'check')) { try { return json(200, await door('POST', seg.length === 2 ? '/v1/mode/check' : '/v1/mode', body)); } catch (e) { const m = await localMode(); if (body && body.mode === 'high-juju') return json(409, Object.assign(m, { error: 'closed', say: API_SAY })); return json(200, m); } }
   if (seg[0] !== 'tap') return no(501, 'not_built', 'Not on the web yet');
   const sys = await seed('systems'), kinds = await seed('kinds');
   if (is('GET', 'tap', 'looks')) return json(200, { looks: sys.map(x => ({ id: x.id, name: x.name, kind: x.kind, themes: x.themes, locked: x.locked, examples: [], swatches: x.swatches || [], inks: x.inks || [] })) });
