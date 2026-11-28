@@ -1,15 +1,13 @@
 {
- "version": "0.4.3",
- "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.4.3/juju-0.4.3.apk",
- "apk_sha256": "fcecce9690864db88cc4ea999569253aeebeca91dc4a6916a3324bc2921d15c3",
+ "version": "0.4.4",
+ "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.4.4/juju-0.4.4.apk",
+ "apk_sha256": "6c50481d5b3c58256d3ba88947a2727ce030b38b357bb78a747bf28e582555c0",
  "notes": [
-  "Each channel has its own buttons: Ideas, its films, Settings (or Finish setup), and the bin.",
-  "Settings opens the whole New Vessel menu again: looks, Absorb, Describe, Learn from a film. It warns you once the channel has made films.",
-  "Pasting a link inside a channel's settings fills that channel; it no longer makes a second one.",
-  "The Mojo Bag shows each service's real 7-day spend and High Juju's plan as a percentage with its reset; Read again reads everything.",
-  "Gris-gris says what it is: the everyday mix."
+  "The Mac app shows every channel made on the phone or the web, and keeps their pictures and lessons.",
+  "The channel buttons fit on one line.",
+  "The Mojo Bag no longer shows a run-out date that has passed."
  ],
- "min_core": "0.4.3",
+ "min_core": "0.4.4",
  "engine": "d019fe24",
- "commit": "77dc5961"
+ "commit": "212b51e4"
 }

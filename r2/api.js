@@ -228,7 +228,7 @@ J.mojo=async(again)=>{const body=document.getElementById('mojoPots'),top=documen
   fig=r=>r.left==null?`<span class="nr">${J.esc(r.week_line||r.say||'No balance to read')}</span>`:pct(r)!=null?`${pct(r)}% left`:usd(r.left),
   bar=r=>pct(r)!=null?`<span class="qbar" aria-hidden="true"><i style="width:${Math.max(2,Math.min(100,pct(r)))}%"></i></span>`:'',
   until=t=>{const d=(Date.parse(t)-Date.now())/36e5;return isFinite(d)&&d>0?(d<48?`resets in ${Math.round(d)} h`:`resets in ${Math.round(d/24)} days`):''},
-  under=r=>[r.left!=null&&r.week_line?r.week_line:'',r.as_of?'read '+ago(r.as_of):'',r.resets_at?until(r.resets_at):'',r.runs_out?'lasts to '+day(r.runs_out):'',r.left==null&&r.note?r.note:''].filter(Boolean).join(' · ');
+  under=r=>[r.left!=null&&r.week_line?r.week_line:'',r.as_of?'read '+ago(r.as_of):'',r.resets_at?until(r.resets_at):'',r.runs_out&&Date.parse(r.runs_out)>Date.now()-864e5?'lasts to '+day(r.runs_out):'',r.left==null&&r.note?r.note:''].filter(Boolean).join(' · ');
  top.innerHTML=`<b class="fig">${usd(p.total)}</b><span>${J.esc(p.total_line||'read from the services')}</span><button class="btn bare" id="mojoAgain" type="button">${mojoBusy?'Reading':'Read again'}</button>`;
  body.innerHTML=p.rows.map(r=>`<div class="pot${r.low?' low':''}${r.stale?' stale':''}"><span><b>${J.esc(r.name)}</b><small>(${J.esc(r.service)})</small>${bar(r)}</span><span class="m">${fig(r)}${under(r)?`<i>${J.esc(under(r))}</i>`:''}</span></div>`).join('');
  const b2=document.getElementById('mojoAgain');b2.onclick=()=>{if(mojoBusy)return;mojoBusy=true;b2.textContent='Reading';J.mojo(true).finally(()=>{mojoBusy=false;const x=document.getElementById('mojoAgain');if(x)x.textContent='Read again'})};
