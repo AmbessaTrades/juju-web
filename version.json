@@ -1,13 +1,15 @@
 {
- "version": "0.4.2",
- "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.4.2/juju-0.4.2.apk",
- "apk_sha256": "45a528426a2f050022dbb15e89dc29150f5d0a7fec25dcffa1c403667232be3c",
+ "version": "0.4.3",
+ "apk_url": "https://github.com/AmbessaTrades/juju-web/releases/download/v0.4.3/juju-0.4.3.apk",
+ "apk_sha256": "fcecce9690864db88cc4ea999569253aeebeca91dc4a6916a3324bc2921d15c3",
  "notes": [
-  "Export: a finished film can be drawn again at 720p or 1080p; it lands in your phone's Movies/Juju with its title and description, ready to upload.",
-  "Uploaded it? Paste the link on the film: Juju measures it from 24 hours, and at twice your usual views Part 2 appears in Crossroads (then 70%, then 50%, then a rest).",
-  "The Mac app is on 0.4.2 too."
+  "Each channel has its own buttons: Ideas, its films, Settings (or Finish setup), and the bin.",
+  "Settings opens the whole New Vessel menu again: looks, Absorb, Describe, Learn from a film. It warns you once the channel has made films.",
+  "Pasting a link inside a channel's settings fills that channel; it no longer makes a second one.",
+  "The Mojo Bag shows each service's real 7-day spend and High Juju's plan as a percentage with its reset; Read again reads everything.",
+  "Gris-gris says what it is: the everyday mix."
  ],
- "min_core": "0.4.2",
+ "min_core": "0.4.3",
  "engine": "d019fe24",
- "commit": "ec0d31f2"
+ "commit": "77dc5961"
 }

@@ -8,7 +8,8 @@ body{--focus-x:36%;--focus-y:36%}
 .chans{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;padding-bottom:24px}
 .chans.wait{visibility:hidden}
 .ch{position:relative;display:grid;grid-template-rows:auto auto auto;gap:0;min-width:0;padding:0;border:2px solid var(--line);background:var(--a-well);color:var(--bone);text-align:left;cursor:pointer;font:inherit;text-decoration:none;transition:border-color .15s,transform .2s cubic-bezier(.2,.9,.3,1.1)}
-.ch:hover,.ch:focus-visible{border-color:var(--act);outline:none;transform:translateY(-3px)}
+.ch:has(.hit:hover),.ch:has(.hit:focus-visible){border-color:var(--act)}.ch .hit{display:grid;color:inherit;text-decoration:none;outline:none}
+.ch .acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:4px 12px 14px}.ch .acts .btn{min-height:40px;font-size:13px}.ch .acts .del{position:static;margin-left:auto;width:40px;height:40px;background:none;border:2px solid var(--line);border-radius:0;padding:0;display:grid;place-items:center;color:var(--ash)}.ch .acts .del svg{width:18px;height:18px}.ch .acts .del:hover,.ch .acts .del:focus-visible{color:var(--need)}
 .ch .pic{position:relative;aspect-ratio:16/9;background:#000;overflow:hidden}
 .ch .pic img,.ch .pic video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .ch .pic .face{object-fit:contain;padding:18% 0;background:radial-gradient(circle at 50% 50%,var(--lift),#000 75%)}
@@ -65,11 +66,13 @@ const $=id=>document.getElementById(id),esc=JUJU.esc;
 let chans=[];
 const CAT=()=>`<span class="cat">${window.JujuCat||''}</span>`;
 function face(c){return c.thumb?`<img src="${esc(c.thumb)}" alt="">`:c.avatar?`<img class="face" src="${esc(c.avatar)}" alt="">`:c.still?`<video data-src="${esc(c.still)}#t=25" muted playsinline preload="none" tabindex="-1" aria-hidden="true"></video>`:CAT()}
+const unfinished=c=>!c.kinds.length||(!c.name&&!c.handle);
 function card(c){let brief=[c.describe||c.niche,c.look,c.minutes?c.minutes+' min':''].filter(Boolean);if(!c.kinds.length&&!c.locked)brief=[c.describe||(c.handle?c.name:''),'Pick a look'].filter(Boolean);if(!c.name&&!c.handle)brief.unshift('Not named yet');
- return `<a class="ch${c.locked?' locked':''}" role="listitem" href="crossroads.html?ch=${esc(c.slug)}" data-ch="${esc(c.slug)}">
-  <span class="pic">${face(c)}<span class="del" role="button" tabindex="0" data-del="${esc(c.slug)}" aria-label="Delete ${esc(c.handle||c.name||'this channel')}" title="Delete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13M10 11v6M14 11v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="pill${c.ready?' need':' dim'}" data-shelf="${esc(c.slug)}" data-d>${c.ready} ${c.ready===1?'film':'films'}</span></span>
-  <span class="who"><span class="av">${c.avatar?`<img src="${esc(c.avatar)}" alt="">`:Art.emblem('altar')}</span><span class="h" data-d>${esc(c.handle||c.name||'New vessel')}</span>${c.handle?'':`<span class="btn link" role="button" data-link="${esc(c.slug)}">${c.name?'Link':'Finish'}</span>`}</span>
-  <span class="brief">${c.locked?Flow.lock:''}<span data-d>${esc(brief.join(' · '))}</span></span></a>`}
+ return `<div class="ch${c.locked?' locked':''}" role="listitem" data-ch="${esc(c.slug)}"><a class="hit" href="crossroads.html?ch=${esc(c.slug)}" aria-label="${esc((c.handle||c.name||'New vessel')+': ideas')}">
+  <span class="pic">${face(c)}</span>
+  <span class="who"><span class="av">${c.avatar?`<img src="${esc(c.avatar)}" alt="">`:Art.emblem('altar')}</span><span class="h" data-d>${esc(c.handle||c.name||'New vessel')}</span></span>
+  <span class="brief">${c.locked?Flow.lock:''}<span data-d>${esc(brief.join(' · '))}</span></span></a>
+  <div class="acts"><a class="btn need" href="crossroads.html?ch=${esc(c.slug)}">Ideas</a><button type="button" class="btn" data-shelf="${esc(c.slug)}">${c.ready} ${c.ready===1?'film':'films'}</button><button type="button" class="btn${unfinished(c)?' need':''}" data-set="${esc(c.slug)}">${unfinished(c)?'Finish setup':'Settings'}</button><button type="button" class="btn bare del" data-del="${esc(c.slug)}" aria-label="Delete ${esc(c.handle||c.name||'this channel')}" title="Delete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13M10 11v6M14 11v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></div>`}
 /* the first time, the Altar is empty: one jar marked +, and nothing chosen for anyone (Ambi, 26 Nov) */
 const FIRST=()=>`<a class="ch first" role="listitem" href="new-vessel.html"><span class="pic"><span class="jarbox">${Art.jar({state:'new'})}</span></span><span class="who"><span class="av">${Art.emblem('altar')}</span><span class="h">New vessel</span></span><span class="brief"><span>Pick a look, paste a channel, or say it in one line</span></span></a>`;
 async function load(){const a=await JUJU.get('/api/tap/channels'+(mine?'?mine=1':''));chans=a.channels;
@@ -79,6 +82,11 @@ async function load(){const a=await JUJU.get('/api/tap/channels'+(mine?'?mine=1'
 $('chans').addEventListener('click',e=>{
  const d=e.target.closest('[data-del]');if(d){e.preventDefault();e.stopPropagation();const c=chans.find(x=>x.slug===d.dataset.del);if(c)JUJU.deleteChannel(c).then(ok=>{if(ok)load()}).catch(x=>JUJU.say($('new'),x.say||'Not deleted'));return}
  const s=e.target.closest('[data-shelf]');if(s){e.preventDefault();JUJU.go('shelf.html?ch='+s.dataset.shelf);return}
+ /* Settings: the whole New Vessel menu again (looks, Absorb, Describe, Learn from a film); a channel that already made films is warned first */
+ const st=e.target.closest('[data-set]');if(st){e.preventDefault();const c=chans.find(x=>x.slug===st.dataset.set);if(!c)return;
+  const made=c.films||c.ready||0;const go=()=>JUJU.go('new-vessel.html?v='+c.slug);
+  if(!made){go();return}
+  JUJU.confirm({title:`Change ${c.handle||c.name||'this channel'}?`,go:'Open settings',stay:'Not now',lines:[`This channel already made ${made} ${made===1?'film':'films'}.`,'What you change shapes the next films. The films already made stay as they are.']}).then(ok=>{if(ok)go()});return}
  const l=e.target.closest('[data-link]');if(l){e.preventDefault();JUJU.go('new-vessel.html?v='+l.dataset.link)}});
 $('new').addEventListener('click',()=>JUJU.go('new-vessel.html'));
 /* Mine · Both: her channels and his, or only the ones this person opened */

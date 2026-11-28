@@ -4,7 +4,7 @@
    Until juju-core runs here as WASM (lane A), a film is not made in the browser: Make says so. */
 const BASE = new URL('./', self.location).pathname;
 /* the version of the unit this worker belongs to: stamped by web/build.py, so a tab knows when the site has moved on */
-const ABOUT = {"version": "0.4.2", "core": null, "commit": "ec0d31f2"};            // /juju-web/ on GitHub Pages
+const ABOUT = {"version": "0.4.3", "core": null, "commit": "77dc5961"};            // /juju-web/ on GitHub Pages
 const STORE = 'juju-state-v1';
 let CFG = null;
 self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
@@ -185,6 +185,12 @@ async function answer(req, url) {
     else if (typeof body.describe === 'string') { const d = body.describe.split(/\s+/).join(' ').trim(); if (d.length < 3 || d.length > 200) return no(422, 'describe', 'One line, please');
       Object.assign(v, { describe: d, niche_words: d.split(' ').slice(0, 6).join(' ').toLowerCase(), door: 'describe', route: { say: 'Pick a look: Juju cannot read a line on the web yet' } }); }
     else return no(422, 'door', 'A link, a line or a look');
+    // a link pasted inside a channel's own settings fills THAT channel; it never makes a second one (Ambi 28 Nov: Absorb added two)
+    if (typeof body.link === 'string' && typeof body.slug === 'string' && chans.some(x => x.slug === body.slug && !x.parked)) {
+      const keep = { link: v.link, handle: v.handle, avatar: v.avatar, best: v.best, titles: v.titles, niche_words: v.niche_words, door: 'absorb' };
+      await change('channels', l => { const c = l.find(x => x.slug === body.slug); if (!c) return 'Not here'; Object.assign(c, keep); if (!c.named && v.name) { c.name = v.name; c.named = true; } });
+      return json(200, { slug: body.slug, new: false, handle: v.handle || null, name: v.name || null, avatar: v.avatar || null, best: v.best || null });
+    }
     let slug = null;
     await change('channels', l => { const base = 'vessel-' + String(Date.now() % 1000000); slug = base; for (let i = 1; l.some(x => x.slug === slug); i++) slug = base + '-' + i; v.slug = slug; l.push(v); });
     return json(200, { slug, new: true, handle: v.handle || null, name: v.name || null, avatar: v.avatar || null, best: v.best || null });
@@ -195,6 +201,7 @@ async function answer(req, url) {
     await change('channels', l => { const i = l.findIndex(x => x.slug === slug); if (i < 0) return 'Not here'; l.splice(i, 1); });
     await change('ideas', d => { if (d && typeof d === 'object' && !Array.isArray(d)) delete d[slug]; }).catch(() => {});
     await change('orders', l => { if (Array.isArray(l)) for (let i = l.length - 1; i >= 0; i--) if (l[i].channel === slug) l.splice(i, 1); }).catch(() => {});
+    await change('deleted', l => { if (!Array.isArray(l)) return 'Not a list'; if (!l.includes(slug)) l.push(slug); if (l.length > 500) l.splice(0, l.length - 500); }).catch(() => {});   // so the Mac never brings it back
     return json(200, { slug, deleted: true }); }
   if (is('POST', 'tap', 'channels', '*', 'park')) { await change('channels', l => { const c = l.find(x => x.slug === seg[2]); if (!c) return 'Not here'; c.parked = true; }); return json(200, { slug: seg[2], parked: true }); }
   // Learn from a film: the Door has Gemini watch it (rea-video's questions + Juju's grammar); the lesson is kept on the channel,

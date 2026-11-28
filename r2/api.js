@@ -180,7 +180,7 @@ J.makeMinutes=m=>Math.max(5,Math.round(m*3.2/5)*5);
 const MCSS=document.createElement('style');MCSS.textContent=`.chip.mode{gap:8px}.chip.mode .tag{color:var(--ash);font-weight:400}.chip.mode.high{color:var(--need);border-color:var(--need)}
 #mode .rows .row{display:grid;grid-template-columns:minmax(0,1fr) auto;-webkit-mask:none;mask:none;padding:8px 12px;min-height:56px;align-items:center;border:2px solid var(--line);background:var(--lift);color:var(--bone);text-align:left;font:600 16px/1.2 "Josefin Sans",sans-serif;cursor:pointer}
 #mode .rows .row.on{border-color:var(--act)}#mode .rows .row small{color:var(--ash);font-weight:400}
-#mode .ways{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}#mode .ways .btn[aria-pressed=true]{color:var(--act);border-color:var(--act)}
+#mode .ways{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}#mode .ways .wl{flex-basis:100%;color:var(--ash);font:600 12px/1.2 "Josefin Sans",sans-serif;letter-spacing:.06em;text-transform:uppercase}#mode .ways .btn[aria-pressed=true]{color:var(--act);border-color:var(--act)}
 #mode .say{margin-top:12px;color:var(--bone);font:400 15px/1.4 "Josefin Sans",sans-serif}#mode .say.warn{color:var(--need)}
 @media (max-width:760px){.chip.mode .tag{display:none}}`;document.head.append(MCSS);
 J.mode=async()=>{const head=document.querySelector('.head');if(!head||GATE)return;
@@ -189,7 +189,7 @@ J.mode=async()=>{const head=document.querySelector('.head');if(!head||GATE)retur
   document.body.insertAdjacentHTML('beforeend',`<section class="sheet" id="mode" hidden aria-labelledby="modeTitle"><h3 id="modeTitle">Thinking</h3><button class="x btn bare" data-close aria-label="Close">×</button>
 <div class="rows"><button class="row" id="mGris"><span>Gris-gris <small>· Recommended</small></span><span></span></button>
 <button class="row" id="mHigh" aria-label="Check High Juju"><span>High Juju</span><span class="btn" id="mCheck" aria-hidden="true">Check High Juju</span></button></div>
-<div class="ways"><button class="btn" id="wPlan" aria-pressed="true">Lean on the plan</button><button class="btn" id="wApi" aria-pressed="true">Lean on the API (cached)</button></div>
+<div class="ways"><span class="wl">When High Juju is on, it uses</span><button class="btn" id="wPlan" aria-pressed="true">Lean on the plan</button><button class="btn" id="wApi" aria-pressed="true">Lean on the API (cached)</button></div>
 <p class="say" id="mSay" aria-live="polite"></p><p class="say warn" id="mWarn" hidden></p></section>`);
   const $=id=>document.getElementById(id),put=v=>{draw(v)};
   $('mGris').addEventListener('click',()=>J.once($('mGris'),async()=>put(await J.post('/api/mode',{mode:'gris-gris'}))));
@@ -200,7 +200,9 @@ J.mode=async()=>{const head=document.querySelector('.head');if(!head||GATE)retur
   chip.className='chip mode'+(hi?' high':'');chip.innerHTML=`<span>${hi?'High Juju':'Gris-gris'}</span><span class="tag">· ${hi?'Use sparingly':'Recommended'}</span>`;chip.setAttribute('aria-label',hi?'High Juju, use sparingly':'Gris-gris, recommended');
   $('mGris').classList.toggle('on',!hi);$('mHigh').classList.toggle('on',hi);
   $('wPlan').setAttribute('aria-pressed',String(v.lean.plan));$('wApi').setAttribute('aria-pressed',String(v.lean.api));
-  $('mSay').textContent=hi?`High Juju is on. Use sparingly. ${v.room}.`:(v.why_not?`Gris-gris. High Juju is not open: ${v.why_not}.`:`Gris-gris. ${v.room}.`);
+  /* Gris-gris is the everyday mix the films are made with; High Juju adds Claude for ideas and storyboards (Ambi 28 Nov: Gris-gris said "the Claude API is ready") */
+  $('mSay').textContent=hi?`High Juju is on: Claude (Opus 5.5) thinks up the ideas and the storyboard; the everyday mix does the rest. Use sparingly. ${v.room}.`
+   :`Gris-gris: the everyday mix. Pen of the Scribe (DeepSeek) writes, Eye of the Judges (GLM 5.3, Jev) checks, Choice of the Seer (Neon) plans.`+(v.why_not?` High Juju is not open: ${v.why_not}.`:' High Juju is ready when you want it.');
   const w=$('mWarn'),o=(v.opens||[]);w.hidden=!hi||!o.length;
   w.textContent=hi&&o.length?`Open now: ${o.map(x=>x.name).join(', ')}. Duppy Night and Duppy Day films are posted every other day or every two days, never daily.`:''};
  try{draw(await J.get('/api/mode'))}catch(e){chip.remove()}};
@@ -208,7 +210,7 @@ J.mode=async()=>{const head=document.querySelector('.head');if(!head||GATE)retur
    Each pot has a Juju name that says its job, then its real service in small brackets. High Juju's row is the week's room. */
 const PCSS=document.createElement('style');PCSS.textContent=`button.chip.tank{cursor:pointer}
 #mojo .total{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap;margin:2px 0 14px}#mojo .total .cap{flex-basis:100%} #mojo #mojoAgain{margin-left:auto;min-height:36px;font-size:13px} #mojo .pot .nr{color:var(--ash);font:400 14px/1.2 "Josefin Sans",sans-serif;white-space:normal} #mojo .pot.stale .m i{color:var(--need)}#mojo .total .fig{font:600 34px/1 "Spectral SC",serif;color:var(--bone)}#mojo .total span{color:var(--ash);font:400 15px/1.2 "Josefin Sans",sans-serif}
-#mojo .pots{display:grid;gap:8px}
+#mojo .pots{display:grid;gap:8px} #mojo .qbar{display:block;height:6px;margin-top:8px;background:var(--line);border-radius:3px;overflow:hidden} #mojo .qbar i{display:block;height:100%;background:var(--act)} #mojo .pot.low .qbar i{background:var(--need)}
 #mojo .pot{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;min-height:56px;padding:8px 14px;border:2px solid var(--line);background:var(--lift);color:var(--bone)}
 #mojo .pot b{font:600 17px/1.2 "Spectral SC",serif}#mojo .pot small{color:var(--smoke);font:400 11px/1 "Josefin Sans",sans-serif;margin-left:6px;white-space:nowrap}
 #mojo .pot .m{font:600 17px/1 "Josefin Sans",sans-serif;text-align:right;white-space:nowrap}#mojo .pot.low{border-color:var(--need)}#mojo .pot.low .m{color:var(--need)}
@@ -221,10 +223,14 @@ const ago=t=>{if(!t)return'';const d=Math.max(0,Date.now()/1000-t);return d<90?'
 let mojoBusy=false;
 J.mojo=async(again)=>{const body=document.getElementById('mojoPots'),top=document.getElementById('mojoTotal');if(!body)return;
  let p;try{p=again?await call('POST','/api/purse/refresh',{},20000):await J.get('/api/purse')}catch(e){top.innerHTML=`<span>${J.esc(e.say||'Not read yet')}</span>`;return}
- const fig=r=>r.left==null?`<span class="nr">${J.esc(r.say||'Not reported')}</span>`:r.unit==='week'?Math.round(r.left*100)+'% of the week':usd(r.left),
-  under=r=>r.left==null?'':[r.as_of?'as of '+ago(r.as_of):'',r.unit==='week'?(r.on?'on':'resting'):r.runs_out?'lasts to '+day(r.runs_out):''].filter(Boolean).join(' · ');
- top.innerHTML=`<b class="fig">${usd(p.total)}</b><span>${J.esc(p.total_line||'read from the services')}</span><button class="btn bare" id="mojoAgain" type="button">${mojoBusy?'Reading':'Read again'}</button>${p.spend_left!=null?`<span class="cap">${usd(p.spend_left)} left of the money set aside</span>`:''}`;
- body.innerHTML=p.rows.map(r=>`<div class="pot${r.low?' low':''}${r.stale?' stale':''}"><span><b>${J.esc(r.name)}</b><small>(${J.esc(r.service)})</small></span><span class="m">${fig(r)}${under(r)?`<i>${under(r)}</i>`:''}</span></div>`).join('');
+ /* each pot as a quota card (Hermes' quota plugin): the balance or the plan's percentage, a bar for a percentage, the 7-day spend and when it was read */
+ const pct=r=>r.unit==='pct_week'?Math.round(r.left):r.unit==='week'?Math.round(r.left*100):null,
+  fig=r=>r.left==null?`<span class="nr">${J.esc(r.week_line||r.say||'No balance to read')}</span>`:pct(r)!=null?`${pct(r)}% left`:usd(r.left),
+  bar=r=>pct(r)!=null?`<span class="qbar" aria-hidden="true"><i style="width:${Math.max(2,Math.min(100,pct(r)))}%"></i></span>`:'',
+  until=t=>{const d=(Date.parse(t)-Date.now())/36e5;return isFinite(d)&&d>0?(d<48?`resets in ${Math.round(d)} h`:`resets in ${Math.round(d/24)} days`):''},
+  under=r=>[r.left!=null&&r.week_line?r.week_line:'',r.as_of?'read '+ago(r.as_of):'',r.resets_at?until(r.resets_at):'',r.runs_out?'lasts to '+day(r.runs_out):'',r.left==null&&r.note?r.note:''].filter(Boolean).join(' · ');
+ top.innerHTML=`<b class="fig">${usd(p.total)}</b><span>${J.esc(p.total_line||'read from the services')}</span><button class="btn bare" id="mojoAgain" type="button">${mojoBusy?'Reading':'Read again'}</button>`;
+ body.innerHTML=p.rows.map(r=>`<div class="pot${r.low?' low':''}${r.stale?' stale':''}"><span><b>${J.esc(r.name)}</b><small>(${J.esc(r.service)})</small>${bar(r)}</span><span class="m">${fig(r)}${under(r)?`<i>${J.esc(under(r))}</i>`:''}</span></div>`).join('');
  const b2=document.getElementById('mojoAgain');b2.onclick=()=>{if(mojoBusy)return;mojoBusy=true;b2.textContent='Reading';J.mojo(true).finally(()=>{mojoBusy=false;const x=document.getElementById('mojoAgain');if(x)x.textContent='Read again'})};
  if(!again&&p.stale&&!mojoBusy){mojoBusy=true;b2.textContent='Reading';J.mojo(true).finally(()=>{mojoBusy=false})}};
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!leaving)J.money()});

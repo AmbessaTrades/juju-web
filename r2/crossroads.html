@@ -60,8 +60,8 @@ body{--focus-x:50%;--focus-y:40%}
  <div class="hand3 wait" id="hand" role="list" aria-label="Ideas"></div>
  <button class="btn bare more" id="more" hidden>More ideas</button>
 </main>
-<div data-tools><button class="btn bare" id="lookbtn" data-open="brand">Look</button></div>
-<footer class="deck"><div class="aside"><button class="btn bare" id="own" data-open="mine">Your own</button><button class="btn bare only-phone" data-open="brand">Look</button></div><button class="primary" id="go">Make</button></footer>
+<div data-tools><button class="btn bare" id="lookbtn" data-open="brand">Look</button><button class="btn bare" id="setbtn">Settings</button></div>
+<footer class="deck"><div class="aside"><button class="btn bare" id="own" data-open="mine">Your own</button><button class="btn bare only-phone" data-open="brand">Look</button><button class="btn bare only-phone" data-set>Settings</button></div><button class="primary" id="go">Make</button></footer>
 <section class="sheet" id="brand" hidden aria-label="Look">
  <h2 class="h2">Look</h2>
  <div class="looks" id="looks" role="radiogroup" aria-label="Look"></div>
@@ -127,6 +127,10 @@ async function make(body,at){
  if(!ok)return;
  const r=await JUJU.post('/api/tap',Object.assign({channel:slug,minutes:Flow.minutes(ch.minutes),test:Flow.TEST||undefined},body));Kit.finish($('go'),'Making it');const on=()=>JUJU.go('cauldron.html?ch='+slug+'&f='+encodeURIComponent(r.film));if(r.say){Kit.toast(r.say);setTimeout(on,2600)}else on();return r}
 let steering=null;
+/* Settings: back to the channel's whole New Vessel menu (looks, Absorb, Describe, Learn from a film), warned when films were made (Ambi 28 Nov) */
+document.addEventListener('click',e=>{if(!e.target.closest('#setbtn,[data-set]')||!slug)return;const go=()=>JUJU.go('new-vessel.html?v='+slug);
+ const made=((ch&&ch.films)||0)||((ch&&ch.ready)||0);if(!made){go();return}
+ JUJU.confirm({title:'Change this channel?',go:'Open settings',stay:'Not now',lines:[`It already made ${made} ${made===1?'film':'films'}.`,'What you change shapes the next films. The films already made stay as they are.']}).then(ok=>{if(ok)go()})});
 function makeIdea(i,btn,steer){const x=ch.ideas[i];if(!x)return;btn&&btn.classList.add('going');
  return JUJU.once(btn||$('go'),()=>make({kind:x.kind,sentence:x.sentence,theme:x.theme,steer:steer||undefined}),{at:$('go'),done:()=>{btn&&btn.classList.remove('going')}})}
 $('hand').addEventListener('click',e=>{const t=e.target.closest('[data-steer]');if(t){e.stopPropagation();steering=+t.dataset.steer;$('stitle').textContent=ch.ideas[steering].title;$('steer').value='';Kit.sheet('steerer').open();setTimeout(()=>$('steer').focus(),60);return}
